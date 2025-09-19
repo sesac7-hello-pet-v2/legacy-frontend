@@ -3,6 +3,8 @@
 기존 Next.js 프론트엔드 프로젝트에 **로컬 VM Kubernetes 환경 배포를 위해 Skaffold를 추가**한 상태입니다.
 개발 환경 매니페스트와 skaffold 설정은 `infra/profile/dev/` 폴더에 있습니다.
 
+모든 환경설정을 끝내고 `hello.pet`으로 접속하시면 됩니다.
+
 ---
 ## 🏷️ 로컬 레지스트리 (10.10.10.1:5000)
 
