@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Hello Pet Frontend
 
-## Getting Started
+기존 Next.js 프론트엔드 프로젝트에 **로컬 VM Kubernetes 환경 배포를 위해 Skaffold를 추가**한 상태입니다.
+개발 환경 매니페스트와 skaffold 설정은 `infra/profile/dev/` 폴더에 있습니다.
 
-First, run the development server:
+---
+
+## 🚀 실행 방법
+
+### 1. 로컬에서 띄우기
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd infra/profile/dev
+skaffold dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+소스 코드 변경 시 자동으로 빌드 및 Kubernetes에 반영됩니다.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 2. 호스트 설정
 
-## Learn More
+Ingress Controller가 MetalLB를 통해 `10.10.10.200` IP를 받아 `hello.pet` 도메인으로 접근할 수 있습니다.
+호스트 PC의 `/etc/hosts` (Linux/Mac) 또는 `C:\Windows\System32\drivers\etc\hosts` (Windows)에 다음을 추가하세요:
 
-To learn more about Next.js, take a look at the following resources:
+```
+10.10.10.200   hello.pet
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+브라우저에서 `http://hello.pet` 으로 접속하면 서비스가 열립니다.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 📂 구조
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+app/                  # Next.js 프론트엔드
+Dockerfile            # 이미지 빌드용
+infra/profile/dev/    # dev 환경용 매니페스트 + skaffold.yaml
+```
