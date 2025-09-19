@@ -19,6 +19,64 @@ curl http://10.10.10.1:5000/v2/_catalog
 ```
 ---
 
+## 🔧 설치 (kubectl, Skaffold)
+
+### kubectl 설치
+
+* **macOS**
+
+  ```bash
+  brew install kubectl
+  ```
+* **Linux**
+
+  ```bash
+  curl -LO "https://dl.k8s.io/release/$(curl -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+  chmod +x kubectl
+  sudo mv kubectl /usr/local/bin/
+  ```
+* **Windows (choco)**
+
+  ```powershell
+  choco install kubernetes-cli
+  ```
+
+설치 확인:
+
+```bash
+kubectl version --client
+```
+
+---
+
+### Skaffold 설치
+
+* **macOS**
+
+  ```bash
+  brew install skaffold
+  ```
+* **Linux**
+
+  ```bash
+  curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
+  chmod +x skaffold
+  sudo mv skaffold /usr/local/bin/
+  ```
+* **Windows (choco)**
+
+  ```powershell
+  choco install skaffold
+  ```
+
+설치 확인:
+
+```bash
+skaffold version
+```
+
+---
+
 ## 🚀 실행 방법
 
 ### 1. 로컬에서 띄우기
