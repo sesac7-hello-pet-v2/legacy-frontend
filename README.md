@@ -43,5 +43,5 @@ curl http://10.10.10.1:5000/v2/_catalog
 
 설치 확인:
 
-```bash
-kubectl version --c정
+
+
