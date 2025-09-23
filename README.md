@@ -75,4 +75,4 @@ kubectl version --client
 skaffold version
 ```
 
-정
+수정합니다!
