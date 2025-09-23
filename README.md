@@ -44,35 +44,4 @@ curl http://10.10.10.1:5000/v2/_catalog
 설치 확인:
 
 ```bash
-kubectl version --client
-```
-
----
-
-### Skaffold 설치
-
-* **macOS**
-
-  ```bash
-  brew install skaffold
-  ```
-* **Linux**
-
-  ```bash
-  curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
-  chmod +x skaffold
-  sudo mv skaffold /usr/local/bin/
-  ```
-* **Windows (choco)**
-
-  ```powershell
-  choco install skaffold
-  ```
-
-설치 확인:
-
-```bash
-skaffold version
-```
-
-정
+kubectl version --c정
