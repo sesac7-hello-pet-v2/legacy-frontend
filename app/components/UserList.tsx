@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import api from "../lib/api";
 import { useRouter } from "next/navigation";
-import RequireRole from "./RequireRole";
 
 interface User {
   id: number;
@@ -119,8 +118,7 @@ export default function UserList() {
 
   /* ─────────── UI ─────────── */
   return (
-    <RequireRole allow={["ADMIN"]}>
-      <div className="bg-white px-4 py-6 sm:px-8">
+    <div className="bg-white px-4 py-6 sm:px-8">
         <div className="w-full rounded-2xl bg-white p-8 shadow-[0_0_0_4px_rgba(253,224,71,0.25)] space-y-8">
           {/* ----------- 정렬 옵션 ----------- */}
           <div className="flex flex-wrap items-center justify-between gap-4">
@@ -279,6 +277,5 @@ export default function UserList() {
           </div>
         </div>
       </div>
-    </RequireRole>
   );
 }

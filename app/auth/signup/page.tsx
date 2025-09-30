@@ -1,7 +1,6 @@
 // app/(auth)/signup/page.tsx
 "use client";
 
-import RequireRole from "@/app/components/RequireRole";
 import api from "@/app/lib/api";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -144,7 +143,7 @@ export default function SignupPage() {
   /* ── 중복 체크 부분 ───────────────────────────────────── */
   const checkEmail = async () => {
     try {
-      const res = await api.get("/users/exist", {
+      const res = await api.get("/v1/users/exist", {
         params: {
           field: "EMAIL",
           value: email,
@@ -162,7 +161,7 @@ export default function SignupPage() {
 
   const checkNicname = async () => {
     try {
-      const res = await api.get("/users/exist", {
+      const res = await api.get("/v1/users/exist", {
         params: {
           field: "NICKNAME",
           value: nickname,
@@ -180,7 +179,7 @@ export default function SignupPage() {
 
   const checkPhone = async () => {
     try {
-      const res = await api.get("/users/exist", {
+      const res = await api.get("/v1/users/exist", {
         params: {
           field: "PHONE",
           value: phone1 + phone2 + phone3,
@@ -214,7 +213,7 @@ export default function SignupPage() {
       userProfileUrl: profileUrl || null,
     };
     try {
-      const res = await api.post("/users/signup", payload);
+      const res = await api.post("/v1/users", payload);
       console.log(res);
       alert("회원가입이 완료되었습니다!");
       router.push("/auth/login");
@@ -226,8 +225,7 @@ export default function SignupPage() {
 
   /* ── UI ──────────────────────────────────────────────── */
   return (
-    <RequireRole notAllow={["USER", "ADMIN", "SHELTER"]}>
-      <div className="flex min-h-screen items-center justify-center bg-white">
+    <div className="flex min-h-screen items-center justify-center bg-white">
         <div className="w-full max-w-md rounded-2xl p-10 shadow-[0_0_0_4px_rgba(253,224,71,0.25)]">
           {/* 역할 선택 */}
           <div className="mb-6 flex justify-center gap-4">
@@ -421,6 +419,5 @@ export default function SignupPage() {
           </div>
         </div>
       </div>
-    </RequireRole>
   );
 }

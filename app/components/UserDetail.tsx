@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import api from "../lib/api";
 import Link from "next/link";
 import { UserDetailData } from "../store/UserStore";
-import RequireRole from "./RequireRole";
 
 export default function UserDetail() {
   /* ─────────── 상태 ─────────── */
@@ -40,8 +39,7 @@ export default function UserDetail() {
 
   /* ─────────── UI ─────────── */
   return (
-    <RequireRole allow={["USER", "ADMIN", "SHELTER"]} fallback="/auth/login">
-      <div className="mx-auto w-full max-w-md rounded-2xl bg-white p-8 shadow-[0_0_0_4px_rgba(253,224,71,0.25)]">
+    <div className="mx-auto w-full max-w-md rounded-2xl bg-white p-8 shadow-[0_0_0_4px_rgba(253,224,71,0.25)]">
         {/* 헤더 */}
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-2xl font-bold tracking-wide text-amber-400">
@@ -75,6 +73,5 @@ export default function UserDetail() {
           </div>
         </dl>
       </div>
-    </RequireRole>
   );
 }
