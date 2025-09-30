@@ -3,7 +3,6 @@
 import ApplicationList from "@/app/components/application/ApplicationList";
 import CommentsList from "@/app/components/boards/CommentsList";
 import MyBoardsList from "@/app/components/boards/MyBoardList";
-import RequireRole from "@/app/components/RequireRole";
 import UserDetail from "@/app/components/UserDetail";
 import UserList from "@/app/components/UserList";
 import { useUserStore } from "@/app/store/UserStore";
@@ -27,11 +26,10 @@ export default function MyPage() {
   };
 
   return (
-    <RequireRole allow={["USER", "ADMIN", "SHELTER"]} fallback="/auth/login">
-      <div className="flex flex-col items-center bg-gray-50 pt-[5vh] min-h-screen">
+    <div className="flex flex-col items-center bg-gray-50 pt-[5vh] min-h-screen">
         {/* --- 프로필 --- */}
         <img
-          src={user?.profileUrl}
+          src={user?.profileUrl || "/basic_profile.jpg"}
           alt="Profile"
           className="h-32 w-32 rounded-full object-cover shadow"
         />
@@ -131,6 +129,5 @@ export default function MyPage() {
           </div>
         </div>
       </div>
-    </RequireRole>
   );
 }

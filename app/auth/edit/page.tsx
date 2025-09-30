@@ -1,6 +1,5 @@
 "use client";
-import RequireRole from "@/app/components/RequireRole";
-import api from "@/app/lib/api";
+import api, { clearTokenExpiry, initializeTokenRefresh } from "@/app/lib/api";
 import { UserDetailData, useUserStore } from "@/app/store/UserStore";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -90,7 +89,7 @@ export default function EditPage() {
 
   const checkNicname = async () => {
     try {
-      const res = await api.get("/users/exist", {
+      const res = await api.get("/v1/users/exist", {
         params: {
           field: "NICKNAME",
           value: nickname,
@@ -162,10 +161,17 @@ export default function EditPage() {
       const email = currentUser?.email;
       console.log(res);
       clearUser();
-      await api.delete("/auth/logout");
-      await api.post("/auth/login", { email, password }).then((res) => {
-        setCurrentUser(res.data);
-      });
+      clearTokenExpiry();
+      await api.post("/v1/auth/logout");
+      const loginRes = await api.post("/v1/auth/login", { email, password });
+      setCurrentUser(loginRes.data);
+
+      // 응답 body에서 만료 시간 가져오기 (밀리초 → 초 변환)
+      if (loginRes.data?.expireIn) {
+        const expireInSeconds = loginRes.data.expireIn / 1000;
+        initializeTokenRefresh(expireInSeconds);
+      }
+
       alert("정보 수정이 완료되었습니다!");
       router.push("/me");
     } catch (error) {
@@ -175,8 +181,7 @@ export default function EditPage() {
   };
 
   return (
-    <RequireRole allow={["USER", "ADMIN", "SHELTER"]} fallback="/auth/login">
-      <div className="flex flex-col min-h-screen items-center justify-center bg-white">
+    <div className="flex flex-col min-h-screen items-center justify-center bg-white">
         <h1 className="mb-8 text-center text-3xl font-bold tracking-widest text-amber-400">
           회원 정보 수정
         </h1>
@@ -305,6 +310,5 @@ export default function EditPage() {
           </Link>
         </form>
       </div>
-    </RequireRole>
   );
 }

@@ -1,5 +1,4 @@
 "use client";
-import RequireRole from "@/app/components/RequireRole";
 import api from "@/app/lib/api";
 import { useUserStore } from "@/app/store/UserStore";
 import { useRouter } from "next/navigation";
@@ -15,7 +14,7 @@ export default function Withdraw() {
 
   async function checkPassword() {
     try {
-      const res = api.post("/auth/check-password", { password });
+      const res = api.post("/v1/auth/check-password", { password });
       if ((await res).data.pass) {
         alert((await res).data.message);
         setVerified(true);
@@ -37,8 +36,7 @@ export default function Withdraw() {
   }
 
   return (
-    <RequireRole allow={["USER", "ADMIN", "SHELTER"]} fallback="/auth/login">
-      <div className="flex flex-col min-h-screen items-center justify-center bg-white px-4">
+    <div className="flex flex-col min-h-screen items-center justify-center bg-white px-4">
         {/* 회원 탈퇴 페이지 타이틀 */}
         <h1 className="mb-8 text-center text-3xl font-bold tracking-widest text-amber-400">
           회원 탈퇴
@@ -91,6 +89,5 @@ export default function Withdraw() {
           </button>
         )}
       </div>
-    </RequireRole>
   );
 }
