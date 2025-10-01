@@ -18,8 +18,7 @@ const roleLabelToCode: Record<RoleLabel, "USER" | "SHELTER" | "ADMIN"> = {
 /* ── 정규식 상수 ───────────────────────────────────────────── */
 const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/; // 영문·숫자·특수문자 포함 6자+
 const PHONE_REGEX = /^\d{3}-\d{4}-\d{4}$/; // 010-0000-0000
-const KOREAN_REGEX = /^[가-힣]+$/;
-const ENGLISH_REGEX = /^[A-Za-z]+$/;
+const NICKNAME_REGEX = /^[가-힣a-zA-Z0-9]{2,10}$/; // 한글, 영문, 숫자 조합 2-10자
 
 export default function SignupPage() {
   /* ── 상태 ──────────────────────────────────────────────── */
@@ -109,12 +108,8 @@ export default function SignupPage() {
 
     if (!nickname) {
       errs.nickname = "닉네임은 필수입니다.";
-    } else if (KOREAN_REGEX.test(nickname) && nickname.length < 2) {
-      errs.nickname = "한글 닉네임은 최소 2자 이상이어야 합니다.";
-    } else if (ENGLISH_REGEX.test(nickname) && nickname.length < 5) {
-      errs.nickname = "영문 닉네임은 최소 5자 이상이어야 합니다.";
-    } else if (!KOREAN_REGEX.test(nickname) && !ENGLISH_REGEX.test(nickname)) {
-      errs.nickname = "닉네임은 한글 또는 영문자만 사용할 수 있습니다.";
+    } else if (!NICKNAME_REGEX.test(nickname)) {
+      errs.nickname = "닉네임은 한글, 영문, 숫자 조합으로 2-10자여야 합니다.";
     }
 
     // 휴대폰 검사
