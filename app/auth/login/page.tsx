@@ -20,16 +20,12 @@ export default function LoginPage() {
     try {
       setLoading(true);
       const res = await api.post("/v1/auth/login", { email, password });
-      console.log("📝 [Login] 로그인 응답:", res.data);
       setUser(res.data);
 
       // 응답 body에서 만료 시간 가져오기 (밀리초 → 초 변환)
       if (res.data?.expireIn) {
         const expireInSeconds = res.data.expireIn / 1000;
-        console.log("🔑 [Login] expireIn 발견:", res.data.expireIn, "ms ->", expireInSeconds, "초");
         initializeTokenRefresh(expireInSeconds);
-      } else {
-        console.warn("⚠️ [Login] expireIn이 응답에 없습니다");
       }
 
       alert("로그인 되었습니다!");
