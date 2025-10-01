@@ -1,7 +1,9 @@
-import Pagination from "@/app/components/Pagination";
+"use client";
+
 import BoardListClient from "./BoardListClient";
-import Head from "next/head";
 import api from "@/app/lib/api";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 
 interface Board {
   id: number;
@@ -35,45 +37,45 @@ interface Filters {
   page: string;
 }
 
-// 클라이언트 컴포넌트에 넘겨주는 모든 데이터 타입
-interface Props {
-  boards: Board[];
-  currentPage: number;
-  totalPages: number;
-  filters: Filters;
-}
+export default function BoardListPage() {
+  const searchParams = useSearchParams();
+  const [data, setData] = useState<BoardPageResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
-function getQureyParam(
-  searchParams: { [key: string]: string | string[] | undefined },
-  key: string,
-  defaultValue: string
-) {
-  const raw = searchParams[key];
-  const value = Array.isArray(raw) ? raw[0] : raw;
-  return value ?? defaultValue;
-}
-
-export default async function BoardListPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
-}) {
-  const params = await searchParams;
-
-  const category = getQureyParam(params, "category", "TOTAL");
-  const searchType = getQureyParam(params, "searchType", "TOTAL");
-  const keyword = getQureyParam(params, "keyword", "");
-  const sortType = getQureyParam(params, "sortType", "CURRENT");
-  const pageStr = getQureyParam(params, "page", "1");
+  const category = searchParams.get("category") || "TOTAL";
+  const searchType = searchParams.get("searchType") || "TOTAL";
+  const keyword = searchParams.get("keyword") || "";
+  const sortType = searchParams.get("sortType") || "CURRENT";
+  const pageStr = searchParams.get("page") || "1";
   const page = parseInt(pageStr);
 
-  const res = await api.get(
-    `/api/v1/boards?category=${category}&searchType=${searchType}&keyword=${keyword}&sortType=${sortType}&page=${
-      page - 1
-    }&size=10`
-  );
+  useEffect(() => {
+    fetchBoards();
+  }, [category, searchType, keyword, sortType, page]);
 
-  const data: BoardPageResponse = res.data;
+  async function fetchBoards() {
+    setLoading(true);
+    setError(false);
+    try {
+      const res = await api.get(
+        `/api/v1/boards?category=${category}&searchType=${searchType}&keyword=${keyword}&sortType=${sortType}&page=${
+          page - 1
+        }&size=10`
+      );
+      setData(res.data);
+    } catch (err) {
+      console.error(err);
+      setError(true);
+      setData(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  if (loading) return <h1 className="text-center mt-20 text-xl">로딩 중...</h1>;
+  if (error || !data) return <h1 className="text-center mt-20 text-xl">조회 실패</h1>;
+
   const filters: Filters = {
     category,
     searchType,
@@ -83,17 +85,11 @@ export default async function BoardListPage({
   };
 
   return (
-    <>
-      <Head>
-        <title>Hello Pet</title>
-        <meta name="description" content="자유게시판" />
-      </Head>
-      <BoardListClient
-        boards={data.boardList}
-        currentPage={data.page + 1}
-        totalPages={data.totalPages}
-        filters={filters}
-      />
-    </>
+    <BoardListClient
+      boards={data.boardList}
+      currentPage={data.page + 1}
+      totalPages={data.totalPages}
+      filters={filters}
+    />
   );
 }

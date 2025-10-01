@@ -97,7 +97,10 @@ export default function Navigator() {
                   <div className="mt-4 flex flex-col gap-2 w-full">
                     <Link
                       href="/me"
-                      onClick={() => setOpen(false)}
+                      onClick={() => {
+                        console.log("🔘 [Navigator] 마이페이지 버튼 클릭");
+                        setOpen(false);
+                      }}
                       className="rounded-md px-4 py-2 text-sm text-center hover:bg-gray-100 transition"
                     >
                       마이페이지

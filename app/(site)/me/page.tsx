@@ -6,16 +6,38 @@ import MyBoardsList from "@/app/components/boards/MyBoardList";
 import UserDetail from "@/app/components/UserDetail";
 import UserList from "@/app/components/UserList";
 import { useUserStore } from "@/app/store/UserStore";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import MyAnnouncementsPage from "@/app/components/MyAnnouncements";
+import { useRouter } from "next/navigation";
 
 export default function MyPage() {
   const user = useUserStore((s) => s.user);
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    console.log("🔍 [MyPage] user 상태:", user);
+    if (!user) {
+      console.log("⚠️ [MyPage] 로그인되지 않음, 로그인 페이지로 이동");
+      alert("로그인이 필요합니다.");
+      router.push("/auth/login");
+    } else {
+      setIsLoading(false);
+    }
+  }, [user, router]);
 
   const [myPage, setMyPage] = useState(true);
   const [roleChangedBtn, setRoleChangedBtn] = useState(false);
   const [myBoard, setMyBoard] = useState(false);
   const [myComment, setMyComment] = useState(false);
+
+  if (isLoading || !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-lg text-gray-500">로딩 중...</p>
+      </div>
+    );
+  }
 
   /* ---------------- 탭 전환 ---------------- */
   const toggle = (tab: "page" | "role" | "board" | "comment") => {
@@ -128,6 +150,6 @@ export default function MyPage() {
             </div>
           </div>
         </div>
-      </div>
+    </div>
   );
 }

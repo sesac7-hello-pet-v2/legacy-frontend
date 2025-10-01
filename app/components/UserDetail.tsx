@@ -14,7 +14,7 @@ export default function UserDetail() {
   useEffect(() => {
     (async () => {
       try {
-        const res = await api.get<UserDetailData>("/me");
+        const res = await api.get<UserDetailData>("/v1/users");
         setUser(res.data);
       } catch (err) {
         console.error(err);
