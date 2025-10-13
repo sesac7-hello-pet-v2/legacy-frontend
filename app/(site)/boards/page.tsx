@@ -2,7 +2,7 @@
 
 import BoardListClient from "./BoardListClient";
 import api from "@/app/lib/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 
 interface Board {
@@ -37,7 +37,7 @@ interface Filters {
   page: string;
 }
 
-export default function BoardListPage() {
+function BoardListContent() {
   const searchParams = useSearchParams();
   const [data, setData] = useState<BoardPageResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -91,5 +91,13 @@ export default function BoardListPage() {
       totalPages={data.totalPages}
       filters={filters}
     />
+  );
+}
+
+export default function BoardListPage() {
+  return (
+    <Suspense fallback={<h1 className="text-center mt-20 text-xl">로딩 중...</h1>}>
+      <BoardListContent />
+    </Suspense>
   );
 }
