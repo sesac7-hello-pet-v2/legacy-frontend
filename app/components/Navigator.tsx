@@ -1,9 +1,9 @@
 "use client";
 import Link from "next/link";
-import { useUserStore } from "../store/UserStore";
-import { useEffect, useRef, useState } from "react";
-import api, { clearTokenExpiry } from "../lib/api";
-import { useRouter } from "next/navigation";
+import {useUserStore} from "../store/UserStore";
+import {useEffect, useRef, useState} from "react";
+import api, {clearTokenExpiry} from "../lib/api";
+import {useRouter} from "next/navigation";
 
 export default function Navigator() {
   const { user, clearUser } = useUserStore();
@@ -69,6 +69,12 @@ export default function Navigator() {
           >
             자유게시판
           </Link>
+            <Link
+                href="/feed"
+                className="text-gray-700 hover:text-amber-500 font-medium transition"
+            >
+                피드
+            </Link>
 
           {user ? (
             <div className="relative" ref={menuRef}>
