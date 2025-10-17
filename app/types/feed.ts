@@ -1,10 +1,10 @@
 export interface FeedPost {
-    id: string;
+    postId: string;
     userId: number;
     content: string;
-    images: FeedImages[];
-    createdAt: string;
-    updatedAt: string;
+    imageUrls: string[];
+    postedAt: string;
+    likeCount: number;
 }
 
 export interface FeedImages {
@@ -21,4 +21,14 @@ export interface FeedGetRequest {
 export interface FeedCreateRequest {
     content: string;
     images?: File[];
+}
+
+export interface PostLikeRequest {
+    userId: number;
+}
+
+export interface PostLikeResponse {
+    postId: string;
+    isLiked: boolean;
+    likeCount: number;
 }
