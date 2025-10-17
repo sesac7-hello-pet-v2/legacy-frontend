@@ -1,17 +1,45 @@
 "use client";
 
 import {useState} from "react";
+import {feedApi} from "../../../lib/feedApi";
+import {PostLikeResponse} from "../../../types/feed";
 
 interface PostActionsProps {
     postId: string;
+    initialLikeCount: number;
+    currentUserId: number;
 }
 
-export default function PostActions({postId}: PostActionsProps) {
+export default function PostActions({postId, initialLikeCount, currentUserId}: PostActionsProps) {
     const [isLiked, setIsLiked] = useState(false);
+    const [likeCount, setLikeCount] = useState(initialLikeCount);
     const [isSaved, setIsSaved] = useState(false);
+    const [isLikeLoading, setIsLikeLoading] = useState(false);
 
-    const handleLike = () => {
+    const handleLike = async () => {
+        if (isLikeLoading) return;
+
+        const originalLiked = isLiked;
+        const originalCount = likeCount;
+
         setIsLiked(!isLiked);
+        setLikeCount(prevCount => isLiked ? prevCount - 1 : prevCount + 1);
+        setIsLikeLoading(true);
+
+        try {
+            const response: PostLikeResponse = await feedApi.likePost(postId, {
+                userId: currentUserId
+            });
+
+            setIsLiked(response.isLiked);
+            setLikeCount(response.likeCount);
+        } catch (error) {
+            console.error('좋아요 처리 중 오류:', error);
+            setIsLiked(originalLiked);
+            setLikeCount(originalCount);
+        } finally {
+            setIsLikeLoading(false);
+        }
     };
 
     const handleSave = () => {
@@ -32,9 +60,10 @@ export default function PostActions({postId}: PostActionsProps) {
                 <div className="flex items-center gap-4">
                     <button
                         onClick={handleLike}
+                        disabled={isLikeLoading}
                         className={`hover:scale-110 transition-transform ${
                             isLiked ? "text-red-500" : "text-gray-700"
-                        }`}
+                        } ${isLikeLoading ? "opacity-50 cursor-not-allowed" : ""}`}
                     >
                         <svg className="w-6 h-6" fill={isLiked ? "currentColor" : "none"} stroke="currentColor"
                              viewBox="0 0 24 24">
@@ -74,6 +103,11 @@ export default function PostActions({postId}: PostActionsProps) {
                     </svg>
                 </button>
             </div>
+            {likeCount > 0 && (
+                <div className="text-sm font-semibold text-gray-900 mb-2">
+                    좋아요 {likeCount.toLocaleString()}개
+                </div>
+            )}
         </div>
     );
 }

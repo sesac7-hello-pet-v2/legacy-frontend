@@ -1,5 +1,5 @@
 import api from "./api";
-import {FeedCreateRequest, FeedGetRequest, FeedPost} from "../types/feed";
+import {FeedCreateRequest, FeedGetRequest, FeedPost, PostLikeRequest, PostLikeResponse} from "../types/feed";
 
 interface FeedResponse {
     content: FeedPost[];
@@ -41,5 +41,10 @@ export const feedApi = {
 
     async deletePost(id: string): Promise<void> {
         await api.delete(`/posts/${id}`);
+    },
+
+    async likePost(id: string, data: PostLikeRequest): Promise<PostLikeResponse> {
+        const response = await api.post(`http://localhost:8083/posts/${id}/like`, data);
+        return response.data;
     },
 };

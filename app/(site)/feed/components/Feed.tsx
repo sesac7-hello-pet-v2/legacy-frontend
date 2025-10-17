@@ -1,6 +1,6 @@
 "use client";
 
-import {useEffect, useState} from "react";
+import React, {useEffect, useState} from "react";
 import {FeedPost as FeedPostType} from "../../../types/feed";
 import {feedApi} from "@/app/lib/feedApi";
 import FeedPost from "./FeedPost";
@@ -11,6 +11,8 @@ export default function Feed() {
     const [error, setError] = useState<string | null>(null);
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
+
+    const currentUserId = 1;
 
     const loadPosts = async (pageNum: number = 1, reset: boolean = false) => {
         try {
@@ -80,9 +82,9 @@ export default function Feed() {
                     <p className="text-gray-500">게시글이 없습니다.</p>
                 </div>
             ) : (
-                <>
+                <div>
                     {posts.map((post) => (
-                        <FeedPost key={post.id} post={post}/>
+                        <FeedPost key={post.postId} post={post} currentUserId={currentUserId}/>
                     ))}
 
                     {hasMore && (
@@ -102,7 +104,7 @@ export default function Feed() {
                             <p className="text-gray-500 text-sm">모든 게시글을 확인했습니다.</p>
                         </div>
                     )}
-                </>
+                </div>
             )}
         </div>
     );

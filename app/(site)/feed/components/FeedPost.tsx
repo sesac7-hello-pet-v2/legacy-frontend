@@ -6,24 +6,29 @@ import PostContent from "./PostContent";
 
 interface FeedPostProps {
     post: FeedPostType;
+    currentUserId: number;
 }
 
-export default function FeedPost({post}: FeedPostProps) {
+export default function FeedPost({post, currentUserId}: FeedPostProps) {
     if (!post) {
         return null;
     }
 
-    const imageUrls = post.images?.map(img => img.s3Key) || [];
+    const imageUrls = post.imageUrls || [];
 
     return (
         <article className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm mb-6">
-            <PostHeader userId={post.userId} postedAt={post.createdAt}/>
+            <PostHeader userId={post.userId} postedAt={post.postedAt}/>
 
             {imageUrls.length > 0 && (
                 <ImageCarousel images={imageUrls}/>
             )}
 
-            <PostActions postId={post.id}/>
+            <PostActions
+                postId={post.postId}
+                initialLikeCount={post.likeCount}
+                currentUserId={currentUserId}
+            />
 
             <PostContent content={post.content}/>
         </article>
