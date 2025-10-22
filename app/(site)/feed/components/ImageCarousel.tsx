@@ -1,6 +1,7 @@
 "use client";
 
 import {useState} from "react";
+import SmartImage from "@/app/components/SmartImage";
 
 interface ImageCarouselProps {
     images: string[];
@@ -27,8 +28,9 @@ export default function ImageCarousel({images}: ImageCarouselProps) {
 
     return (
         <div className="relative w-full aspect-square bg-gray-100">
-            <img
+            <SmartImage
                 src={images[currentIndex]}
+                size="feed"
                 alt={`Post image ${currentIndex + 1}`}
                 className="w-full h-full object-cover"
             />
