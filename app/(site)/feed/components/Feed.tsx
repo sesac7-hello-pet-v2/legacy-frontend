@@ -11,6 +11,7 @@ export default function Feed() {
     const [error, setError] = useState<string | null>(null);
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
+    const [showMyPosts, setShowMyPosts] = useState(false);
 
     const currentUserId = 1;
 
@@ -20,12 +21,20 @@ export default function Feed() {
             const response = await feedApi.getPosts({
                 page: pageNum,
                 size: 10,
+                userId: showMyPosts ? currentUserId : undefined,
             });
 
+            let postsData = response.content;
+
+            // 클라이언트 사이드에서 내 게시글 필터링 (API에서 지원하지 않는 경우)
+            if (showMyPosts) {
+                postsData = postsData.filter(post => post.userId === currentUserId);
+            }
+
             if (reset) {
-                setPosts(response.content);
+                setPosts(postsData);
             } else {
-                setPosts(prev => [...prev, ...response.content]);
+                setPosts(prev => [...prev, ...postsData]);
             }
 
             setHasMore(pageNum < response.page.totalPages);
@@ -41,7 +50,7 @@ export default function Feed() {
 
     useEffect(() => {
         loadPosts(1, true);
-    }, []);
+    }, [showMyPosts]);
 
     const handleLoadMore = () => {
         if (!loading && hasMore) {
@@ -51,6 +60,10 @@ export default function Feed() {
 
     const handleRefresh = () => {
         loadPosts(1, true);
+    };
+
+    const handlePostDelete = (postId: string) => {
+        setPosts(prev => prev.filter(post => post.postId !== postId));
     };
 
     if (loading && posts.length === 0) {
@@ -77,14 +90,47 @@ export default function Feed() {
 
     return (
         <div className="max-w-md mx-auto">
+            {/* 필터 버튼 */}
+            <div className="px-4 mb-4">
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => setShowMyPosts(false)}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                            !showMyPosts
+                                ? "bg-blue-500 text-white"
+                                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        }`}
+                    >
+                        모든 게시글
+                    </button>
+                    <button
+                        onClick={() => setShowMyPosts(true)}
+                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+                            showMyPosts
+                                ? "bg-blue-500 text-white"
+                                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                        }`}
+                    >
+                        내 게시글
+                    </button>
+                </div>
+            </div>
+
             {posts.length === 0 ? (
                 <div className="text-center py-8">
-                    <p className="text-gray-500">게시글이 없습니다.</p>
+                    <p className="text-gray-500">
+                        {showMyPosts ? "작성한 게시글이 없습니다." : "게시글이 없습니다."}
+                    </p>
                 </div>
             ) : (
                 <div>
                     {posts.map((post) => (
-                        <FeedPost key={post.postId} post={post} currentUserId={currentUserId}/>
+                        <FeedPost
+                            key={post.postId}
+                            post={post}
+                            currentUserId={currentUserId}
+                            onPostDelete={handlePostDelete}
+                        />
                     ))}
 
                     {hasMore && (

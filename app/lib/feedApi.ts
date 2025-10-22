@@ -13,12 +13,12 @@ interface FeedResponse {
 
 export const feedApi = {
     async getPosts(params: FeedGetRequest = {}): Promise<FeedResponse> {
-        const response = await api.get("http://localhost:8083/posts", {params});
+        const response = await api.get("/api/posts", {params});
         return response.data;
     },
 
     async getPost(id: string): Promise<FeedPost> {
-        const response = await api.get(`/posts/${id}`);
+        const response = await api.get(`/api/posts/${id}`);
         return response.data;
     },
 
@@ -32,7 +32,7 @@ export const feedApi = {
             });
         }
 
-        await api.post("/posts", formData, {
+        await api.post("/api/posts", formData, {
             headers: {
                 "Content-Type": "multipart/form-data",
             },
@@ -40,11 +40,11 @@ export const feedApi = {
     },
 
     async deletePost(id: string): Promise<void> {
-        await api.delete(`/posts/${id}`);
+        await api.delete(`/api/posts/${id}`);
     },
 
     async likePost(id: string, data: PostLikeRequest): Promise<PostLikeResponse> {
-        const response = await api.post(`http://localhost:8083/posts/${id}/like`, data);
+        const response = await api.post(`/api/posts/${id}/like`, data);
         return response.data;
     },
 };
