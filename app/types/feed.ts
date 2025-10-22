@@ -5,6 +5,7 @@ export interface FeedPost {
     imageUrls: string[];
     postedAt: string;
     likeCount: number;
+    isLiked: boolean;
 }
 
 export interface FeedImages {
@@ -16,6 +17,7 @@ export interface FeedGetRequest {
     page?: number;
     size?: number;
     userId?: number;
+    currentUserId?: number;
 }
 
 export interface FeedCreateRequest {
