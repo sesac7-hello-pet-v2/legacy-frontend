@@ -177,11 +177,11 @@ export default function ImageDragDrop({
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                     {images.map((image) => (
                         <div key={image.id} className="relative group">
-                            <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                            <div className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
                                 <img
                                     src={image.preview}
                                     alt="Preview"
-                                    className="w-full h-full object-cover"
+                                    className="absolute inset-0 w-full h-full object-cover"
                                 />
                             </div>
 
