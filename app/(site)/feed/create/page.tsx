@@ -46,11 +46,7 @@ export default function CreatePostPage() {
                 formData.append("images", file);
             });
 
-            await api.post("/posts", formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
+            await api.post("/posts", formData);
 
             // 성공 시 상태 업데이트
             usePostStore.getState().updatePendingPost(tempId, 'success');
