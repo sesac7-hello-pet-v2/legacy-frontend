@@ -43,33 +43,29 @@ export default function CreatePostPage() {
             return;
         }
 
+        if (selectedFiles.length === 0) {
+            showModalMessage("입력 오류", "최소 1개의 이미지를 업로드해주세요.", "warning");
+            return;
+        }
+
         setIsLoading(true);
 
         try {
-            // board-service를 통해 이미지 업로드
-            const imageUrls: string[] = [];
+            // FormData로 게시글 생성 요청 준비
+            const formData = new FormData();
+            formData.append("content", content.trim());
 
-            for (const file of selectedFiles) {
-                const formData = new FormData();
-                formData.append("file", file);
+            // 이미지 파일들 추가
+            selectedFiles.forEach((file) => {
+                formData.append("images", file);
+            });
 
-                // board-service의 이미지 업로드 엔드포인트 호출
-                const uploadResponse = await api.post("/posts/upload-image", formData, {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                    },
-                });
-
-                imageUrls.push(uploadResponse.data.imageUrl);
-            }
-
-            // 게시글 생성
-            const postData = {
-                content: content.trim(),
-                imageUrls,
-            };
-
-            await api.post("/posts", postData);
+            // board-service로 게시글 생성 요청
+            await api.post("/posts", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
 
             showModalMessage("완료", "게시글이 성공적으로 작성되었습니다.", "success");
             setTimeout(() => {
