@@ -8,6 +8,7 @@ import UserList from "@/app/components/UserList";
 import { useUserStore } from "@/app/store/UserStore";
 import { useState, useEffect } from "react";
 import MyAnnouncementsPage from "@/app/components/MyAnnouncements";
+import MyPets from "@/app/components/MyPets";
 import { useRouter } from "next/navigation";
 
 export default function MyPage() {
@@ -30,6 +31,7 @@ export default function MyPage() {
   const [roleChangedBtn, setRoleChangedBtn] = useState(false);
   const [myBoard, setMyBoard] = useState(false);
   const [myComment, setMyComment] = useState(false);
+  const [myPets, setMyPets] = useState(false);
 
   if (isLoading || !user) {
     return (
@@ -40,11 +42,12 @@ export default function MyPage() {
   }
 
   /* ---------------- 탭 전환 ---------------- */
-  const toggle = (tab: "page" | "role" | "board" | "comment") => {
+  const toggle = (tab: "page" | "role" | "board" | "comment" | "pets") => {
     setMyPage(tab === "page");
     setRoleChangedBtn(tab === "role");
     setMyBoard(tab === "board");
     setMyComment(tab === "comment");
+    setMyPets(tab === "pets");
   };
 
   return (
@@ -88,16 +91,28 @@ export default function MyPage() {
                 유저목록
               </button>
             ) : user?.role === "SHELTER" ? (
-              <button
-                onClick={() => toggle("role")}
-                className={`w-40 rounded-lg py-2 font-semibold shadow-sm transition ${
-                  roleChangedBtn
-                    ? "bg-amber-400 text-white"
-                    : "bg-amber-50 text-amber-300 hover:bg-amber-100"
-                }`}
-              >
-                공고내역
-              </button>
+              <>
+                <button
+                  onClick={() => toggle("role")}
+                  className={`w-40 rounded-lg py-2 font-semibold shadow-sm transition ${
+                    roleChangedBtn
+                      ? "bg-amber-400 text-white"
+                      : "bg-amber-50 text-amber-300 hover:bg-amber-100"
+                  }`}
+                >
+                  공고내역
+                </button>
+                <button
+                  onClick={() => toggle("pets")}
+                  className={`w-40 rounded-lg py-2 font-semibold shadow-sm transition ${
+                    myPets
+                      ? "bg-amber-400 text-white"
+                      : "bg-amber-50 text-amber-300 hover:bg-amber-100"
+                  }`}
+                >
+                  동물관리
+                </button>
+              </>
             ) : (
               <button
                 onClick={() => toggle("role")}
@@ -145,8 +160,8 @@ export default function MyPage() {
                   <ApplicationList />
                 ))}
               {myBoard && <MyBoardsList />}
-
               {myComment && <CommentsList />}
+              {myPets && <MyPets />}
             </div>
           </div>
         </div>
