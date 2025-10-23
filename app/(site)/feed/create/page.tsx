@@ -1,13 +1,15 @@
 "use client";
 
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useRouter} from "next/navigation";
 import api from "@/app/lib/api";
 import ImageDragDrop from "@/app/components/ImageDragDrop";
 import {AlertModal} from "@/app/components/Modal";
+import {useAuth} from "@/app/hooks/useAuth";
 
 export default function CreatePostPage() {
     const router = useRouter();
+    const {isAuthenticated} = useAuth();
     const [content, setContent] = useState("");
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -21,6 +23,12 @@ export default function CreatePostPage() {
     const handleFilesChange = (files: File[]) => {
         setSelectedFiles(files);
     };
+
+    useEffect(() => {
+        if (!isAuthenticated) {
+            router.push("/auth/login");
+        }
+    }, [isAuthenticated, router]);
 
     const showModalMessage = (title: string, message: string, type: 'info' | 'warning' | 'error' | 'success' = 'info') => {
         setModalConfig({title, message, type});

@@ -3,6 +3,7 @@
 import {useEffect, useState} from "react";
 import {useParams, useRouter} from "next/navigation";
 import api from "@/app/lib/api";
+import {useAuth} from "@/app/hooks/useAuth";
 
 interface PostData {
     postId: string;
@@ -15,6 +16,7 @@ export default function EditPostPage() {
     const router = useRouter();
     const params = useParams();
     const postId = params.id as string;
+    const {isAuthenticated} = useAuth();
 
     const [post, setPost] = useState<PostData | null>(null);
     const [content, setContent] = useState("");
@@ -22,8 +24,12 @@ export default function EditPostPage() {
     const [isSaving, setIsSaving] = useState(false);
 
     useEffect(() => {
+        if (!isAuthenticated) {
+            router.push("/auth/login");
+            return;
+        }
         fetchPost();
-    }, [postId]);
+    }, [postId, isAuthenticated, router]);
 
     const fetchPost = async () => {
         try {

@@ -1,18 +1,30 @@
 "use client";
 
-import api, { initializeTokenRefresh } from "@/app/lib/api";
-import { useUserStore } from "@/app/store/UserStore";
+import api, {initializeTokenRefresh} from "@/app/lib/api";
+import {useUserStore} from "@/app/store/UserStore";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import {useRouter} from "next/navigation";
+import React, {useState} from "react";
+import {AlertModal} from "@/app/components/Modal";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [modalConfig, setModalConfig] = useState({
+        title: '',
+        message: '',
+        type: 'info' as 'info' | 'warning' | 'error' | 'success'
+    });
   const router = useRouter();
 
   const setUser = useUserStore((s) => s.setUser);
+
+    const showModalMessage = (title: string, message: string, type: 'info' | 'warning' | 'error' | 'success' = 'info') => {
+        setModalConfig({title, message, type});
+        setShowModal(true);
+    };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -28,11 +40,13 @@ export default function LoginPage() {
         initializeTokenRefresh(expireInSeconds);
       }
 
-      alert("로그인 되었습니다!");
-      router.push("/");
+        showModalMessage("성공", "로그인 되었습니다!", "success");
+        setTimeout(() => {
+            router.push("/");
+        }, 1500);
     } catch (err) {
       console.error("❌ [Login] 로그인 실패:", err);
-      alert("로그인 실패: " + (err as Error).message);
+        showModalMessage("로그인 실패", (err as Error).message, "error");
     } finally {
       setLoading(false);
     }
@@ -83,6 +97,15 @@ export default function LoginPage() {
             회원가입
           </Link>
         </div>
+
+          {/* Modal */}
+          <AlertModal
+              isOpen={showModal}
+              onClose={() => setShowModal(false)}
+              title={modalConfig.title}
+              message={modalConfig.message}
+              type={modalConfig.type}
+          />
       </div>
     </div>
   );

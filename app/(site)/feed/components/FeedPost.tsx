@@ -6,6 +6,7 @@ import PostContent from "./PostContent";
 import {useRouter} from "next/navigation";
 import api from "@/app/lib/api";
 import {useState} from "react";
+import {useAuth} from "@/app/hooks/useAuth";
 
 interface FeedPostProps {
     post: FeedPostType;
@@ -15,6 +16,7 @@ interface FeedPostProps {
 
 export default function FeedPost({post, currentUserId, onPostDelete}: FeedPostProps) {
     const router = useRouter();
+    const {isAuthenticated} = useAuth();
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const [showAlert, setShowAlert] = useState(false);
     const [alertMessage, setAlertMessage] = useState('');
@@ -26,10 +28,18 @@ export default function FeedPost({post, currentUserId, onPostDelete}: FeedPostPr
     const imageUrls = post.imageUrls || [];
 
     const handleEdit = () => {
+        if (!isAuthenticated) {
+            router.push("/auth/login");
+            return;
+        }
         router.push(`/feed/edit/${post.postId}`);
     };
 
     const handleDeleteClick = () => {
+        if (!isAuthenticated) {
+            router.push("/auth/login");
+            return;
+        }
         setShowDeleteConfirm(true);
     };
 

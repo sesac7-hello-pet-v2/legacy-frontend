@@ -33,7 +33,14 @@ export default function ImageDragDrop({
 
     const processFiles = useCallback((files: FileList | File[]) => {
         const fileArray = Array.from(files);
-        const imageFiles = fileArray.filter(file => file.type.startsWith('image/'));
+        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        const imageFiles = fileArray.filter(file => allowedTypes.includes(file.type.toLowerCase()));
+
+        if (fileArray.length > imageFiles.length) {
+            setModalMessage(`지원하지 않는 파일 형식이 포함되어 있습니다. JPG, PNG, GIF, WebP 파일만 업로드 가능합니다.`);
+            setShowModal(true);
+            return;
+        }
 
         if (images.length + imageFiles.length > maxFiles) {
             setModalMessage(`최대 ${maxFiles}개의 이미지만 업로드할 수 있습니다.`);
@@ -126,7 +133,7 @@ export default function ImageDragDrop({
                     ref={fileInputRef}
                     type="file"
                     multiple
-                    accept="image/*"
+                    accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
                     onChange={handleFileSelect}
                     className="hidden"
                     disabled={images.length >= maxFiles}
@@ -158,7 +165,7 @@ export default function ImageDragDrop({
                                 이미지를 드래그하거나 클릭하여 업로드
                             </p>
                             <p className="text-xs text-gray-500">
-                                최대 {maxFiles}개 • PNG, JPG, JPEG, GIF
+                                최대 {maxFiles}개 • JPG, PNG, GIF, WebP
                             </p>
                         </div>
                     )}
