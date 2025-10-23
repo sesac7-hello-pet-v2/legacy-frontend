@@ -3,7 +3,7 @@ import axios from "axios";
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
   withCredentials: true,
-  timeout: 5000,
+    timeout: 30000, // 30초로 증가
 });
 
 // 토큰 만료 시간 관리

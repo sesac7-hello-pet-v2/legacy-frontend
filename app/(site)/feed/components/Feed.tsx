@@ -4,6 +4,8 @@ import React, {useEffect, useState} from "react";
 import {FeedPost as FeedPostType} from "../../../types/feed";
 import {feedApi} from "@/app/lib/feedApi";
 import FeedPost from "./FeedPost";
+import {usePostStore} from "@/app/store/PostStore";
+import PendingPostComponent from "./PendingPost";
 
 export default function Feed() {
     const [posts, setPosts] = useState<FeedPostType[]>([]);
@@ -12,6 +14,7 @@ export default function Feed() {
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [showMyPosts, setShowMyPosts] = useState(false);
+    const {pendingPosts, isCreating} = usePostStore();
 
     const currentUserId = 1;
 
@@ -51,6 +54,19 @@ export default function Feed() {
     useEffect(() => {
         loadPosts(1, true);
     }, [showMyPosts]);
+
+    // pending 게시글의 상태 변화 감지해서 자동 새로고침
+    useEffect(() => {
+        const hasSuccessfulPosts = pendingPosts.some(post => post.status === 'success');
+        if (hasSuccessfulPosts) {
+            // 성공한 게시글이 있으면 잠시 후 새로고침
+            const refreshTimer = setTimeout(() => {
+                loadPosts(1, true);
+            }, 1000);
+
+            return () => clearTimeout(refreshTimer);
+        }
+    }, [pendingPosts]);
 
     const handleLoadMore = () => {
         if (!loading && hasMore) {
@@ -116,7 +132,7 @@ export default function Feed() {
                 </div>
             </div>
 
-            {posts.length === 0 ? (
+            {posts.length === 0 && pendingPosts.length === 0 ? (
                 <div className="text-center py-8">
                     <p className="text-gray-500">
                         {showMyPosts ? "작성한 게시글이 없습니다." : "게시글이 없습니다."}
@@ -124,6 +140,15 @@ export default function Feed() {
                 </div>
             ) : (
                 <div>
+                    {/* Pending 게시글들 먼저 표시 */}
+                    {pendingPosts.map((pendingPost) => (
+                        <PendingPostComponent
+                            key={pendingPost.tempId}
+                            post={pendingPost}
+                        />
+                    ))}
+
+                    {/* 실제 게시글들 */}
                     {posts.map((post) => (
                         <FeedPost
                             key={post.postId}
