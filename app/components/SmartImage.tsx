@@ -29,14 +29,15 @@ export default function SmartImage({
     }
 
     return (
-        <div className="relative">
-            {isLoading && (
-                <div className={`absolute inset-0 ${fallbackClassName} ${className}`}/>
-            )}
+        <div className="relative w-full h-full">
+            {/* 항상 표시되는 스켈레톤 배경 */}
+            <div className={`absolute inset-0 ${fallbackClassName}`}/>
+
+            {/* 실제 이미지 */}
             <img
                 src={imageUrl}
                 alt={alt}
-                className={`${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-200`}
+                className={`absolute inset-0 ${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
                 onLoad={onLoad}
                 onError={onError}
             />

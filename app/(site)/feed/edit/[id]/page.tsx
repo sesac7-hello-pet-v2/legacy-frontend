@@ -107,18 +107,29 @@ export default function EditPostPage() {
             {/* 기존 이미지 표시 */}
             {post.imageUrls && post.imageUrls.length > 0 && (
                 <div className="mb-4">
-                    <div className="grid grid-cols-3 gap-2">
-                        {post.imageUrls.map((imageUrl, index) => (
-                            <div key={index} className="aspect-square">
-                                <img
-                                    src={imageUrl}
-                                    alt={`Image ${index + 1}`}
-                                    className="w-full h-full object-cover rounded-lg"
-                                />
-                            </div>
-                        ))}
-                    </div>
-                    <p className="text-sm text-gray-500 mt-2">
+                    {post.imageUrls.length === 1 ? (
+                        <div className="relative w-full aspect-square bg-gray-100 rounded-lg overflow-hidden mb-2">
+                            <img
+                                src={post.imageUrls[0]}
+                                alt="Post image"
+                                className="absolute inset-0 w-full h-full object-cover"
+                            />
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-3 gap-2 mb-2">
+                            {post.imageUrls.map((imageUrl, index) => (
+                                <div key={index}
+                                     className="relative aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                                    <img
+                                        src={imageUrl}
+                                        alt={`Image ${index + 1}`}
+                                        className="absolute inset-0 w-full h-full object-cover"
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                    <p className="text-sm text-gray-500">
                         * 이미지는 수정할 수 없습니다. 필요시 게시글을 삭제하고 다시 작성해주세요.
                     </p>
                 </div>
