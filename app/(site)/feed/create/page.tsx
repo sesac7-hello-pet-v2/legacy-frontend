@@ -6,10 +6,12 @@ import api from "@/app/lib/api";
 import ImageDragDrop from "@/app/components/ImageDragDrop";
 import {AlertModal} from "@/app/components/Modal";
 import {useAuth} from "@/app/hooks/useAuth";
+import {PendingPost, usePostStore} from "@/app/store/PostStore";
 
 export default function CreatePostPage() {
     const router = useRouter();
     const {isAuthenticated} = useAuth();
+    const {addPendingPost, setCreating} = usePostStore();
     const [content, setContent] = useState("");
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -35,6 +37,37 @@ export default function CreatePostPage() {
         setShowModal(true);
     };
 
+    // 비동기 게시글 업로드 함수
+    const uploadPostAsync = async (tempId: string, content: string, files: File[]) => {
+        try {
+            const formData = new FormData();
+            formData.append("content", content);
+            files.forEach((file) => {
+                formData.append("images", file);
+            });
+
+            await api.post("/posts", formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+            });
+
+            // 성공 시 상태 업데이트
+            usePostStore.getState().updatePendingPost(tempId, 'success');
+
+            // 2초 후 pending 게시글 제거
+            setTimeout(() => {
+                usePostStore.getState().removePendingPost(tempId);
+            }, 2000);
+
+        } catch (error) {
+            console.error("게시글 업로드 실패:", error);
+            usePostStore.getState().updatePendingPost(tempId, 'error');
+        } finally {
+            setCreating(false);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -49,34 +82,36 @@ export default function CreatePostPage() {
         }
 
         setIsLoading(true);
+        setCreating(true);
 
-        try {
-            // FormData로 게시글 생성 요청 준비
-            const formData = new FormData();
-            formData.append("content", content.trim());
+        // 임시 ID 생성
+        const tempId = `temp_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
-            // 이미지 파일들 추가
-            selectedFiles.forEach((file) => {
-                formData.append("images", file);
-            });
+        // 이미지 미리보기 URL 생성
+        const previewUrls = selectedFiles.map(file => URL.createObjectURL(file));
 
-            // board-service로 게시글 생성 요청
-            await api.post("/posts", formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            });
+        // 즉시 pending 게시글 추가 (optimistic UI)
+        const pendingPost: PendingPost = {
+            tempId,
+            content: content.trim(),
+            imageFiles: selectedFiles,
+            status: 'pending',
+            createdAt: new Date(),
+            previewUrls
+        };
 
-            showModalMessage("완료", "게시글이 성공적으로 작성되었습니다.", "success");
-            setTimeout(() => {
-                router.push("/feed");
-            }, 1500);
-        } catch (error) {
-            console.error("게시글 작성 실패:", error);
-            showModalMessage("오류", "게시글 작성에 실패했습니다.", "error");
-        } finally {
-            setIsLoading(false);
-        }
+        addPendingPost(pendingPost);
+
+        // 백그라운드에서 비동기 업로드 시작
+        uploadPostAsync(tempId, content.trim(), selectedFiles);
+
+        // 즉시 피드로 이동
+        setIsLoading(false);
+        showModalMessage("업로드 중", "게시글을 업로드하고 있습니다. 피드에서 진행 상황을 확인하세요.", "info");
+
+        setTimeout(() => {
+            router.push("/feed");
+        }, 1500);
     };
 
     return (

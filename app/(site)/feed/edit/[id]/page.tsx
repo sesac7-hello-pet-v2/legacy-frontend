@@ -33,7 +33,7 @@ export default function EditPostPage() {
 
     const fetchPost = async () => {
         try {
-            const response = await api.get(`/api/v1/boards/${postId}`);
+            const response = await api.get(`/posts/${postId}`);
             const postData = response.data;
             setPost(postData);
             setContent(postData.content || "");
@@ -55,10 +55,11 @@ export default function EditPostPage() {
         setIsSaving(true);
 
         try {
-            await api.put(`/api/v1/boards/${postId}`, {
+            await api.put(`/posts/${postId}`, {
                 content: content.trim(),
             });
 
+            alert("게시글이 수정되었습니다.");
             router.push("/feed");
         } catch (error) {
             console.error("게시글 수정 실패:", error);
