@@ -3,6 +3,7 @@
 import {useState} from "react";
 import {feedApi} from "../../../lib/feedApi";
 import {PostLikeResponse} from "../../../types/feed";
+import {useAuth} from "@/app/hooks/useAuth";
 
 interface PostActionsProps {
     postId: string;
@@ -21,13 +22,14 @@ export default function PostActions({
                                         onEdit,
                                         onDelete
                                     }: PostActionsProps) {
+    const {isAuthenticated} = useAuth();
     const [isLiked, setIsLiked] = useState(false);
     const [likeCount, setLikeCount] = useState(initialLikeCount);
     const [isSaved, setIsSaved] = useState(false);
     const [isLikeLoading, setIsLikeLoading] = useState(false);
 
     const handleLike = async () => {
-        if (isLikeLoading) return;
+        if (!isAuthenticated || isLikeLoading) return;
 
         const originalLiked = isLiked;
         const originalCount = likeCount;
@@ -64,7 +66,7 @@ export default function PostActions({
         console.log("Share post:", postId);
     };
 
-    const isMyPost = postUserId === currentUserId;
+    const isMyPost = isAuthenticated && postUserId === currentUserId;
 
     return (
         <div className="p-4">
@@ -72,10 +74,15 @@ export default function PostActions({
                 <div className="flex items-center gap-4">
                     <button
                         onClick={handleLike}
-                        disabled={isLikeLoading}
-                        className={`hover:scale-110 transition-transform ${
-                            isLiked ? "text-red-500" : "text-gray-700"
+                        disabled={!isAuthenticated || isLikeLoading}
+                        className={`transition-transform ${
+                            !isAuthenticated
+                                ? "text-gray-400 cursor-not-allowed"
+                                : isLiked
+                                    ? "text-red-500 hover:scale-110"
+                                    : "text-gray-700 hover:scale-110"
                         } ${isLikeLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                        title={!isAuthenticated ? "로그인이 필요합니다" : "좋아요"}
                     >
                         <svg className="w-6 h-6" fill={isLiked ? "currentColor" : "none"} stroke="currentColor"
                              viewBox="0 0 24 24">
@@ -144,6 +151,11 @@ export default function PostActions({
             {likeCount > 0 && (
                 <div className="text-sm font-semibold text-gray-900 mb-2">
                     좋아요 {likeCount.toLocaleString()}개
+                    {!isAuthenticated && (
+                        <span className="text-gray-500 text-xs ml-2">
+                            (로그인하여 좋아요 남기기)
+                        </span>
+                    )}
                 </div>
             )}
         </div>
