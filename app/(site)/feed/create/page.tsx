@@ -3,81 +3,73 @@
 import {useState} from "react";
 import {useRouter} from "next/navigation";
 import api from "@/app/lib/api";
+import ImageDragDrop from "@/app/components/ImageDragDrop";
+import {AlertModal} from "@/app/components/Modal";
 
 export default function CreatePostPage() {
     const router = useRouter();
     const [content, setContent] = useState("");
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-    const [previews, setPreviews] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [modalConfig, setModalConfig] = useState({
+        title: '',
+        message: '',
+        type: 'info' as 'info' | 'warning' | 'error' | 'success'
+    });
 
-    const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const files = Array.from(e.target.files || []);
-
-        if (files.length + selectedFiles.length > 5) {
-            alert("최대 5개의 이미지만 업로드할 수 있습니다.");
-            return;
-        }
-
-        setSelectedFiles(prev => [...prev, ...files]);
-
-        // 미리보기 생성
-        files.forEach(file => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                setPreviews(prev => [...prev, e.target?.result as string]);
-            };
-            reader.readAsDataURL(file);
-        });
+    const handleFilesChange = (files: File[]) => {
+        setSelectedFiles(files);
     };
 
-    const removeImage = (index: number) => {
-        setSelectedFiles(prev => prev.filter((_, i) => i !== index));
-        setPreviews(prev => prev.filter((_, i) => i !== index));
+    const showModalMessage = (title: string, message: string, type: 'info' | 'warning' | 'error' | 'success' = 'info') => {
+        setModalConfig({title, message, type});
+        setShowModal(true);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
         if (!content.trim()) {
-            alert("내용을 입력해주세요.");
+            showModalMessage("입력 오류", "내용을 입력해주세요.", "warning");
             return;
         }
 
         setIsLoading(true);
 
         try {
-            // 이미지 업로드
+            // board-service를 통해 이미지 업로드
             const imageUrls: string[] = [];
 
             for (const file of selectedFiles) {
                 const formData = new FormData();
                 formData.append("file", file);
-                formData.append("userId", "1"); // TODO: 실제 사용자 ID로 변경
-                formData.append("postId", Date.now().toString()); // 임시 postId
 
-                const uploadResponse = await api.post("/api/v1/images/upload", formData, {
+                // board-service의 이미지 업로드 엔드포인트 호출
+                const uploadResponse = await api.post("/posts/upload-image", formData, {
                     headers: {
                         "Content-Type": "multipart/form-data",
                     },
                 });
 
-                imageUrls.push(uploadResponse.data.s3Key);
+                imageUrls.push(uploadResponse.data.imageUrl);
             }
 
             // 게시글 생성
             const postData = {
                 content: content.trim(),
                 imageUrls,
-                userId: 1, // TODO: 실제 사용자 ID로 변경
             };
 
-            await api.post("/api/v1/boards", postData);
+            await api.post("/posts", postData);
 
-            router.push("/feed");
+            showModalMessage("완료", "게시글이 성공적으로 작성되었습니다.", "success");
+            setTimeout(() => {
+                router.push("/feed");
+            }, 1500);
         } catch (error) {
             console.error("게시글 작성 실패:", error);
-            alert("게시글 작성에 실패했습니다.");
+            showModalMessage("오류", "게시글 작성에 실패했습니다.", "error");
         } finally {
             setIsLoading(false);
         }
@@ -102,64 +94,37 @@ export default function CreatePostPage() {
                 </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-                {/* 이미지 업로드 영역 */}
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
-                    <input
-                        type="file"
-                        multiple
-                        accept="image/*"
-                        onChange={handleFileSelect}
-                        className="hidden"
-                        id="file-upload"
-                    />
-                    <label
-                        htmlFor="file-upload"
-                        className="cursor-pointer flex flex-col items-center justify-center text-gray-500"
-                    >
-                        <svg className="w-8 h-8 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                                  d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                        </svg>
-                        <span>사진/동영상 추가</span>
-                    </label>
-                </div>
-
-                {/* 이미지 미리보기 */}
-                {previews.length > 0 && (
-                    <div className="grid grid-cols-3 gap-2">
-                        {previews.map((preview, index) => (
-                            <div key={index} className="relative aspect-square">
-                                <img
-                                    src={preview}
-                                    alt={`Preview ${index + 1}`}
-                                    className="w-full h-full object-cover rounded-lg"
-                                />
-                                <button
-                                    type="button"
-                                    onClick={() => removeImage(index)}
-                                    className="absolute top-1 right-1 bg-black bg-opacity-50 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm"
-                                >
-                                    ×
-                                </button>
-                            </div>
-                        ))}
-                    </div>
-                )}
-
-                {/* 내용 입력 */}
-                <textarea
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    placeholder="문구를 입력하세요..."
-                    className="w-full min-h-[120px] p-3 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    maxLength={1000}
+            <form onSubmit={handleSubmit} className="space-y-6">
+                {/* 이미지 업로드 영역 - Drag & Drop */}
+                <ImageDragDrop
+                    onFilesChange={handleFilesChange}
+                    maxFiles={5}
+                    className="mb-4"
                 />
 
-                <div className="text-right text-sm text-gray-500">
-                    {content.length}/1000
+                {/* 내용 입력 */}
+                <div className="space-y-2">
+                    <textarea
+                        value={content}
+                        onChange={(e) => setContent(e.target.value)}
+                        placeholder="문구를 입력하세요..."
+                        className="w-full min-h-[120px] p-3 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        maxLength={1000}
+                    />
+                    <div className="text-right text-sm text-gray-500">
+                        {content.length}/1000
+                    </div>
                 </div>
             </form>
+
+            {/* Modal */}
+            <AlertModal
+                isOpen={showModal}
+                onClose={() => setShowModal(false)}
+                title={modalConfig.title}
+                message={modalConfig.message}
+                type={modalConfig.type}
+            />
         </div>
     );
 }
