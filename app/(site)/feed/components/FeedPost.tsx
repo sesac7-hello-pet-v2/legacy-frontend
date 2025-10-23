@@ -5,6 +5,7 @@ import PostActions from "./PostActions";
 import PostContent from "./PostContent";
 import {useRouter} from "next/navigation";
 import api from "@/app/lib/api";
+import {useState} from "react";
 
 interface FeedPostProps {
     post: FeedPostType;
@@ -14,6 +15,9 @@ interface FeedPostProps {
 
 export default function FeedPost({post, currentUserId, onPostDelete}: FeedPostProps) {
     const router = useRouter();
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+    const [showAlert, setShowAlert] = useState(false);
+    const [alertMessage, setAlertMessage] = useState('');
 
     if (!post) {
         return null;
@@ -25,17 +29,18 @@ export default function FeedPost({post, currentUserId, onPostDelete}: FeedPostPr
         router.push(`/feed/edit/${post.postId}`);
     };
 
-    const handleDelete = async () => {
-        if (!confirm("정말로 이 게시글을 삭제하시겠습니까?")) {
-            return;
-        }
+    const handleDeleteClick = () => {
+        setShowDeleteConfirm(true);
+    };
 
+    const handleDeleteConfirm = async () => {
         try {
-            await api.delete(`/api/v1/boards/${post.postId}`);
+            await api.delete(`/v1/posts/${post.postId}`);
             onPostDelete?.(post.postId);
         } catch (error) {
             console.error("게시글 삭제 실패:", error);
-            alert("게시글 삭제에 실패했습니다.");
+            setAlertMessage("게시글 삭제에 실패했습니다.");
+            setShowAlert(true);
         }
     };
 
@@ -53,7 +58,7 @@ export default function FeedPost({post, currentUserId, onPostDelete}: FeedPostPr
                 currentUserId={currentUserId}
                 postUserId={post.userId}
                 onEdit={handleEdit}
-                onDelete={handleDelete}
+                onDelete={handleDeleteClick}
             />
 
             <PostContent content={post.content}/>
