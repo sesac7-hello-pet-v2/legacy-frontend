@@ -1,17 +1,9 @@
-import { FinancialInfo } from "@/app/types/application";
-
-interface Props {
-    financialInfo: FinancialInfo;
-    setFinancialInfo?: (info: FinancialInfo) => void; // 작성 모드에서만 필요
-    isReadOnly?: boolean;
-}
-
 export default function FinancialSection({
     financialInfo,
     setFinancialInfo,
     isReadOnly = false,
-}: Props) {
-    const update = (key: keyof FinancialInfo, value: any) => {
+}) {
+    const update = (key, value) => {
         if (setFinancialInfo) {
             setFinancialInfo({
                 ...financialInfo,
@@ -84,7 +76,6 @@ export default function FinancialSection({
                 )}
             </div>
 
-            <hr className="border-gray-300 mt-4" />
         </div>
     );
 }

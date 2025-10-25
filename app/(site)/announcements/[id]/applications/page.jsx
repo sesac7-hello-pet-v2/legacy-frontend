@@ -4,7 +4,7 @@ import AnnouncementApplicationList from "@/app/components/announcementApplicatio
 import { useParams, useRouter } from "next/navigation";
 
 export default function AnnouncementApplicationsPage() {
-    const { id } = useParams<{ id: string }>();
+    const { id } = useParams();
     const router = useRouter();
 
     return (

@@ -1,15 +1,4 @@
-interface Props {
-    application: {
-        applicationId: number;
-        announcementId: number;
-        applicationStatusLabel: string; // 이제는 이미 한글 상태로 전달됨
-        submittedAt: string;
-        petImageUrl: string;
-    };
-    onClick: () => void;
-}
-
-export default function ApplicationItem({ application, onClick }: Props) {
+export default function ApplicationItem({ application, onClick }) {
     return (
         <div className="cursor-pointer hover:bg-amber-50" onClick={onClick}>
             <div className="flex justify-between items-center p-5">

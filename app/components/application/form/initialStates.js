@@ -1,14 +1,4 @@
-import {
-    HousingInfo,
-    FamilyInfo,
-    CareInfo,
-    FinancialInfo,
-    PetExperienceInfo,
-    FuturePlanInfo,
-    Agreement,
-} from "@/app/types/application";
-
-export const initialHousingInfo: HousingInfo = {
+export const initialHousingInfo = {
     housingType: "",
     housingTypeLabel: "",
     residenceType: "",
@@ -20,7 +10,7 @@ export const initialHousingInfo: HousingInfo = {
     houseSizeRangeLabel: "",
 };
 
-export const initialFamilyInfo: FamilyInfo = {
+export const initialFamilyInfo = {
     numberOfHousehold: 0,
     hasChildUnder13: null,
     familyAgreement: "",
@@ -28,30 +18,30 @@ export const initialFamilyInfo: FamilyInfo = {
     hasPetAllergy: null,
 };
 
-export const initialCareInfo: CareInfo = {
+export const initialCareInfo = {
     absenceTime: "",
     absenceTimeLabel: "",
     careTime: "",
     careTimeLabel: "",
 };
 
-export const initialFinancialInfo: FinancialInfo = {
+export const initialFinancialInfo = {
     monthlyBudget: "",
     monthlyBudgetLabel: "",
     hasEmergencyFund: null,
 };
 
-export const initialPetExperienceInfo: PetExperienceInfo = {
+export const initialPetExperienceInfo = {
     hasPetExperience: null,
     experienceDetails: "",
 };
 
-export const initialFuturePlanInfo: FuturePlanInfo = {
+export const initialFuturePlanInfo = {
     hasFuturePlan: null,
     planDetails: "",
 };
 
-export const initialAgreement: Agreement = {
+export const initialAgreement = {
     agreedToAccuracy: false,
     agreedToCare: false,
     agreedToPrivacy: false,
