@@ -44,9 +44,10 @@ export default function LoginPage() {
         setTimeout(() => {
             router.push("/");
         }, 1500);
-    } catch (err) {
+    } catch (err: any) {
       console.error("❌ [Login] 로그인 실패:", err);
-        showModalMessage("로그인 실패", (err as Error).message, "error");
+      const errorMessage = err.response?.data?.message || err.message || "로그인에 실패했습니다.";
+      showModalMessage("로그인 실패", errorMessage, "error");
     } finally {
       setLoading(false);
     }
