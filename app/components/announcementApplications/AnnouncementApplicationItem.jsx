@@ -3,18 +3,7 @@
 import { formatPhoneNumber } from "@/app/lib/formatPhoneNumber";
 import { useRouter } from "next/navigation";
 
-interface Props {
-    application: {
-        applicationId: number;
-        applicationStatusLabel: string;
-        userName: string;
-        userPhoneNumber: string;
-        userEmail: string;
-    };
-    onApprove: () => void;
-}
-
-export default function AnnouncementApplicationItem({ application, onApprove }: Props) {
+export default function AnnouncementApplicationItem({ application, onApprove }) {
     const router = useRouter();
 
     return (

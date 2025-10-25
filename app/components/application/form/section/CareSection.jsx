@@ -1,13 +1,5 @@
-import { CareInfo } from "@/app/types/application";
-
-interface Props {
-    careInfo: CareInfo;
-    setCareInfo?: (info: CareInfo) => void; // 작성 모드에서만 필요
-    isReadOnly?: boolean;
-}
-
-export default function CareSection({ careInfo, setCareInfo, isReadOnly = false }: Props) {
-    const update = (key: keyof CareInfo, value: string) => {
+export default function CareSection({ careInfo, setCareInfo, isReadOnly = false }) {
+    const update = (key, value) => {
         if (setCareInfo) {
             setCareInfo({
                 ...careInfo,
@@ -16,7 +8,7 @@ export default function CareSection({ careInfo, setCareInfo, isReadOnly = false 
         }
     };
 
-    const renderField = (title: string, value: string) => (
+    const renderField = (title, value) => (
         <div className="flex gap-2">
             <span className="font-medium text-sm">{title}:</span>
             <span className="text-sm text-gray-800">{value || "-"}</span>
@@ -84,8 +76,6 @@ export default function CareSection({ careInfo, setCareInfo, isReadOnly = false 
                     </div>
                 </>
             )}
-
-            <hr className="border-gray-300 mt-4" />
         </div>
     );
 }
