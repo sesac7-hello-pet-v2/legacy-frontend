@@ -7,18 +7,10 @@ import ApplicationItem from "@/app/components/application/ApplicationItem";
 import ConfirmModal from "@/app/components/ConfirmModal";
 import Pagination from "@/app/components/Pagination";
 
-interface Application {
-    applicationId: number;
-    announcementId: number;
-    applicationStatusLabel: string;
-    submittedAt: string;
-    petImageUrl: string;
-}
-
 export default function ApplicationList() {
-    const [applications, setApplications] = useState<Application[]>([]);
+    const [applications, setApplications] = useState([]);
     const [totalPages, setTotalPages] = useState(1);
-    const [selectedId, setSelectedId] = useState<number | null>(null);
+    const [selectedId, setSelectedId] = useState(null);
 
     const searchParams = useSearchParams();
     const currentPage = useMemo(() => Number(searchParams.get("page")) || 1, [searchParams]);
@@ -27,9 +19,9 @@ export default function ApplicationList() {
         fetchApplications(currentPage);
     }, [searchParams]);
 
-    const fetchApplications = async (pageNum: number) => {
+    const fetchApplications = async (pageNum) => {
         try {
-            const res = await api.get(`/me/applications?page=${pageNum - 1}&size=10`);
+            const res = await api.get(`/v1/applications/user?page=${pageNum - 1}&size=10`);
             setApplications(res.data.applications);
             setTotalPages(res.data.totalPages);
         } catch (e) {
@@ -40,7 +32,7 @@ export default function ApplicationList() {
     const handleDelete = async () => {
         if (selectedId === null) return;
         try {
-            await api.delete(`/applications/${selectedId}`);
+            await api.delete(`/v1/applications/${selectedId}`);
             alert("신청서가 삭제되었습니다.");
             setSelectedId(null);
             fetchApplications(currentPage); // 현재 페이지로 재조회
