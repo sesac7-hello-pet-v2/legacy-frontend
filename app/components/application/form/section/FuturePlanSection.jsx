@@ -1,17 +1,9 @@
-import { FuturePlanInfo } from "@/app/types/application";
-
-interface Props {
-    futurePlanInfo: FuturePlanInfo;
-    setFuturePlanInfo?: (info: FuturePlanInfo) => void; // readOnly 모드에서는 필요 없음
-    isReadOnly?: boolean;
-}
-
 export default function FuturePlanSection({
     futurePlanInfo,
     setFuturePlanInfo,
     isReadOnly = false,
-}: Props) {
-    const update = (key: keyof FuturePlanInfo, value: any) => {
+}) {
+    const update = (key, value) => {
         if (setFuturePlanInfo) {
             setFuturePlanInfo({
                 ...futurePlanInfo,
@@ -75,7 +67,6 @@ export default function FuturePlanSection({
                 )}
             </div>
 
-            <hr className="border-gray-300 mt-4" />
         </div>
     );
 }

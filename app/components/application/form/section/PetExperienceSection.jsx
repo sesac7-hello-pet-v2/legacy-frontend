@@ -1,17 +1,9 @@
-import { PetExperienceInfo } from "@/app/types/application";
-
-interface Props {
-    petExperienceInfo: PetExperienceInfo;
-    setPetExperienceInfo?: (info: PetExperienceInfo) => void; // 작성/수정 모드에서만 필요
-    isReadOnly?: boolean;
-}
-
 export default function PetExperienceSection({
     petExperienceInfo,
     setPetExperienceInfo,
     isReadOnly = false,
-}: Props) {
-    const update = (key: keyof PetExperienceInfo, value: any) => {
+}) {
+    const update = (key, value) => {
         if (setPetExperienceInfo) {
             setPetExperienceInfo({
                 ...petExperienceInfo,
@@ -72,8 +64,6 @@ export default function PetExperienceSection({
                     )
                 )}
             </div>
-
-            <hr className="border-gray-300 mt-4" />
         </div>
     );
 }

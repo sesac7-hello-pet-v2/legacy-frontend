@@ -1,19 +1,11 @@
-import { Agreement } from "@/app/types/application";
-
-interface Props {
-    agreement: Agreement;
-    setAgreement?: (val: Agreement) => void; // readOnly 모드면 필요 없음
-    isReadOnly?: boolean;
-}
-
-const CHECKBOXES: { key: keyof Agreement; label: string }[] = [
+const CHECKBOXES = [
     { key: "agreedToAccuracy", label: "위 항목은 사실에 근거하여 작성하였습니다." },
     { key: "agreedToCare", label: "입양 후 반려동물을 책임감 있게 돌볼 것을 약속합니다." },
     { key: "agreedToPrivacy", label: "개인정보 수집 및 활용에 동의합니다." },
 ];
 
-export default function AgreementSection({ agreement, setAgreement, isReadOnly = false }: Props) {
-    const update = (key: keyof Agreement, value: boolean) => {
+export default function AgreementSection({ agreement, setAgreement, isReadOnly = false }) {
+    const update = (key, value) => {
         if (setAgreement) {
             setAgreement({
                 ...agreement,
@@ -22,7 +14,7 @@ export default function AgreementSection({ agreement, setAgreement, isReadOnly =
         }
     };
 
-    const renderItem = (key: keyof Agreement, label: string) => {
+    const renderItem = (key, label) => {
         if (isReadOnly) {
             return (
                 <div className="flex items-center gap-2 text-sm" key={key}>
