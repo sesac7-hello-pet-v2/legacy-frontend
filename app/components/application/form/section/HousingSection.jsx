@@ -1,13 +1,5 @@
-import { HousingInfo } from "@/app/types/application";
-
-interface Props {
-    housingInfo: HousingInfo;
-    setHousingInfo?: (info: HousingInfo) => void; // 작성 모드에서만 필요
-    isReadOnly?: boolean;
-}
-
-export default function HousingSection({ housingInfo, setHousingInfo, isReadOnly = false }: Props) {
-    const update = (key: keyof HousingInfo, value: any) => {
+export default function HousingSection({ housingInfo, setHousingInfo, isReadOnly = false }) {
+    const update = (key, value) => {
         if (setHousingInfo) {
             setHousingInfo({
                 ...housingInfo,
@@ -17,7 +9,7 @@ export default function HousingSection({ housingInfo, setHousingInfo, isReadOnly
     };
 
     // 공통 렌더 함수
-    const renderField = (title: string, value: string | boolean | null) => (
+    const renderField = (title, value) => (
         <div className="flex gap-2">
             <span className="font-medium text-sm">{title}:</span>
             <span className="text-sm text-gray-800">{value !== null ? String(value) : "-"}</span>
@@ -172,7 +164,6 @@ export default function HousingSection({ housingInfo, setHousingInfo, isReadOnly
                 </>
             )}
 
-            <hr className="border-gray-300 mt-4" />
         </div>
     );
 }

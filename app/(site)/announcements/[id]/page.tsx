@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import api from "@/app/lib/api";
 import Link from "next/link";
+import { useUserStore } from "@/app/store/UserStore";
 
 interface AnnouncementDetailResponse {
     id: number;
@@ -18,7 +19,6 @@ interface AnnouncementDetailResponse {
     personality: string;
     age: number;
     announcementPeriod: string;
-    alreadyApplied: boolean;
 }
 
 const statusLabel: Record<"IN_PROGRESS" | "COMPLETED", string> = {
@@ -29,8 +29,10 @@ const statusLabel: Record<"IN_PROGRESS" | "COMPLETED", string> = {
 export default function AnnouncementDetailPage() {
     const params = useParams();
     const id = Array.isArray(params.id) ? params.id[0] : params.id;
+    const { user } = useUserStore();
 
     const [detail, setDetail] = useState<AnnouncementDetailResponse | null>(null);
+    const [alreadyApplied, setAlreadyApplied] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
 
     useEffect(() => {
@@ -43,6 +45,18 @@ export default function AnnouncementDetailPage() {
                 setError("공고 정보를 불러오지 못했습니다.");
             });
     }, [id]);
+
+    // 사용자의 공고 지원 여부 확인
+    useEffect(() => {
+        if (!id || !user) return;
+
+        api.get(`/v1/applications/status?announcementId=${id}&userId=${user.id}`)
+            .then((res) => setAlreadyApplied(res.data.applied))
+            .catch((err) => {
+                console.error("지원 상태 확인 실패:", err);
+                // 에러 발생 시 기본값 false 유지
+            });
+    }, [id, user]);
 
     if (error) {
         return (
@@ -110,7 +124,7 @@ export default function AnnouncementDetailPage() {
             </section>
 
             {/* 신청 여부에 따른 버튼 */}
-            {detail.alreadyApplied ? (
+            {alreadyApplied ? (
                 <button
                     className="mt-4 w-full rounded-full bg-gray-300 py-3 font-semibold text-white shadow-inner cursor-not-allowed block mx-auto text-center"
                     disabled

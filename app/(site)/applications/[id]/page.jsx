@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import api from "@/app/lib/api";
-import RequireRole from "@/app/components/RequireRole";
 import AgreementSection from "@/app/components/application/form/section/AgreementSection";
 import ApplicationInfoSection from "@/app/components/application/form/section/ApplicationInfoSection";
 import HousingSection from "@/app/components/application/form/section/HousingSection";
@@ -17,16 +16,20 @@ export default function ApplicationDetailPage() {
     const params = useParams();
     const router = useRouter();
     const applicationId = Array.isArray(params.id) ? params.id[0] : params.id;
-    const [data, setData] = useState<any>(null);
+    const [data, setData] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function fetchData() {
             try {
-                const res = await api.get(`/applications/${applicationId}`);
+                console.log("Fetching application with ID:", applicationId);
+                const res = await api.get(`/v1/applications/${applicationId}`);
+                console.log("Application data received:", res.data);
                 setData(res.data);
             } catch (e) {
-                alert("신청서를 불러오지 못했습니다.");
+                console.error("Error fetching application:", e);
+                console.error("Error response:", e.response);
+                alert("신청서를 불러오지 못했습니다: " + (e.response?.data?.message || e.message));
                 router.back();
             } finally {
                 setLoading(false);
@@ -37,10 +40,10 @@ export default function ApplicationDetailPage() {
 
     const handleApprove = async () => {
         try {
-            await api.put(`/announcements/${data.announcementId}/applications/${applicationId}`);
+            await api.patch(`/v1/applications/announcement/${data.announcementId}/${applicationId}/approve`);
             alert("신청이 승인되었습니다.");
             router.push(`/`);
-        } catch (e: any) {
+        } catch (e) {
             alert("승인에 실패했습니다: " + (e.response?.data?.message || e.message));
         }
     };
