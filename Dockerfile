@@ -13,6 +13,9 @@ RUN npm install
 # 소스 코드 복사
 COPY . .
 
+# 빌드 시 환경변수 설정 (Kubernetes 환경에서는 /api 경로 사용)
+ENV NEXT_PUBLIC_API_URL=/api
+
 # Next.js 프로덕션 빌드
 RUN npm run build
 

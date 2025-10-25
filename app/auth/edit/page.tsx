@@ -1,5 +1,4 @@
 "use client";
-import RequireRole from "@/app/components/RequireRole";
 import api from "@/app/lib/api";
 import { UserDetailData, useUserStore } from "@/app/store/UserStore";
 import Link from "next/link";
@@ -7,66 +6,40 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/; // 영문·숫자·특수문자 포함 6자+
-const KOREAN_REGEX = /^[가-힣]+$/;
-const ENGLISH_REGEX = /^[A-Za-z]+$/;
+const NICKNAME_REGEX = /^[가-힣a-zA-Z0-9]{2,10}$/; // 한글, 영문, 숫자 조합 2-10자
 
 export default function EditPage() {
   const [user, setUser] = useState<UserDetailData | null>(null);
   const [loading, setLoading] = useState(true);
 
   const [password, setPassword] = useState("");
-  const [passwordCheck, setPasswordCheck] = useState("");
-  const [nickname, setNickname] = useState("");
-  const [address, setAddress] = useState("");
-  const [profileUrl, setProfileUrl] = useState("");
+
+  // 입력용 임시 state
+  const [nicknameInput, setNicknameInput] = useState("");
+  const [addressInput, setAddressInput] = useState("");
+  const [profileUrlInput, setProfileUrlInput] = useState("");
 
   const currentUser = useUserStore((s) => s.user);
-  const setCurrentUser = useUserStore((s) => s.setUser);
-  const clearUser = useUserStore((s) => s.clearUser);
 
   const [nicknameChecked, setNicknameChecked] = useState(false);
 
-  /* ✅ “건드렸는지” 상태 */
-  const [touched, setTouched] = useState<Record<string, boolean>>({});
-
-  /* 제출 시 true → 모든 에러 표시 */
-  const [submitted, setSubmitted] = useState(false);
-
-  /* 에러 메시지 */
-  const [errors, setErrors] = useState<Record<string, string>>({});
-
   const router = useRouter();
-
-  const isFormValid =
-    PASSWORD_REGEX.test(password) &&
-    !errors.password &&
-    !errors.passwordCheck &&
-    nickname &&
-    nicknameChecked &&
-    !errors.nickname &&
-    address &&
-    !errors.address;
 
   useEffect(() => {
     getUserDetail();
   }, []);
 
-  // 2) user 가 바뀌는 순간에만 폼 값 초기화
   useEffect(() => {
     if (user) {
-      setNickname(user.nickname);
-      setAddress(user.address);
-      setProfileUrl(user.profileUrl);
+      setNicknameInput(user.nickname);
+      setAddressInput(user.address);
+      setProfileUrlInput(user.profileUrl || "");
     }
   }, [user]);
-  useEffect(() => {
-    validate(); // 한 글자만 바뀌어도 즉시 재검사
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [password, passwordCheck, address, nickname]);
 
   async function getUserDetail() {
     try {
-      const res = await api.get<UserDetailData>("/me");
+      const res = await api.get<UserDetailData>("/v1/users");
       setUser(res.data);
     } catch (err) {
       console.error(err);
@@ -75,25 +48,16 @@ export default function EditPage() {
     }
   }
 
-  /* ── 한번이라도 텍스트 입력 했는지 체크 ─────────────────── */
-
-  const markTouched =
-    (field: string, setter: (v: string) => void, markPhone = false) =>
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      setter(e.target.value);
-      setTouched((t) => ({
-        ...t,
-        [field]: true,
-        ...(markPhone ? { phone: true } : {}),
-      }));
-    };
-
-  const checkNicname = async () => {
+  const checkNickname = async () => {
+    if (!NICKNAME_REGEX.test(nicknameInput)) {
+      alert("닉네임은 한글, 영문, 숫자 조합으로 2-10자여야 합니다.");
+      return;
+    }
     try {
-      const res = await api.get("/users/exist", {
+      const res = await api.get("/v1/users/exist", {
         params: {
           field: "NICKNAME",
-          value: nickname,
+          value: nicknameInput,
         },
       });
       if (!res.data.result) {
@@ -106,30 +70,76 @@ export default function EditPage() {
     }
   };
 
-  const validate = () => {
-    const errs: Record<string, string> = {};
-
-    // 비밀번호
-    if (!PASSWORD_REGEX.test(password))
-      errs.password = "영문, 숫자, 특수문자를 포함해 6자 이상이어야 합니다.";
-    if (password !== passwordCheck)
-      errs.passwordCheck = "비밀번호가 일치하지 않습니다.";
-
-    // 주소
-    if (!address) errs.address = "주소는 필수입니다.";
-
-    if (!nickname) {
-      errs.nickname = "닉네임은 필수입니다.";
-    } else if (KOREAN_REGEX.test(nickname) && nickname.length < 2) {
-      errs.nickname = "한글 닉네임은 최소 2자 이상이어야 합니다.";
-    } else if (ENGLISH_REGEX.test(nickname) && nickname.length < 5) {
-      errs.nickname = "영문 닉네임은 최소 5자 이상이어야 합니다.";
-    } else if (!KOREAN_REGEX.test(nickname) && !ENGLISH_REGEX.test(nickname)) {
-      errs.nickname = "닉네임은 한글 또는 영문자만 사용할 수 있습니다.";
+  const updateNickname = async () => {
+    if (!nicknameChecked) {
+      alert("닉네임 중복확인을 해주세요.");
+      return;
     }
+    if (!user) return;
+    try {
+      await api.put("/v1/users", {
+        nickname: nicknameInput,
+        address: user.address,
+        userProfileUrl: user.profileUrl || null
+      });
+      alert("닉네임이 수정되었습니다.");
+      setNicknameChecked(false);
+      await getUserDetail();
+      window.location.reload();
+    } catch (error) {
+      alert("닉네임 수정 실패: " + (error as Error).message);
+    }
+  };
 
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
+  const updateAddress = async () => {
+    if (!addressInput) {
+      alert("주소를 입력해주세요.");
+      return;
+    }
+    if (!user) return;
+    try {
+      await api.put("/v1/users", {
+        nickname: user.nickname,
+        address: addressInput,
+        userProfileUrl: user.profileUrl || null
+      });
+      alert("주소가 수정되었습니다.");
+      await getUserDetail();
+      window.location.reload();
+    } catch (error) {
+      alert("주소 수정 실패: " + (error as Error).message);
+    }
+  };
+
+  const updateProfileUrl = async () => {
+    if (!user) return;
+    try {
+      await api.put("/v1/users", {
+        nickname: user.nickname,
+        address: user.address,
+        userProfileUrl: profileUrlInput || null
+      });
+      alert("프로필 사진이 수정되었습니다.");
+      await getUserDetail();
+      window.location.reload();
+    } catch (error) {
+      alert("프로필 사진 수정 실패: " + (error as Error).message);
+    }
+  };
+
+  const updatePassword = async () => {
+    if (!PASSWORD_REGEX.test(password)) {
+      alert("영문, 숫자, 특수문자를 포함해 6자 이상이어야 합니다.");
+      return;
+    }
+    try {
+      await api.put("/v1/users/password", { password });
+      alert("비밀번호가 수정되었습니다.");
+      setPassword("");
+      window.location.reload();
+    } catch (error) {
+      alert("비밀번호 수정 실패: " + (error as Error).message);
+    }
   };
 
   if (loading) {
@@ -144,167 +154,160 @@ export default function EditPage() {
     );
   }
 
-  /* ── 제출 ────────────────────────────────────────────── */
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    // 1) 마지막 유효성 검사
-    if (!validate()) return;
-
-    // 2) 백엔드 DTO(UserRegisterRequest)에 맞춰 페이로드 구성
-    const payload = {
-      password,
-      nickname,
-      address,
-      userProfileUrl: profileUrl || null,
-    };
-    try {
-      const res = await api.put("/me", payload);
-      const email = currentUser?.email;
-      console.log(res);
-      clearUser();
-      await api.delete("/auth/logout");
-      await api.post("/auth/login", { email, password }).then((res) => {
-        setCurrentUser(res.data);
-      });
-      alert("정보 수정이 완료되었습니다!");
-      router.push("/me");
-    } catch (error) {
-      const msg = (error as Error).message || "알 수 없는 오류가 발생했습니다.";
-      alert(`정보 수정 실패: ${msg}`);
-    }
-  };
-
   return (
-    <RequireRole allow={["USER", "ADMIN", "SHELTER"]} fallback="/auth/login">
-      <div className="flex flex-col min-h-screen items-center justify-center bg-white">
-        <h1 className="mb-8 text-center text-3xl font-bold tracking-widest text-amber-400">
-          회원 정보 수정
-        </h1>
+    <div className="flex flex-col min-h-screen items-center justify-center bg-white py-10">
+      <h1 className="mb-8 text-center text-3xl font-bold tracking-widest text-amber-400">
+        회원 정보 수정
+      </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-4 w-[500px]">
-          {/* 이메일 */}
-          <div className="flex items-center">
+      <div className="space-y-6 w-[500px]">
+        {/* 프로필 사진 미리보기 */}
+        <div className="flex flex-col items-center mb-6">
+          <img
+            src={profileUrlInput || user.profileUrl || "/basic_profile.jpg"}
+            alt="Profile Preview"
+            className="h-32 w-32 rounded-full object-cover shadow-lg border-4 border-amber-400"
+            onError={(e) => {
+              e.currentTarget.src = "/basic_profile.jpg";
+            }}
+          />
+          <p className="mt-2 text-sm text-gray-500">프로필 사진 미리보기</p>
+        </div>
+
+        {/* 프로필 URL */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">프로필 사진 URL</label>
+          <div className="flex items-center gap-3">
             <input
-              value={user.email}
-              type="email"
-              disabled
-              readOnly
-              placeholder="이메일"
-              className="flex-grow rounded-lg px-4 py-3 shadow placeholder-gray-400 focus:ring-2 focus:ring-amber-400 disabled:bg-gray-100 
-      disabled:text-gray-500 
-      disabled:cursor-not-allowed"
-            />
-          </div>
-
-          {/* 비밀번호 */}
-          <input
-            value={password}
-            onChange={markTouched("password", setPassword)}
-            type="password"
-            placeholder="비밀번호"
-            className="w-full rounded-lg px-4 py-3 shadow placeholder-gray-400 focus:ring-2 focus:ring-amber-400"
-          />
-          <input
-            value={passwordCheck}
-            onChange={markTouched("passwordCheck", setPasswordCheck)}
-            type="password"
-            placeholder="비밀번호 확인"
-            className="w-full rounded-lg px-4 py-3 shadow placeholder-gray-400 focus:ring-2 focus:ring-amber-400"
-          />
-          {(errors.password || errors.passwordCheck) &&
-            (touched.password || submitted) && (
-              <p className="text-xs text-red-500">
-                {errors.password ?? errors.passwordCheck}
-              </p>
-            )}
-
-          {/* 이름 & 닉네임 */}
-          <input
-            value={user.username}
-            type="text"
-            placeholder="이름 (2~10자)"
-            disabled
-            readOnly
-            className="w-full rounded-lg px-4 py-3 shadow placeholder-gray-400 focus:ring-2 focus:ring-amber-400 disabled:bg-gray-100 
-      disabled:text-gray-500 
-      disabled:cursor-not-allowed"
-          />
-
-          <div className="flex items-center">
-            <input
-              value={nickname}
-              onChange={(e) => {
-                markTouched("nickname", setNickname)(e);
-                setNicknameChecked(false);
-              }}
-              type="text"
-              placeholder="닉네임"
+              value={profileUrlInput}
+              onChange={(e) => setProfileUrlInput(e.target.value)}
+              type="url"
+              placeholder="프로필 사진 URL"
               className="flex-grow rounded-lg px-4 py-3 shadow placeholder-gray-400 focus:ring-2 focus:ring-amber-400"
             />
             <button
               type="button"
-              onClick={checkNicname}
-              disabled={!nickname || Boolean(errors.nickname)}
-              className="ml-3 flex-none whitespace-nowrap rounded-lg bg-amber-400 px-4 py-2 text-sm font-medium text-white shadow transition hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={updateProfileUrl}
+              disabled={profileUrlInput === (user.profileUrl || "")}
+              className="flex-none whitespace-nowrap rounded-lg bg-amber-400 px-4 py-3 text-sm font-medium text-white shadow transition hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              중복확인
+              수정
             </button>
           </div>
-          {errors.nickname && (touched.nickname || submitted) && (
-            <p className="text-xs text-red-500">{errors.nickname}</p>
-          )}
-          {/* 주소 */}
-          <input
-            value={address}
-            onChange={markTouched("address", setAddress)}
-            type="text"
-            placeholder="주소"
-            className="w-full rounded-lg px-4 py-3 shadow placeholder-gray-400 focus:ring-2 focus:ring-amber-400"
-          />
-          {errors.address && (touched.address || submitted) && (
-            <p className="text-xs text-red-500">{errors.address}</p>
-          )}
-          {/* 프로필 URL */}
-          <input
-            value={profileUrl}
-            onChange={markTouched("profileUrl", setProfileUrl)}
-            type="url"
-            placeholder="프로필 사진 URL"
-            className="w-full rounded-lg px-4 py-3 shadow placeholder-gray-400 focus:ring-2 focus:ring-amber-400"
-          />
+        </div>
 
-          {/* 휴대폰 번호 */}
+        {/* 이메일 */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">이메일</label>
+          <input
+            value={user.email}
+            type="email"
+            disabled
+            readOnly
+            className="w-full rounded-lg px-4 py-3 shadow placeholder-gray-400 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
+          />
+        </div>
+
+        {/* 이름 */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">이름</label>
+          <input
+            value={user.username}
+            type="text"
+            disabled
+            readOnly
+            className="w-full rounded-lg px-4 py-3 shadow placeholder-gray-400 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
+          />
+        </div>
+
+        {/* 휴대폰 번호 */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">휴대전화</label>
+          <input
+            value={user.phoneNumber}
+            disabled
+            readOnly
+            className="w-full rounded-lg px-4 py-3 shadow placeholder-gray-400 disabled:bg-gray-100 disabled:text-gray-500 disabled:cursor-not-allowed"
+          />
+        </div>
+
+        {/* 비밀번호 */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">비밀번호</label>
           <div className="flex items-center gap-3">
             <input
-              value={user.phoneNumber}
-              placeholder="휴대전화"
-              disabled
-              readOnly
-              className="w-full rounded-lg px-4 py-3 shadow placeholder-gray-400 focus:ring-2 focus:ring-amber-400 disabled:bg-gray-100 
-      disabled:text-gray-500 
-      disabled:cursor-not-allowed"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              type="password"
+              placeholder="영문, 숫자, 특수문자 포함 6자 이상"
+              className="flex-grow rounded-lg px-4 py-3 shadow placeholder-gray-400 focus:ring-2 focus:ring-amber-400"
             />
+            <button
+              type="button"
+              onClick={updatePassword}
+              disabled={!password}
+              className="flex-none whitespace-nowrap rounded-lg bg-amber-400 px-4 py-3 text-sm font-medium text-white shadow transition hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              수정
+            </button>
           </div>
+        </div>
 
-          {/* 제출 */}
-          <button
-            type="submit"
-            disabled={!isFormValid}
-            className="mt-4 w-full rounded-lg bg-amber-400 py-3 font-semibold text-white shadow-md transition 
-                   hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            수정하기
-          </button>
-          {/* 회원 탈퇴 이동 */}
-          <Link
-            href="/auth/withdraw"
-            className="mt-3 block w-full rounded-lg bg-red-500 py-3 text-center font-semibold text-white shadow-md transition 
-             hover:bg-red-600"
-          >
-            회원 탈퇴하기
-          </Link>
-        </form>
+        {/* 닉네임 */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">닉네임</label>
+          <div className="flex items-center gap-3">
+            <input
+              value={nicknameInput}
+              onChange={(e) => {
+                setNicknameInput(e.target.value);
+                setNicknameChecked(false);
+              }}
+              type="text"
+              placeholder="한글, 영문, 숫자 2-10자"
+              className="flex-grow rounded-lg px-4 py-3 shadow placeholder-gray-400 focus:ring-2 focus:ring-amber-400"
+            />
+            <button
+              type="button"
+              onClick={nicknameChecked ? updateNickname : checkNickname}
+              disabled={!nicknameInput || nicknameInput === user.nickname}
+              className="flex-none whitespace-nowrap rounded-lg bg-amber-400 px-4 py-3 text-sm font-medium text-white shadow transition hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {nicknameChecked ? "수정" : "중복확인"}
+            </button>
+          </div>
+        </div>
+
+        {/* 주소 */}
+        <div>
+          <label className="block text-sm font-semibold text-gray-700 mb-2">주소</label>
+          <div className="flex items-center gap-3">
+            <input
+              value={addressInput}
+              onChange={(e) => setAddressInput(e.target.value)}
+              type="text"
+              placeholder="주소"
+              className="flex-grow rounded-lg px-4 py-3 shadow placeholder-gray-400 focus:ring-2 focus:ring-amber-400"
+            />
+            <button
+              type="button"
+              onClick={updateAddress}
+              disabled={!addressInput || addressInput === user.address}
+              className="flex-none whitespace-nowrap rounded-lg bg-amber-400 px-4 py-3 text-sm font-medium text-white shadow transition hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              수정
+            </button>
+          </div>
+        </div>
+
+        {/* 회원 탈퇴 */}
+        <Link
+          href="/auth/withdraw"
+          className="mt-6 block w-full rounded-lg bg-red-500 py-3 text-center font-semibold text-white shadow-md transition hover:bg-red-600"
+        >
+          회원 탈퇴하기
+        </Link>
       </div>
-    </RequireRole>
+    </div>
   );
 }

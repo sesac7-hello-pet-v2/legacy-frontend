@@ -1,9 +1,9 @@
 "use client";
 import Link from "next/link";
-import { useUserStore } from "../store/UserStore";
-import { useEffect, useRef, useState } from "react";
-import api from "../lib/api";
-import { useRouter } from "next/navigation";
+import {useUserStore} from "../store/UserStore";
+import {useEffect, useRef, useState} from "react";
+import api, {clearTokenExpiry} from "../lib/api";
+import {useRouter} from "next/navigation";
 
 export default function Navigator() {
   const { user, clearUser } = useUserStore();
@@ -29,9 +29,10 @@ export default function Navigator() {
   /* ── 로그아웃 ── */
   const logout = async () => {
     clearUser();
+    clearTokenExpiry();
     setOpen(false);
     try {
-      await api.delete("/auth/logout");
+      await api.post("/v1/auth/logout");
       router.push("/");
       alert("로그아웃 되었습니다.");
     } catch (err) {
@@ -68,12 +69,18 @@ export default function Navigator() {
           >
             자유게시판
           </Link>
+            <Link
+                href="/feed"
+                className="text-gray-700 hover:text-amber-500 font-medium transition"
+            >
+                피드
+            </Link>
 
           {user ? (
             <div className="relative" ref={menuRef}>
               <button onClick={() => setOpen(!open)}>
                 <img
-                  src={user.profileUrl}
+                  src={user.profileUrl || "/basic_profile.jpg"}
                   alt="Profile"
                   width={36}
                   height={36}
@@ -85,7 +92,7 @@ export default function Navigator() {
                 <div className="absolute right-0 mt-2 w-56 rounded-xl border border-gray-200 bg-white p-4 shadow-lg z-10">
                   <div className="flex flex-col items-center gap-2">
                     <img
-                      src={user.profileUrl}
+                      src={user.profileUrl || "/basic_profile.jpg"}
                       alt="profile"
                       width={64}
                       height={64}
@@ -96,7 +103,10 @@ export default function Navigator() {
                   <div className="mt-4 flex flex-col gap-2 w-full">
                     <Link
                       href="/me"
-                      onClick={() => setOpen(false)}
+                      onClick={() => {
+                        console.log("🔘 [Navigator] 마이페이지 버튼 클릭");
+                        setOpen(false);
+                      }}
                       className="rounded-md px-4 py-2 text-sm text-center hover:bg-gray-100 transition"
                     >
                       마이페이지

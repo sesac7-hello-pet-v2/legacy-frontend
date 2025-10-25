@@ -22,7 +22,6 @@ import CareSection from "./section/CareSection";
 import FinancialSection from "./section/FinancialSection";
 import PetExperienceSection from "./section/PetExperienceSection";
 import FuturePlanSection from "./section/FuturePlanSection";
-import RequireRole from "../../RequireRole";
 
 interface AnnouncementDetailResponse {
     shelterName: string;
@@ -95,8 +94,7 @@ export default function ApplicationForm() {
     };
 
     return (
-        <RequireRole allow={["USER"]} fallback="/auth/login">
-            <div className="max-w-2xl mx-auto p-6 bg-[#FFFDF0] shadow rounded-xl space-y-6 my-10">
+        <div className="max-w-2xl mx-auto p-6 bg-[#FFFDF0] shadow rounded-xl space-y-6 my-10">
                 <h1 className="text-xl font-bold text-center mb-8">입양 신청서</h1>
 
                 <ApplicationInfoSection
@@ -137,6 +135,5 @@ export default function ApplicationForm() {
                     입양 신청
                 </button>
             </div>
-        </RequireRole>
     );
 }

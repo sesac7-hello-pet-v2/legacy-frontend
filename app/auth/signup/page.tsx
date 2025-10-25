@@ -1,7 +1,6 @@
 // app/(auth)/signup/page.tsx
 "use client";
 
-import RequireRole from "@/app/components/RequireRole";
 import api from "@/app/lib/api";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -19,8 +18,7 @@ const roleLabelToCode: Record<RoleLabel, "USER" | "SHELTER" | "ADMIN"> = {
 /* ── 정규식 상수 ───────────────────────────────────────────── */
 const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/; // 영문·숫자·특수문자 포함 6자+
 const PHONE_REGEX = /^\d{3}-\d{4}-\d{4}$/; // 010-0000-0000
-const KOREAN_REGEX = /^[가-힣]+$/;
-const ENGLISH_REGEX = /^[A-Za-z]+$/;
+const NICKNAME_REGEX = /^[가-힣a-zA-Z0-9]{2,10}$/; // 한글, 영문, 숫자 조합 2-10자
 
 export default function SignupPage() {
   /* ── 상태 ──────────────────────────────────────────────── */
@@ -110,12 +108,8 @@ export default function SignupPage() {
 
     if (!nickname) {
       errs.nickname = "닉네임은 필수입니다.";
-    } else if (KOREAN_REGEX.test(nickname) && nickname.length < 2) {
-      errs.nickname = "한글 닉네임은 최소 2자 이상이어야 합니다.";
-    } else if (ENGLISH_REGEX.test(nickname) && nickname.length < 5) {
-      errs.nickname = "영문 닉네임은 최소 5자 이상이어야 합니다.";
-    } else if (!KOREAN_REGEX.test(nickname) && !ENGLISH_REGEX.test(nickname)) {
-      errs.nickname = "닉네임은 한글 또는 영문자만 사용할 수 있습니다.";
+    } else if (!NICKNAME_REGEX.test(nickname)) {
+      errs.nickname = "닉네임은 한글, 영문, 숫자 조합으로 2-10자여야 합니다.";
     }
 
     // 휴대폰 검사
@@ -144,7 +138,7 @@ export default function SignupPage() {
   /* ── 중복 체크 부분 ───────────────────────────────────── */
   const checkEmail = async () => {
     try {
-      const res = await api.get("/users/exist", {
+      const res = await api.get("/v1/users/exist", {
         params: {
           field: "EMAIL",
           value: email,
@@ -162,7 +156,7 @@ export default function SignupPage() {
 
   const checkNicname = async () => {
     try {
-      const res = await api.get("/users/exist", {
+      const res = await api.get("/v1/users/exist", {
         params: {
           field: "NICKNAME",
           value: nickname,
@@ -180,7 +174,7 @@ export default function SignupPage() {
 
   const checkPhone = async () => {
     try {
-      const res = await api.get("/users/exist", {
+      const res = await api.get("/v1/users/exist", {
         params: {
           field: "PHONE",
           value: phone1 + phone2 + phone3,
@@ -214,7 +208,7 @@ export default function SignupPage() {
       userProfileUrl: profileUrl || null,
     };
     try {
-      const res = await api.post("/users/signup", payload);
+      const res = await api.post("/v1/users", payload);
       console.log(res);
       alert("회원가입이 완료되었습니다!");
       router.push("/auth/login");
@@ -226,8 +220,7 @@ export default function SignupPage() {
 
   /* ── UI ──────────────────────────────────────────────── */
   return (
-    <RequireRole notAllow={["USER", "ADMIN", "SHELTER"]}>
-      <div className="flex min-h-screen items-center justify-center bg-white">
+    <div className="flex min-h-screen items-center justify-center bg-white">
         <div className="w-full max-w-md rounded-2xl p-10 shadow-[0_0_0_4px_rgba(253,224,71,0.25)]">
           {/* 역할 선택 */}
           <div className="mb-6 flex justify-center gap-4">
@@ -421,6 +414,5 @@ export default function SignupPage() {
           </div>
         </div>
       </div>
-    </RequireRole>
   );
 }
