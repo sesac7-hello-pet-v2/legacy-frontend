@@ -8,7 +8,7 @@ import {useAuth} from "@/app/hooks/useAuth";
 interface PostActionsProps {
     postId: string;
     initialLikeCount: number;
-    currentUserId: number;
+    currentUserId?: number;
     postUserId?: number;
     onEdit?: () => void;
     onDelete?: () => void;
@@ -29,7 +29,7 @@ export default function PostActions({
     const [isLikeLoading, setIsLikeLoading] = useState(false);
 
     const handleLike = async () => {
-        if (!isAuthenticated || isLikeLoading) return;
+        if (!isAuthenticated || isLikeLoading || !currentUserId) return;
 
         const originalLiked = isLiked;
         const originalCount = likeCount;
@@ -66,7 +66,7 @@ export default function PostActions({
         console.log("Share post:", postId);
     };
 
-    const isMyPost = isAuthenticated && postUserId === currentUserId;
+    const isMyPost = isAuthenticated && currentUserId && postUserId === currentUserId;
 
     return (
         <div className="p-4">

@@ -6,6 +6,7 @@ import {feedApi} from "@/app/lib/feedApi";
 import FeedPost from "./FeedPost";
 import {usePostStore} from "@/app/store/PostStore";
 import PendingPostComponent from "./PendingPost";
+import {useAuth} from "@/app/hooks/useAuth";
 
 export default function Feed() {
     const [posts, setPosts] = useState<FeedPostType[]>([]);
@@ -15,22 +16,23 @@ export default function Feed() {
     const [hasMore, setHasMore] = useState(true);
     const [showMyPosts, setShowMyPosts] = useState(false);
     const {pendingPosts, isCreating} = usePostStore();
+    const {user} = useAuth();
 
-    const currentUserId = 1;
+    const currentUserId = user?.id;
 
-    const loadPosts = async (pageNum: number = 1, reset: boolean = false) => {
+    const loadPosts = React.useCallback(async (pageNum: number = 1, reset: boolean = false) => {
         try {
             setLoading(true);
             const response = await feedApi.getPosts({
                 page: pageNum,
                 size: 10,
-                userId: showMyPosts ? currentUserId : undefined,
+                userId: showMyPosts && currentUserId ? currentUserId : undefined,
             });
 
             let postsData = response.content;
 
             // 클라이언트 사이드에서 내 게시글 필터링 (API에서 지원하지 않는 경우)
-            if (showMyPosts) {
+            if (showMyPosts && currentUserId) {
                 postsData = postsData.filter(post => post.userId === currentUserId);
             }
 
@@ -49,11 +51,11 @@ export default function Feed() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [showMyPosts, currentUserId]);
 
     useEffect(() => {
         loadPosts(1, true);
-    }, [showMyPosts]);
+    }, [loadPosts]);
 
     // pending 게시글의 상태 변화 감지해서 자동 새로고침
     useEffect(() => {
@@ -66,7 +68,7 @@ export default function Feed() {
 
             return () => clearTimeout(refreshTimer);
         }
-    }, [pendingPosts]);
+    }, [pendingPosts, loadPosts]);
 
     const handleLoadMore = () => {
         if (!loading && hasMore) {
@@ -121,9 +123,12 @@ export default function Feed() {
                     </button>
                     <button
                         onClick={() => setShowMyPosts(true)}
+                        disabled={!user}
                         className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                             showMyPosts
                                 ? "bg-blue-500 text-white"
+                                : !user
+                                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                                 : "bg-gray-200 text-gray-700 hover:bg-gray-300"
                         }`}
                     >
