@@ -29,7 +29,7 @@ export default function EditAnnouncementPage() {
     const fetchDetail = async () => {
       setLoading(true);
       try {
-        const res = await api.get(`/announcements/${id}`);
+        const res = await api.get(`/v1/announcements/${id}`);
         const data = res.data;
 
         setForm({
@@ -75,7 +75,7 @@ export default function EditAnnouncementPage() {
         image: form.image || null,
       };
 
-      await api.put(`/announcements/${id}`, payload, {
+      await api.put(`/v1/announcements/${id}`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
