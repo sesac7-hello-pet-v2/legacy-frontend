@@ -4,6 +4,7 @@ import {useEffect, useState} from "react";
 import {useParams, useRouter} from "next/navigation";
 import api from "@/app/lib/api";
 import {useAuth} from "@/app/hooks/useAuth";
+import {modalAlert} from "@/app/utils/alertUtils";
 
 interface PostData {
     postId: string;
@@ -39,7 +40,7 @@ export default function EditPostPage() {
             setContent(postData.content || "");
         } catch (error) {
             console.error("게시글 조회 실패:", error);
-            alert("게시글을 불러올 수 없습니다.");
+            await modalAlert("게시글을 불러올 수 없습니다.", "error");
             router.back();
         } finally {
             setIsLoading(false);
@@ -48,7 +49,7 @@ export default function EditPostPage() {
 
     const handleSave = async () => {
         if (!content.trim()) {
-            alert("내용을 입력해주세요.");
+            await modalAlert("내용을 입력해주세요.", "warning");
             return;
         }
 
@@ -59,11 +60,11 @@ export default function EditPostPage() {
                 content: content.trim(),
             });
 
-            alert("게시글이 수정되었습니다.");
+            await modalAlert("게시글이 수정되었습니다.", "success");
             router.push("/feed");
         } catch (error) {
             console.error("게시글 수정 실패:", error);
-            alert("게시글 수정에 실패했습니다.");
+            await modalAlert("게시글 수정에 실패했습니다.", "error");
         } finally {
             setIsSaving(false);
         }

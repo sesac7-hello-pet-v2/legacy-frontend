@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import MyAnnouncementsPage from "@/app/components/MyAnnouncements";
 import MyPets from "@/app/components/MyPets";
 import { useRouter } from "next/navigation";
+import { modalAlert } from "@/app/utils/alertUtils";
 
 export default function MyPage() {
     const user = useUserStore((s) => s.user);
@@ -20,8 +21,9 @@ export default function MyPage() {
         console.log("🔍 [MyPage] user 상태:", user);
         if (!user) {
             console.log("⚠️ [MyPage] 로그인되지 않음, 로그인 페이지로 이동");
-            alert("로그인이 필요합니다.");
-            router.push("/auth/login");
+            modalAlert("로그인이 필요합니다.", "warning").then(() => {
+                router.push("/auth/login");
+            });
         } else {
             setIsLoading(false);
         }
