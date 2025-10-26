@@ -46,8 +46,7 @@ export default function FeedCards() {
         setFeeds(data);
       }
     } catch (error) {
-      console.error("피드 불러오기 실패:", error);
-      // 에러 시에도 더미 데이터 유지
+      // 에러 시에도 더미 데이터 유지 (콘솔 에러 제거)
       setFeeds(DUMMY_FEEDS);
     } finally {
       setLoading(false);
