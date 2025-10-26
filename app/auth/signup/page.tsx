@@ -6,6 +6,13 @@ import Link from "next/link";
 import {useRouter} from "next/navigation";
 import React, {useEffect, useState} from "react";
 import {modalAlert} from "@/app/utils/alertUtils";
+import Script from "next/script";
+
+declare global {
+  interface Window {
+    daum: any;
+  }
+}
 
 /* ── 역할 매핑 ─────────────────────────────────────────────── */
 const ROLE_LABELS = ["유저", "보호소", "관리자"] as const;
@@ -30,7 +37,8 @@ export default function SignupPage() {
   const [passwordCheck, setPasswordCheck] = useState("");
   const [username, setUsername] = useState("");
   const [nickname, setNickname] = useState("");
-  const [address, setAddress] = useState("");
+  const [addressBase, setAddressBase] = useState(""); // 기본 주소
+  const [addressDetail, setAddressDetail] = useState(""); // 상세 주소
   const [profileUrl, setProfileUrl] = useState("");
   const [phone1, setPhone1] = useState("010");
   const [phone2, setPhone2] = useState("");
@@ -60,8 +68,8 @@ export default function SignupPage() {
     !errors.username &&
     nickname &&
     !errors.nickname &&
-    address &&
-    !errors.address &&
+    addressBase &&
+    !errors.addressBase &&
     phone1 &&
     phone2 &&
     phone3 &&
@@ -79,7 +87,8 @@ export default function SignupPage() {
     password,
     passwordCheck,
     username,
-    address,
+    addressBase,
+    addressDetail,
     nickname,
     phone1,
     phone2,
@@ -105,7 +114,7 @@ export default function SignupPage() {
       errs.username = "이름은 2~10자여야 합니다.";
 
     // 주소
-    if (!address) errs.address = "주소는 필수입니다.";
+    if (!addressBase) errs.addressBase = "주소는 필수입니다.";
 
     if (!nickname) {
       errs.nickname = "닉네임은 필수입니다.";
@@ -191,6 +200,23 @@ export default function SignupPage() {
     }
   };
 
+  /* ── 카카오 주소 검색 ──────────────────────────────── */
+  const openAddressSearch = () => {
+    if (!window.daum) {
+      modalAlert("주소 검색 API가 로드되지 않았습니다.", "error");
+      return;
+    }
+
+    new window.daum.Postcode({
+      oncomplete: function (data: any) {
+        // 도로명 주소 또는 지번 주소 선택
+        const fullAddress = data.roadAddress || data.jibunAddress;
+        setAddressBase(fullAddress);
+        setTouched((t) => ({ ...t, addressBase: true }));
+      },
+    }).open();
+  };
+
   /* ── 제출 ────────────────────────────────────────────── */
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -198,13 +224,17 @@ export default function SignupPage() {
     if (!validate()) return;
 
     // 2) 백엔드 DTO(UserRegisterRequest)에 맞춰 페이로드 구성
+    const fullAddress = addressDetail
+      ? `${addressBase} ${addressDetail}`
+      : addressBase;
+
     const payload = {
       email,
       password,
       role: roleLabelToCode[role], // "USER" | "SHELTER" | "ADMIN"
       nickname,
       username,
-      address,
+      address: fullAddress, // 기본 주소 + 상세 주소
       phoneNumber: `${phone1}${phone2}${phone3}`, // 11자리 숫자
       userProfileUrl: profileUrl || null,
     };
@@ -222,7 +252,12 @@ export default function SignupPage() {
 
   /* ── UI ──────────────────────────────────────────────── */
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white">
+    <>
+      <Script
+        src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"
+        strategy="lazyOnload"
+      />
+      <div className="flex min-h-screen items-center justify-center bg-white">
         <div className="w-full max-w-md rounded-2xl p-10 shadow-[0_0_0_4px_rgba(253,224,71,0.25)]">
           {/* 역할 선택 */}
           <div className="mb-6 flex justify-center gap-4">
@@ -329,17 +364,36 @@ export default function SignupPage() {
             {errors.nickname && (touched.nickname || submitted) && (
               <p className="text-xs text-red-500">{errors.nickname}</p>
             )}
+
             {/* 주소 */}
+            <div className="flex items-center gap-3">
+              <input
+                value={addressBase}
+                readOnly
+                type="text"
+                placeholder="주소 검색을 클릭하세요"
+                className="flex-grow rounded-lg px-4 py-3 shadow placeholder-gray-400 bg-gray-50 cursor-not-allowed"
+              />
+              <button
+                type="button"
+                onClick={openAddressSearch}
+                className="flex-none whitespace-nowrap rounded-lg bg-amber-400 px-4 py-2 text-sm font-medium text-white shadow transition hover:bg-amber-500"
+              >
+                주소 검색
+              </button>
+            </div>
+            {errors.addressBase && (touched.addressBase || submitted) && (
+              <p className="text-xs text-red-500">{errors.addressBase}</p>
+            )}
+
+            {/* 상세 주소 */}
             <input
-              value={address}
-              onChange={markTouched("address", setAddress)}
+              value={addressDetail}
+              onChange={markTouched("addressDetail", setAddressDetail)}
               type="text"
-              placeholder="주소"
+              placeholder="상세 주소 (선택사항)"
               className="w-full rounded-lg px-4 py-3 shadow placeholder-gray-400 focus:ring-2 focus:ring-amber-400"
             />
-            {errors.address && (touched.address || submitted) && (
-              <p className="text-xs text-red-500">{errors.address}</p>
-            )}
 
             {/* 프로필 URL */}
             <input
@@ -416,5 +470,6 @@ export default function SignupPage() {
           </div>
         </div>
       </div>
+    </>
   );
 }
