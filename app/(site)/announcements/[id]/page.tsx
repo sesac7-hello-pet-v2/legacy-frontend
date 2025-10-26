@@ -38,7 +38,7 @@ export default function AnnouncementDetailPage() {
     useEffect(() => {
         if (!id) return;
 
-        api.get(`/announcements/${id}`)
+        api.get(`/v1/announcements/${id}`)
             .then((res) => setDetail(res.data))
             .catch((err) => {
                 console.error(err);

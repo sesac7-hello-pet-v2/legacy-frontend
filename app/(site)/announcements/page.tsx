@@ -41,7 +41,7 @@ export default function AnnouncementsPage() {
     setLoading(true);
     try {
       const res = await api.get<AnnouncementPage>(
-        `/announcements?page=${p}&size=${ITEMS_PER_PAGE}`
+        `/v1/announcements?page=${p}&size=${ITEMS_PER_PAGE}`
       );
       setData(res.data);
     } catch (err) {
