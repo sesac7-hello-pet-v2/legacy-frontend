@@ -1,0 +1,165 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import api from "@/app/lib/api";
+
+interface Feed {
+  postId: string;
+  userId: number;
+  content: string;
+  imageUrls: string[];
+  postedAt: string;
+  likeCount: number;
+  isLiked: boolean;
+}
+
+// 더미 데이터 (항상 10개)
+const DUMMY_FEEDS: Feed[] = Array.from({ length: 10 }, (_, i) => ({
+  postId: `dummy-${i + 1}`,
+  userId: 0,
+  content: "데이터를 불러올 수 없습니다",
+  imageUrls: [],
+  postedAt: new Date().toISOString(),
+  likeCount: 0,
+  isLiked: false,
+}));
+
+export default function FeedCards() {
+  const [feeds, setFeeds] = useState<Feed[]>(DUMMY_FEEDS);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchFeeds();
+  }, []);
+
+  // 자동 슬라이드 (5초마다)
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => {
+        const maxIdx = Math.max(0, feeds.length - visibleCount);
+        return prev >= maxIdx ? 0 : prev + 1;
+      });
+    }, 5000);
+    return () => clearInterval(timer);
+  }, [feeds.length]);
+
+  const fetchFeeds = async () => {
+    try {
+      const response = await api.get("/posts?page=0&size=10");
+      const data = response.data.content || [];
+      // API 데이터가 있으면 사용, 없으면 더미 데이터 유지
+      if (data.length > 0) {
+        setFeeds(data);
+      }
+    } catch (error) {
+      console.error("피드 불러오기 실패:", error);
+      // 에러 시에도 더미 데이터 유지
+      setFeeds(DUMMY_FEEDS);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const visibleCount = 4;
+  const maxIndex = Math.max(0, feeds.length - visibleCount);
+
+  const goToPrevious = () => {
+    setCurrentIndex((prev) => Math.max(0, prev - 1));
+  };
+
+  const goToNext = () => {
+    setCurrentIndex((prev) => Math.min(maxIndex, prev + 1));
+  };
+
+  return (
+    <section className="py-12 bg-white">
+      <div className="max-w-7xl mx-auto px-4">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold">우리 동물들의 이야기</h2>
+          <Link
+            href="/feed"
+            className="text-amber-500 hover:text-amber-600 text-sm font-medium"
+          >
+            더보기 →
+          </Link>
+        </div>
+
+        <div className="relative">
+          {/* 카드 컨테이너 */}
+          <div className="overflow-hidden">
+            <div
+              className="flex transition-transform duration-500 ease-in-out gap-6"
+              style={{ transform: `translateX(-${currentIndex * (100 / visibleCount + 1.5)}%)` }}
+            >
+              {feeds.map((feed) => (
+                <Link
+                  key={feed.postId}
+                  href={`/feed/${feed.postId}`}
+                  className="flex-shrink-0 w-[calc(25%-18px)] bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 group border border-gray-200"
+                >
+                  {/* 사용자 정보 */}
+                  <div className="p-3 flex items-center gap-2.5 border-b">
+                    <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
+                      <span className="text-xs font-medium text-gray-600">
+                        {feed.userId}
+                      </span>
+                    </div>
+                    <span className="font-medium text-sm">사용자 {feed.userId}</span>
+                  </div>
+
+                  {/* 이미지 */}
+                  <div className="relative h-48 overflow-hidden bg-gray-200">
+                    {feed.imageUrls && feed.imageUrls.length > 0 ? (
+                      <Image
+                        src={feed.imageUrls[0]}
+                        alt="Feed"
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full text-gray-400 text-sm">
+                        이미지 없음
+                      </div>
+                    )}
+                  </div>
+
+                  {/* 내용 */}
+                  <div className="p-3">
+                    <p className="text-gray-700 text-sm line-clamp-3">{feed.content}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* 좌우 버튼 */}
+          {feeds.length > visibleCount && (
+            <>
+              <button
+                onClick={goToPrevious}
+                disabled={currentIndex === 0}
+                className="absolute -left-4 top-1/2 -translate-y-1/2 bg-white hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed rounded-full p-3 shadow-lg z-10"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button
+                onClick={goToNext}
+                disabled={currentIndex >= maxIndex}
+                className="absolute -right-4 top-1/2 -translate-y-1/2 bg-white hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed rounded-full p-3 shadow-lg z-10"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
