@@ -39,15 +39,14 @@ export default function FeedCards() {
 
   const fetchFeeds = async () => {
     try {
-      const response = await feedApi.getPosts({ page: 0, size: 10 });
+      const response = await feedApi.getPosts({ page: 1, size: 10 });
       const data = response.content || [];
       // API 데이터가 있으면 사용, 없으면 더미 데이터 유지
       if (data.length > 0) {
         setFeeds(data);
       }
     } catch (error) {
-      console.error("피드 불러오기 실패:", error);
-      // 에러 시에도 더미 데이터 유지
+      // 에러 시에도 더미 데이터 유지 (콘솔 에러 제거)
       setFeeds(DUMMY_FEEDS);
     } finally {
       setLoading(false);
