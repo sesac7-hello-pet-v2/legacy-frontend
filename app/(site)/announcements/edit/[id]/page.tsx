@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import api from "@/app/lib/api";
+import { modalAlert } from "@/app/utils/alertUtils";
 
 export default function EditAnnouncementPage() {
   const { id } = useParams();
@@ -29,7 +30,7 @@ export default function EditAnnouncementPage() {
     const fetchDetail = async () => {
       setLoading(true);
       try {
-        const res = await api.get(`/announcements/${id}`);
+        const res = await api.get(`/v1/announcements/${id}`);
         const data = res.data;
 
         setForm({
@@ -75,11 +76,11 @@ export default function EditAnnouncementPage() {
         image: form.image || null,
       };
 
-      await api.put(`/announcements/${id}`, payload, {
+      await api.put(`/v1/announcements/${id}`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      alert("수정 완료!");
+      await modalAlert("수정 완료!", "success");
       router.push("/me");
     } catch (err) {
       console.error("수정 실패", err);

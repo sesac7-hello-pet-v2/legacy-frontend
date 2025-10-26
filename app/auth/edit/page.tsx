@@ -4,6 +4,7 @@ import { UserDetailData, useUserStore } from "@/app/store/UserStore";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { modalAlert } from "@/app/utils/alertUtils";
 
 const PASSWORD_REGEX = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/; // 영문·숫자·특수문자 포함 6자+
 const NICKNAME_REGEX = /^[가-힣a-zA-Z0-9]{2,10}$/; // 한글, 영문, 숫자 조합 2-10자
@@ -50,7 +51,7 @@ export default function EditPage() {
 
   const checkNickname = async () => {
     if (!NICKNAME_REGEX.test(nicknameInput)) {
-      alert("닉네임은 한글, 영문, 숫자 조합으로 2-10자여야 합니다.");
+      await modalAlert("닉네임은 한글, 영문, 숫자 조합으로 2-10자여야 합니다.", "warning");
       return;
     }
     try {
@@ -62,17 +63,17 @@ export default function EditPage() {
       });
       if (!res.data.result) {
         setNicknameChecked(true);
-        alert(res.data.message);
+        await modalAlert(res.data.message, "success");
       }
     } catch (error) {
       const msg = (error as Error).message || "알 수 없는 오류가 발생했습니다.";
-      alert(`중복확인 실패: ${msg}`);
+      await modalAlert(`중복확인 실패: ${msg}`, "error");
     }
   };
 
   const updateNickname = async () => {
     if (!nicknameChecked) {
-      alert("닉네임 중복확인을 해주세요.");
+      await modalAlert("닉네임 중복확인을 해주세요.", "warning");
       return;
     }
     if (!user) return;
@@ -82,18 +83,18 @@ export default function EditPage() {
         address: user.address,
         userProfileUrl: user.profileUrl || null
       });
-      alert("닉네임이 수정되었습니다.");
+      await modalAlert("닉네임이 수정되었습니다.", "success");
       setNicknameChecked(false);
       await getUserDetail();
       window.location.reload();
     } catch (error) {
-      alert("닉네임 수정 실패: " + (error as Error).message);
+      await modalAlert("닉네임 수정 실패: " + (error as Error).message, "error");
     }
   };
 
   const updateAddress = async () => {
     if (!addressInput) {
-      alert("주소를 입력해주세요.");
+      await modalAlert("주소를 입력해주세요.", "warning");
       return;
     }
     if (!user) return;
@@ -103,11 +104,11 @@ export default function EditPage() {
         address: addressInput,
         userProfileUrl: user.profileUrl || null
       });
-      alert("주소가 수정되었습니다.");
+      await modalAlert("주소가 수정되었습니다.", "success");
       await getUserDetail();
       window.location.reload();
     } catch (error) {
-      alert("주소 수정 실패: " + (error as Error).message);
+      await modalAlert("주소 수정 실패: " + (error as Error).message, "error");
     }
   };
 
@@ -119,26 +120,26 @@ export default function EditPage() {
         address: user.address,
         userProfileUrl: profileUrlInput || null
       });
-      alert("프로필 사진이 수정되었습니다.");
+      await modalAlert("프로필 사진이 수정되었습니다.", "success");
       await getUserDetail();
       window.location.reload();
     } catch (error) {
-      alert("프로필 사진 수정 실패: " + (error as Error).message);
+      await modalAlert("프로필 사진 수정 실패: " + (error as Error).message, "error");
     }
   };
 
   const updatePassword = async () => {
     if (!PASSWORD_REGEX.test(password)) {
-      alert("영문, 숫자, 특수문자를 포함해 6자 이상이어야 합니다.");
+      await modalAlert("영문, 숫자, 특수문자를 포함해 6자 이상이어야 합니다.", "warning");
       return;
     }
     try {
       await api.put("/v1/users/password", { password });
-      alert("비밀번호가 수정되었습니다.");
+      await modalAlert("비밀번호가 수정되었습니다.", "success");
       setPassword("");
       window.location.reload();
     } catch (error) {
-      alert("비밀번호 수정 실패: " + (error as Error).message);
+      await modalAlert("비밀번호 수정 실패: " + (error as Error).message, "error");
     }
   };
 

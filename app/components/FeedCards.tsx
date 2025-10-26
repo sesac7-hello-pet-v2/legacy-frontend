@@ -3,20 +3,11 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import api from "@/app/lib/api";
-
-interface Feed {
-  postId: string;
-  userId: number;
-  content: string;
-  imageUrls: string[];
-  postedAt: string;
-  likeCount: number;
-  isLiked: boolean;
-}
+import { feedApi } from "@/app/lib/feedApi";
+import { FeedPost } from "@/app/types/feed";
 
 // 더미 데이터 (항상 10개)
-const DUMMY_FEEDS: Feed[] = Array.from({ length: 10 }, (_, i) => ({
+const DUMMY_FEEDS: FeedPost[] = Array.from({ length: 10 }, (_, i) => ({
   postId: `dummy-${i + 1}`,
   userId: 0,
   content: "데이터를 불러올 수 없습니다",
@@ -27,7 +18,7 @@ const DUMMY_FEEDS: Feed[] = Array.from({ length: 10 }, (_, i) => ({
 }));
 
 export default function FeedCards() {
-  const [feeds, setFeeds] = useState<Feed[]>(DUMMY_FEEDS);
+  const [feeds, setFeeds] = useState<FeedPost[]>(DUMMY_FEEDS);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -48,8 +39,8 @@ export default function FeedCards() {
 
   const fetchFeeds = async () => {
     try {
-      const response = await api.get("/posts?page=0&size=10");
-      const data = response.data.content || [];
+      const response = await feedApi.getPosts({ page: 0, size: 10 });
+      const data = response.content || [];
       // API 데이터가 있으면 사용, 없으면 더미 데이터 유지
       if (data.length > 0) {
         setFeeds(data);
@@ -94,44 +85,53 @@ export default function FeedCards() {
               className="flex transition-transform duration-500 ease-in-out gap-6"
               style={{ transform: `translateX(-${currentIndex * (100 / visibleCount + 1.5)}%)` }}
             >
-              {feeds.map((feed) => (
-                <Link
-                  key={feed.postId}
-                  href={`/feed/${feed.postId}`}
-                  className="flex-shrink-0 w-[calc(25%-18px)] bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 group border border-gray-200"
-                >
-                  {/* 사용자 정보 */}
-                  <div className="p-3 flex items-center gap-2.5 border-b">
-                    <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-xs font-medium text-gray-600">
-                        {feed.userId}
+              {feeds.map((feed) => {
+                const isDummy = feed.postId.startsWith('dummy-');
+                const CardWrapper = isDummy ? 'div' : Link;
+                const cardProps = isDummy
+                  ? { className: "flex-shrink-0 w-[calc(25%-18px)] bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 opacity-50 cursor-not-allowed" }
+                  : {
+                      href: `/feed/${feed.postId}`,
+                      className: "flex-shrink-0 w-[calc(25%-18px)] bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 group border border-gray-200"
+                    };
+
+                return (
+                  <CardWrapper key={feed.postId} {...cardProps}>
+                    {/* 사용자 정보 */}
+                    <div className="p-3 flex items-center gap-2.5 border-b">
+                      <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
+                        <span className="text-xs font-medium text-gray-600">
+                          {feed.userId || '?'}
+                        </span>
+                      </div>
+                      <span className="font-medium text-sm">
+                        {isDummy ? '로딩 중...' : `사용자 ${feed.userId}`}
                       </span>
                     </div>
-                    <span className="font-medium text-sm">사용자 {feed.userId}</span>
-                  </div>
 
-                  {/* 이미지 */}
-                  <div className="relative h-48 overflow-hidden bg-gray-200">
-                    {feed.imageUrls && feed.imageUrls.length > 0 ? (
-                      <Image
-                        src={feed.imageUrls[0]}
-                        alt="Feed"
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center h-full text-gray-400 text-sm">
-                        이미지 없음
-                      </div>
-                    )}
-                  </div>
+                    {/* 이미지 */}
+                    <div className="relative h-48 overflow-hidden bg-gray-200">
+                      {feed.imageUrls && feed.imageUrls.length > 0 ? (
+                        <Image
+                          src={feed.imageUrls[0]}
+                          alt="Feed"
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center h-full text-gray-400 text-sm">
+                          이미지 없음
+                        </div>
+                      )}
+                    </div>
 
-                  {/* 내용 */}
-                  <div className="p-3">
-                    <p className="text-gray-700 text-sm line-clamp-3">{feed.content}</p>
-                  </div>
-                </Link>
-              ))}
+                    {/* 내용 */}
+                    <div className="p-3">
+                      <p className="text-gray-700 text-sm line-clamp-3">{feed.content}</p>
+                    </div>
+                  </CardWrapper>
+                );
+              })}
             </div>
           </div>
 

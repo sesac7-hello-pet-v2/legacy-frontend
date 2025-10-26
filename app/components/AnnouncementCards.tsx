@@ -52,7 +52,7 @@ export default function AnnouncementCards() {
 
   const fetchAnnouncements = async () => {
     try {
-      const response = await api.get("/announcements?page=0&size=10");
+      const response = await api.get("/v1/announcements?page=0&size=10");
       const data = response.data.announcements || [];
       // API 데이터가 있으면 사용, 없으면 더미 데이터 유지
       if (data.length > 0) {
@@ -98,42 +98,49 @@ export default function AnnouncementCards() {
               className="flex transition-transform duration-500 ease-in-out gap-6"
               style={{ transform: `translateX(-${currentIndex * (100 / visibleCount + 1.5)}%)` }}
             >
-              {announcements.map((announcement) => (
-                <Link
-                  key={announcement.id}
-                  href={`/announcements/${announcement.id}`}
-                  className="flex-shrink-0 w-[calc(25%-18px)] bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 group"
-                >
-                  {/* 이미지 */}
-                  <div className="relative h-48 overflow-hidden bg-gray-200">
-                    {announcement.image ? (
-                      <Image
-                        src={announcement.image}
-                        alt={announcement.breed}
-                        fill
-                        className="object-cover group-hover:scale-105 transition-transform duration-300"
-                      />
-                    ) : (
-                      <div className="flex items-center justify-center h-full text-gray-400 text-sm">
-                        이미지 없음
-                      </div>
-                    )}
-                    {/* 뱃지 */}
-                    <div className="absolute top-3 left-3 bg-orange-500 text-white px-2.5 py-0.5 rounded-full text-xs font-medium">
-                      {animalStatus[announcement.status as "IN_PROGRESS" | "COMPLETED"]}
-                    </div>
-                  </div>
+              {announcements.map((announcement) => {
+                const isDummy = announcement.breed === "데이터를 불러올 수 없습니다";
+                const CardWrapper = isDummy ? 'div' : Link;
+                const cardProps = isDummy
+                  ? { className: "flex-shrink-0 w-[calc(25%-18px)] bg-white rounded-lg shadow-sm overflow-hidden opacity-50 cursor-not-allowed" }
+                  : {
+                      href: `/announcements/${announcement.id}`,
+                      className: "flex-shrink-0 w-[calc(25%-18px)] bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 group"
+                    };
 
-                  {/* 정보 */}
-                  <div className="p-3">
-                    <h3 className="font-semibold text-base mb-1.5 truncate">{announcement.breed}</h3>
-                    <div className="text-xs text-gray-600 space-y-0.5">
-                      <p>보호소: {announcement.shelterName}</p>
-                      <p>등록일: {new Date(announcement.createdAt).toLocaleDateString()}</p>
+                return (
+                  <CardWrapper key={announcement.id} {...cardProps}>
+                    {/* 이미지 */}
+                    <div className="relative h-48 overflow-hidden bg-gray-200">
+                      {announcement.image ? (
+                        <Image
+                          src={announcement.image}
+                          alt={announcement.breed}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center h-full text-gray-400 text-sm">
+                          {isDummy ? '로딩 중...' : '이미지 없음'}
+                        </div>
+                      )}
+                      {/* 뱃지 */}
+                      <div className="absolute top-3 left-3 bg-orange-500 text-white px-2.5 py-0.5 rounded-full text-xs font-medium">
+                        {animalStatus[announcement.status as "IN_PROGRESS" | "COMPLETED"]}
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
+
+                    {/* 정보 */}
+                    <div className="p-3">
+                      <h3 className="font-semibold text-base mb-1.5 truncate">{announcement.breed}</h3>
+                      <div className="text-xs text-gray-600 space-y-0.5">
+                        <p>보호소: {announcement.shelterName}</p>
+                        <p>등록일: {new Date(announcement.createdAt).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+                  </CardWrapper>
+                );
+              })}
             </div>
           </div>
 

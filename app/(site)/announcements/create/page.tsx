@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation"; // 여기 추가
 import api from "@/app/lib/api";
+import { modalAlert } from "@/app/utils/alertUtils";
 
 export default function Page() {
   const router = useRouter(); // router 선언
@@ -31,15 +32,14 @@ export default function Page() {
 
       console.log("전송 데이터:", data);
 
-      const res = await api.post("/announcements", data);
+      const res = await api.post("/v1/announcements", data);
       console.log("등록이 되었습니다:", res.data);
 
+      await modalAlert("등록 성공!", "success");
       router.push("/me"); // router.push 호출 가능!
-
-      alert("등록 성공!");
     } catch (err) {
       console.error("등록 실패", err);
-      alert("등록 실패: " + (err instanceof Error ? err.message : "에러 발생"));
+      await modalAlert("등록 실패: " + (err instanceof Error ? err.message : "에러 발생"), "error");
     }
   };
 
