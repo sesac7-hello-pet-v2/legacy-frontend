@@ -39,7 +39,7 @@ export default function FeedCards() {
 
   const fetchFeeds = async () => {
     try {
-      const response = await feedApi.getPosts({ page: 0, size: 10 });
+      const response = await feedApi.getPosts({ page: 1, size: 10 });
       const data = response.content || [];
       // API 데이터가 있으면 사용, 없으면 더미 데이터 유지
       if (data.length > 0) {
