@@ -1,13 +1,5 @@
-import { FamilyInfo } from "@/app/types/application";
-
-interface Props {
-    familyInfo: FamilyInfo;
-    setFamilyInfo?: (info: FamilyInfo) => void; // 작성 모드일 때만 필요
-    isReadOnly?: boolean;
-}
-
-export default function FamilySection({ familyInfo, setFamilyInfo, isReadOnly = false }: Props) {
-    const update = (key: keyof FamilyInfo, value: any) => {
+export default function FamilySection({ familyInfo, setFamilyInfo, isReadOnly = false }) {
+    const update = (key, value) => {
         if (setFamilyInfo) {
             setFamilyInfo({
                 ...familyInfo,
@@ -16,7 +8,7 @@ export default function FamilySection({ familyInfo, setFamilyInfo, isReadOnly = 
         }
     };
 
-    const renderField = (title: string, value: string | number | boolean | null) => (
+    const renderField = (title, value) => (
         <div className="flex gap-2">
             <span className="font-medium text-sm">{title}:</span>
             <span className="text-sm text-gray-800">{value !== null ? String(value) : "-"}</span>
@@ -127,7 +119,6 @@ export default function FamilySection({ familyInfo, setFamilyInfo, isReadOnly = 
                 </>
             )}
 
-            <hr className="border-gray-300 mt-4" />
         </div>
     );
 }
