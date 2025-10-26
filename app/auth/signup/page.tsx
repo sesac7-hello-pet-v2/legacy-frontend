@@ -3,8 +3,9 @@
 
 import api from "@/app/lib/api";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import React, { useState, useEffect } from "react";
+import {useRouter} from "next/navigation";
+import React, {useEffect, useState} from "react";
+import {modalAlert} from "@/app/utils/alertUtils";
 
 /* ── 역할 매핑 ─────────────────────────────────────────────── */
 const ROLE_LABELS = ["유저", "보호소", "관리자"] as const;
@@ -146,11 +147,11 @@ export default function SignupPage() {
       });
       if (!res.data.result) {
         setEmailChecked(true);
-        alert(res.data.message);
+          modalAlert(res.data.message, "success");
       }
     } catch (error) {
       const msg = (error as Error).message || "알 수 없는 오류가 발생했습니다.";
-      alert(`중복확인 실패: ${msg}`);
+        modalAlert(`중복확인 실패: ${msg}`, "error");
     }
   };
 
@@ -164,11 +165,11 @@ export default function SignupPage() {
       });
       if (!res.data.result) {
         setNicknameChecked(true);
-        alert(res.data.message);
+          modalAlert(res.data.message, "success");
       }
     } catch (error) {
       const msg = (error as Error).message || "알 수 없는 오류가 발생했습니다.";
-      alert(`중복확인 실패: ${msg}`);
+        modalAlert(`중복확인 실패: ${msg}`, "error");
     }
   };
 
@@ -182,11 +183,11 @@ export default function SignupPage() {
       });
       if (!res.data.result) {
         setPhoneChecked(true);
-        alert(res.data.message);
+          modalAlert(res.data.message, "success");
       }
     } catch (error) {
       const msg = (error as Error).message || "알 수 없는 오류가 발생했습니다.";
-      alert(`중복확인 실패: ${msg}`);
+        modalAlert(`중복확인 실패: ${msg}`, "error");
     }
   };
 
@@ -210,11 +211,12 @@ export default function SignupPage() {
     try {
       const res = await api.post("/v1/users", payload);
       console.log(res);
-      alert("회원가입이 완료되었습니다!");
-      router.push("/auth/login");
+        modalAlert("회원가입이 완료되었습니다!", "success").then(() => {
+            router.push("/auth/login");
+        });
     } catch (error) {
       const msg = (error as Error).message || "알 수 없는 오류가 발생했습니다.";
-      alert(`회원가입 실패: ${msg}`);
+        modalAlert(`회원가입 실패: ${msg}`, "error");
     }
   };
 
@@ -397,7 +399,7 @@ export default function SignupPage() {
             <button
               type="submit"
               disabled={!isFormValid}
-              className="mt-4 w-full rounded-lg bg-amber-400 py-3 font-semibold text-white shadow-md transition 
+              className="mt-4 w-full rounded-lg bg-amber-400 py-3 font-semibold text-white shadow-md transition
                    hover:bg-amber-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               가입하기

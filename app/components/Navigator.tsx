@@ -4,6 +4,7 @@ import {useUserStore} from "../store/UserStore";
 import {useEffect, useRef, useState} from "react";
 import api, {clearTokenExpiry} from "../lib/api";
 import {useRouter} from "next/navigation";
+import {modalAlert} from "@/app/utils/alertUtils";
 
 export default function Navigator() {
   const { user, clearUser } = useUserStore();
@@ -34,9 +35,9 @@ export default function Navigator() {
     try {
       await api.post("/v1/auth/logout");
       router.push("/");
-      alert("로그아웃 되었습니다.");
+        modalAlert("로그아웃 되었습니다.", "success");
     } catch (err) {
-      alert("로그아웃 실패: " + (err as Error).message);
+        modalAlert("로그아웃 실패: " + (err as Error).message, "error");
     }
   };
 
