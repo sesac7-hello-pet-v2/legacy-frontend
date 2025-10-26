@@ -3,20 +3,11 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import api from "@/app/lib/api";
-
-interface Feed {
-  postId: string;
-  userId: number;
-  content: string;
-  imageUrls: string[];
-  postedAt: string;
-  likeCount: number;
-  isLiked: boolean;
-}
+import { feedApi } from "@/app/lib/feedApi";
+import { FeedPost } from "@/app/types/feed";
 
 // 더미 데이터 (항상 10개)
-const DUMMY_FEEDS: Feed[] = Array.from({ length: 10 }, (_, i) => ({
+const DUMMY_FEEDS: FeedPost[] = Array.from({ length: 10 }, (_, i) => ({
   postId: `dummy-${i + 1}`,
   userId: 0,
   content: "데이터를 불러올 수 없습니다",
@@ -27,7 +18,7 @@ const DUMMY_FEEDS: Feed[] = Array.from({ length: 10 }, (_, i) => ({
 }));
 
 export default function FeedCards() {
-  const [feeds, setFeeds] = useState<Feed[]>(DUMMY_FEEDS);
+  const [feeds, setFeeds] = useState<FeedPost[]>(DUMMY_FEEDS);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -48,8 +39,8 @@ export default function FeedCards() {
 
   const fetchFeeds = async () => {
     try {
-      const response = await api.get("/posts?page=0&size=10");
-      const data = response.data.content || [];
+      const response = await feedApi.getPosts({ page: 0, size: 10 });
+      const data = response.content || [];
       // API 데이터가 있으면 사용, 없으면 더미 데이터 유지
       if (data.length > 0) {
         setFeeds(data);
