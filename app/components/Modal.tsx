@@ -65,7 +65,7 @@ export default function Modal({
             onClick={handleBackdropClick}
         >
             {/* Backdrop */}
-            <div className="absolute inset-0 bg-black bg-opacity-20 transition-opacity"/>
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"/>
 
             {/* Modal */}
             <div
