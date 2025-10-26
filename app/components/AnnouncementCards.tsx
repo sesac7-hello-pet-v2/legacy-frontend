@@ -52,7 +52,7 @@ export default function AnnouncementCards() {
 
   const fetchAnnouncements = async () => {
     try {
-      const response = await api.get("/announcements?page=0&size=10");
+      const response = await api.get("/v1/announcements?page=0&size=10");
       const data = response.data.announcements || [];
       // API 데이터가 있으면 사용, 없으면 더미 데이터 유지
       if (data.length > 0) {
