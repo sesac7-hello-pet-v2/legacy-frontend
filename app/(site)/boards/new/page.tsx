@@ -1,8 +1,9 @@
 "use client";
 
 import api from "@/app/lib/api";
-import { useRouter } from "next/navigation";
-import React, { useRef, useState } from "react";
+import {useRouter} from "next/navigation";
+import {modalAlert} from "@/app/utils/alertUtils";
+import React, {useRef, useState} from "react";
 
 export default function BoardCreate() {
   const [category, setCategory] = useState<string>("커뮤니티");
@@ -52,7 +53,7 @@ export default function BoardCreate() {
 
     // 유효성 검사
     if (!checkTitle || !checkContent) {
-      alert("제목과 내용을 모두 입력해주세요!!");
+        modalAlert("제목과 내용을 모두 입력해주세요.", "warning");
       return;
     }
 
@@ -66,11 +67,12 @@ export default function BoardCreate() {
 
     try {
       const res = await api.post("/boards", payload);
-      alert("글이 등록되었습니다!!");
-      router.push(`/boards/${res.data.id}`);
+        modalAlert("게시글이 성공적으로 등록되었습니다.", "success").then(() => {
+            router.push(`/boards/${res.data.id}`);
+        });
     } catch (err) {
       console.error("등록실패", err);
-      alert("등록에 실패했습니다. 다시 시도해주세요");
+        modalAlert("등록 중 오류가 발생했습니다. 다시 시도해주세요.", "error");
     }
   }
 
@@ -158,9 +160,9 @@ export default function BoardCreate() {
                 type="file"
                 ref={imgText}
                 //onChange={loadImg}
-                className="flex-1 rounded-lg  bg-[#F1F1E8] px-2 py-1 text-sm 
+                className="flex-1 rounded-lg  bg-[#F1F1E8] px-2 py-1 text-sm
              file:mr-4 file:rounded-full file:border file:border-gray-300
-             file:bg-[#F1F5FF] file:px-2 file:py-0.5 file:text-[12px]  file:text-gray-700 
+             file:bg-[#F1F5FF] file:px-2 file:py-0.5 file:text-[12px]  file:text-gray-700
              hover:bg-amber-100"
               />
               <button
@@ -177,7 +179,7 @@ export default function BoardCreate() {
           <div className="pt-4 text-center">
             <button
               type="submit"
-              className="inline-block rounded-full bg-[#FAD393] px-8 py-3 font-medium text-gray-700 
+              className="inline-block rounded-full bg-[#FAD393] px-8 py-3 font-medium text-gray-700
                          ring-2 ring-transparent transition hover:bg-amber-100 focus:outline-none focus:ring-amber-300
                          disabled:cursor-not-allowed disabled:opacity-40"
             >

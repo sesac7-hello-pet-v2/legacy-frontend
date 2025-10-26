@@ -1,8 +1,9 @@
 "use client";
 
 import api from "@/app/lib/api";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import {useState} from "react";
+import {useRouter} from "next/navigation";
+import {modalAlert} from "@/app/utils/alertUtils";
 
 export default function CreatePetPage() {
   const router = useRouter();
@@ -29,26 +30,27 @@ export default function CreatePetPage() {
 
     // 유효성 검사
     if (!formData.breed.trim()) {
-      alert("품종을 입력해주세요.");
+        modalAlert("품종을 입력해주세요.", "warning");
       return;
     }
     if (!formData.personality.trim()) {
-      alert("성격/특징을 입력해주세요.");
+        modalAlert("성격/특징을 입력해주세요.", "warning");
       return;
     }
     if (formData.age < 0) {
-      alert("올바른 나이를 입력해주세요.");
+        modalAlert("올바른 나이를 입력해주세요.", "warning");
       return;
     }
 
     try {
       await api.post("/v1/pets", formData);
 
-      alert("동물 등록 완료!");
-      router.push("/me");
+        modalAlert("반려동물이 성공적으로 등록되었습니다.", "success").then(() => {
+            router.push("/me");
+        });
     } catch (err) {
       console.error("등록 실패", err);
-      alert("등록에 실패했습니다.");
+        modalAlert("등록 중 오류가 발생했습니다. 다시 시도해주세요.", "error");
     }
   };
 

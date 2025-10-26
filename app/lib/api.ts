@@ -1,4 +1,5 @@
 import axios from "axios";
+import {modalAlert} from "@/app/utils/alertUtils";
 
 const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL,
@@ -51,8 +52,9 @@ export function setTokenExpiry(expiresIn: number) {
       console.error("❌ [Token Manager] 토큰 갱신 실패:", error);
       // 갱신 실패 시 로그인 페이지로 이동
       if (typeof window !== "undefined") {
-        alert("세션이 만료되었습니다.");
-        window.location.replace("/auth/login");
+          modalAlert("세션이 만료되어 로그인 페이지로 이동합니다.", "warning").then(() => {
+              window.location.replace("/auth/login");
+          });
       }
     }
   }, refreshDelay);
