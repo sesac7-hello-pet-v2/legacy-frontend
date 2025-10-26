@@ -3,6 +3,7 @@ import api from "@/app/lib/api";
 import { useUserStore } from "@/app/store/UserStore";
 import { useRouter } from "next/navigation";
 import React, { useState } from "react";
+import { modalAlert } from "@/app/utils/alertUtils";
 
 export default function Withdraw() {
   const [password, setPassword] = useState("");
@@ -16,13 +17,13 @@ export default function Withdraw() {
     try {
       const res = await api.post("/v1/users/check-password", { password });
       if (res.data.success) {
-        alert(res.data.message);
+        await modalAlert(res.data.message, "success");
         setVerified(true);
       } else {
-        alert(res.data.message);
+        await modalAlert(res.data.message, "error");
       }
     } catch (err) {
-      alert(err);
+      await modalAlert(String(err), "error");
     }
   }
 
@@ -30,10 +31,10 @@ export default function Withdraw() {
     try {
       await api.delete("/v1/users");
       clearUser();
-      alert("탈퇴 되었습니다.");
+      await modalAlert("탈퇴 되었습니다.", "info");
       router.push("/");
     } catch (err) {
-      alert(err);
+      await modalAlert(String(err), "error");
     }
   }
 
