@@ -10,7 +10,7 @@ import {useAuth} from "@/app/hooks/useAuth";
 
 interface FeedPostProps {
     post: FeedPostType;
-    currentUserId: number;
+    currentUserId?: number;
     onPostDelete?: (postId: string) => void;
 }
 
