@@ -87,16 +87,48 @@ export default function FeedCards() {
             >
               {feeds.map((feed) => {
                 const isDummy = feed.postId.startsWith('dummy-');
-                const CardWrapper = isDummy ? 'div' : Link;
-                const cardProps = isDummy
-                  ? { className: "flex-shrink-0 w-[calc(25%-18px)] bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 opacity-50 cursor-not-allowed" }
-                  : {
-                      href: `/feed/${feed.postId}`,
-                      className: "flex-shrink-0 w-[calc(25%-18px)] bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 group border border-gray-200"
-                    };
 
+                // 로딩 중이거나 더미인 경우 div, 아니면 Link
+                if (loading || isDummy) {
+                  return (
+                    <div
+                      key={feed.postId}
+                      className="flex-shrink-0 w-[calc(25%-18px)] bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 opacity-50 cursor-not-allowed"
+                    >
+                      {/* 사용자 정보 */}
+                      <div className="p-3 flex items-center gap-2.5 border-b">
+                        <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-xs font-medium text-gray-600">
+                            {feed.userId || '?'}
+                          </span>
+                        </div>
+                        <span className="font-medium text-sm">
+                          로딩 중...
+                        </span>
+                      </div>
+
+                      {/* 이미지 */}
+                      <div className="relative h-48 overflow-hidden bg-gray-200">
+                        <div className="flex items-center justify-center h-full text-gray-400 text-sm">
+                          이미지 없음
+                        </div>
+                      </div>
+
+                      {/* 내용 */}
+                      <div className="p-3">
+                        <p className="text-gray-700 text-sm line-clamp-3">{feed.content}</p>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // 실제 데이터인 경우 Link로 렌더링
                 return (
-                  <CardWrapper key={feed.postId} {...cardProps}>
+                  <Link
+                    key={feed.postId}
+                    href={`/feed/${feed.postId}`}
+                    className="flex-shrink-0 w-[calc(25%-18px)] bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 group border border-gray-200"
+                  >
                     {/* 사용자 정보 */}
                     <div className="p-3 flex items-center gap-2.5 border-b">
                       <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
@@ -105,7 +137,7 @@ export default function FeedCards() {
                         </span>
                       </div>
                       <span className="font-medium text-sm">
-                        {isDummy ? '로딩 중...' : `사용자 ${feed.userId}`}
+                        사용자 {feed.userId}
                       </span>
                     </div>
 
@@ -129,7 +161,7 @@ export default function FeedCards() {
                     <div className="p-3">
                       <p className="text-gray-700 text-sm line-clamp-3">{feed.content}</p>
                     </div>
-                  </CardWrapper>
+                  </Link>
                 );
               })}
             </div>
