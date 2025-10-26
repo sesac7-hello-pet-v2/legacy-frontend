@@ -3,6 +3,7 @@
 import api from "@/app/lib/api";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
+import { modalAlert } from "@/app/utils/alertUtils";
 
 export default function BoardUpdate() {
   const { id } = useParams();
@@ -68,7 +69,7 @@ export default function BoardUpdate() {
     //     );
     //   } catch (err) {
     //     console.error("게시글 로딩 실패", err);
-    //     alert("게시글을 불러오지 못했습니다.");
+    //     await modalAlert("게시글을 불러오지 못했습니다.", "error");
     //   }
     // };
 
@@ -111,11 +112,11 @@ export default function BoardUpdate() {
 
     try {
       await api.put(`/boards/${id}`, payload);
-      alert("게시글이 수정되었습니다.");
+      await modalAlert("게시글이 수정되었습니다.", "success");
       router.push(`/boards/${id}`);
     } catch (err) {
       console.error("등록실패", err);
-      alert("등록에 실패했습니다. 다시 시도해주세요");
+      await modalAlert("등록에 실패했습니다. 다시 시도해주세요", "error");
     }
   }
 
