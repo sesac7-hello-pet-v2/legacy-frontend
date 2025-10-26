@@ -31,7 +31,7 @@ export default function Page() {
 
       console.log("전송 데이터:", data);
 
-      const res = await api.post("/announcements", data);
+      const res = await api.post("/v1/announcements", data);
       console.log("등록이 되었습니다:", res.data);
 
       router.push("/me"); // router.push 호출 가능!
