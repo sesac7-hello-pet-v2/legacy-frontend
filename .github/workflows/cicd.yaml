@@ -82,10 +82,8 @@ jobs:
 
           echo "Updating $MANIFEST_FILE_PATH with new tag: $NEW_TAG"
 
-          # deployment.yaml의 image 태그를 직접 업데이트
-          # Frontend는 deployment.yaml 파일 사용
-          yq -i '(.spec.template.spec.containers[0].image | split(":")[0]) as $repo | .spec.template.spec.containers[0].image = $repo + ":'${NEW_TAG}'"' ${MANIFEST_FILE_PATH}
-
+          # values.yaml의 image.tag 필드 업데이트 (Helm 차트용)
+          yq -i '.image.tag = "'${NEW_TAG}'"' ${MANIFEST_FILE_PATH}
           echo "Manifest file updated:"
           cat ${MANIFEST_FILE_PATH}
 
