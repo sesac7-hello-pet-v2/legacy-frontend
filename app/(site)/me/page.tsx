@@ -19,13 +19,12 @@ export default function MyPage() {
 
     useEffect(() => {
         console.log("🔍 [MyPage] user 상태:", user);
+        setIsLoading(false);
         if (!user) {
             console.log("⚠️ [MyPage] 로그인되지 않음, 로그인 페이지로 이동");
             modalAlert("로그인이 필요합니다.", "warning").then(() => {
                 router.push("/auth/login");
             });
-        } else {
-            setIsLoading(false);
         }
     }, [user, router]);
 
