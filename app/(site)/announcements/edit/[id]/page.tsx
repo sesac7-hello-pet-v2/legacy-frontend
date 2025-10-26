@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import api from "@/app/lib/api";
+import { modalAlert } from "@/app/utils/alertUtils";
 
 export default function EditAnnouncementPage() {
   const { id } = useParams();
@@ -79,7 +80,7 @@ export default function EditAnnouncementPage() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      alert("수정 완료!");
+      await modalAlert("수정 완료!", "success");
       router.push("/me");
     } catch (err) {
       console.error("수정 실패", err);
