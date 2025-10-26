@@ -7,37 +7,25 @@ import AnnouncementApplicationItem from "./AnnouncementApplicationItem";
 import ConfirmModal from "@/app/components/ConfirmModal";
 import Pagination from "@/app/components/Pagination";
 
-interface Props {
-    announcementId: number;
-}
-
-interface Application {
-    applicationId: number;
-    applicationStatusLabel: string;
-    userName: string;
-    userPhoneNumber: string;
-    userEmail: string;
-}
-
-export default function AnnouncementApplicationList({ announcementId }: Props) {
-    const [applications, setApplications] = useState<Application[]>([]);
+export default function AnnouncementApplicationList({ announcementId }) {
+    const [applications, setApplications] = useState([]);
     const [totalPages, setTotalPages] = useState(1);
-    const [announcementCreatedAt, setAnnouncementCreatedAt] = useState<string>("");
-    const [selectedAppId, setSelectedAppId] = useState<number | null>(null);
+    const [announcementCreatedAt, setAnnouncementCreatedAt] = useState("");
+    const [selectedAppId, setSelectedAppId] = useState(null);
 
     const searchParams = useSearchParams();
     const currentPage = Number(searchParams.get("page")) || 1;
     const router = useRouter();
 
-    const fetchApplications = async (pageNum: number) => {
+    const fetchApplications = async (pageNum) => {
         try {
             const res = await api.get(
-                `/announcements/${announcementId}/applications?page=${pageNum - 1}&size=10`
+                `/v1/applications/announcement/${announcementId}?page=${pageNum - 1}&size=10`
             );
             setApplications(res.data.applications);
             setTotalPages(res.data.totalPages);
             setAnnouncementCreatedAt(res.data.announcementCreatedAt);
-        } catch (e: any) {
+        } catch (e) {
             if (e.response?.status === 403) {
                 alert("해당 공고에 대한 접근 권한이 없습니다.");
                 router.push("/");
@@ -54,10 +42,10 @@ export default function AnnouncementApplicationList({ announcementId }: Props) {
     const handleApprove = async () => {
         if (selectedAppId === null) return;
         try {
-            await api.put(`/announcements/${announcementId}/applications/${selectedAppId}`);
+            await api.patch(`/v1/applications/announcement/${announcementId}/${selectedAppId}/approve`);
             alert("신청이 승인되었습니다.");
             await fetchApplications(currentPage);
-        } catch (e: any) {
+        } catch (e) {
             alert("승인에 실패했습니다: " + (e.response?.data?.message || e.message));
         } finally {
             setSelectedAppId(null);
