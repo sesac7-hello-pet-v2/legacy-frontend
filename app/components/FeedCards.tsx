@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import SmartImage from "@/app/components/SmartImage";
+
 import { feedApi } from "@/app/lib/feedApi";
 import { FeedPost } from "@/app/types/feed";
 
@@ -143,11 +144,13 @@ export default function FeedCards() {
                     {/* 이미지 */}
                     <div className="relative h-48 overflow-hidden bg-gray-200">
                       {feed.imageUrls && feed.imageUrls.length > 0 ? (
+
                         <SmartImage
                           src={feed.imageUrls[0]}
                           alt="Feed"
                           size="feed"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+
                         />
                       ) : (
                         <div className="flex items-center justify-center h-full text-gray-400 text-sm">
