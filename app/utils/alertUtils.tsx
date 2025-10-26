@@ -1,5 +1,6 @@
 "use client";
 
+import React from 'react';
 import {AlertModal, ConfirmModal} from '@/app/components/Modal';
 import {createRoot} from 'react-dom/client';
 
@@ -42,15 +43,14 @@ export function showAlert(options: AlertOptions): Promise<void> {
 
         root.render(
             <AlertModal
-                isOpen = {true}
-        onClose = {handleClose}
-        title = {options.title}
-        message = {options.message}
-        type = {options.type || 'info'}
-        buttonText = {options.buttonText}
-        />
-    )
-        ;
+                isOpen={true}
+                onClose={handleClose}
+                title={options.title}
+                message={options.message}
+                type={options.type || 'info'}
+                buttonText={options.buttonText}
+            />
+        );
     });
 }
 
@@ -84,17 +84,16 @@ export function showConfirm(options: ConfirmOptions): Promise<boolean> {
 
         root.render(
             <ConfirmModal
-                isOpen = {true}
-        onClose = {handleClose}
-        onConfirm = {handleConfirm}
-        title = {options.title}
-        message = {options.message}
-        type = {options.type || 'info'}
-        confirmText = {options.confirmText}
-        cancelText = {options.cancelText}
-        />
-    )
-        ;
+                isOpen={true}
+                onClose={handleClose}
+                onConfirm={handleConfirm}
+                title={options.title}
+                message={options.message}
+                type={options.type || 'info'}
+                confirmText={options.confirmText}
+                cancelText={options.cancelText}
+            />
+        );
     });
 }
 

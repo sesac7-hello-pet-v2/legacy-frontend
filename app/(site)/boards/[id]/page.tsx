@@ -1,12 +1,12 @@
 "use client";
 
 import api from "@/app/lib/api";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
-import { BoardResponse, Comment } from "@/app/lib/boardTypes";
-import { categories, petTypes } from "@/app/lib/boardConstants";
-import { changeResponse } from "@/app/lib/boardUtils";
-import { useUserStore } from "@/app/store/UserStore";
+import {useParams, useRouter, useSearchParams} from "next/navigation";
+import {useEffect, useState} from "react";
+import {BoardResponse, Comment} from "@/app/lib/boardTypes";
+import {categories, petTypes} from "@/app/lib/boardConstants";
+import {changeResponse} from "@/app/lib/boardUtils";
+import {useUserStore} from "@/app/store/UserStore";
 import Pagination from "@/app/components/Pagination";
 
 export default function BoardDetail() {
@@ -63,7 +63,7 @@ export default function BoardDetail() {
       setBoard(res.data.boardResponse ?? null);
       // 여기서 댓글을 createdAt 기준으로 정렬해서 setComments
       const sortedComments = (res.data.commentList ?? []).sort(
-        (a, b) =>
+          (a: any, b: any) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
       setComments(sortedComments);
