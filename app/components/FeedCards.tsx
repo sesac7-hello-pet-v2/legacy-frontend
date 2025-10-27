@@ -1,16 +1,20 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {useEffect, useState} from "react";
 import Link from "next/link";
 import SmartImage from "@/app/components/SmartImage";
 
-import { feedApi } from "@/app/lib/feedApi";
-import { FeedPost } from "@/app/types/feed";
+import {feedApi} from "@/app/lib/feedApi";
+import {FeedPost} from "@/app/types/feed";
 
 // 더미 데이터 (항상 10개)
 const DUMMY_FEEDS: FeedPost[] = Array.from({ length: 10 }, (_, i) => ({
   postId: `dummy-${i + 1}`,
-  userId: 0,
+    user: {
+        userId: 0,
+        nickname: "로딩중",
+        profileUrl: null,
+    },
   content: "데이터를 불러올 수 없습니다",
   imageUrls: [],
   postedAt: new Date().toISOString(),
@@ -88,35 +92,28 @@ export default function FeedCards() {
               {feeds.map((feed) => {
                 const isDummy = feed.postId.startsWith('dummy-');
 
-                // 로딩 중이거나 더미인 경우 div, 아니면 Link
+                  // 로딩 중이거나 더미인 경우 스켈레톤, 아니면 Link
                 if (loading || isDummy) {
                   return (
                     <div
                       key={feed.postId}
-                      className="flex-shrink-0 w-[calc(25%-18px)] bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200 opacity-50 cursor-not-allowed"
+                      className="flex-shrink-0 w-[calc(25%-18px)] bg-white rounded-lg shadow-sm overflow-hidden border border-gray-200"
                     >
-                      {/* 사용자 정보 */}
+                        {/* 사용자 정보 스켈레톤 */}
                       <div className="p-3 flex items-center gap-2.5 border-b">
-                        <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
-                          <span className="text-xs font-medium text-gray-600">
-                            {feed.userId || '?'}
-                          </span>
-                        </div>
-                        <span className="font-medium text-sm">
-                          로딩 중...
-                        </span>
+                          <div className="w-8 h-8 bg-gray-300 rounded-full animate-pulse flex-shrink-0"></div>
+                          <div className="h-4 bg-gray-300 rounded animate-pulse flex-1"></div>
                       </div>
 
-                      {/* 이미지 */}
-                      <div className="relative h-48 overflow-hidden bg-gray-200">
-                        <div className="flex items-center justify-center h-full text-gray-400 text-sm">
-                          이미지 없음
-                        </div>
+                        {/* 이미지 스켈레톤 */}
+                        <div className="relative h-48 overflow-hidden bg-gray-300 animate-pulse">
                       </div>
 
-                      {/* 내용 */}
-                      <div className="p-3">
-                        <p className="text-gray-700 text-sm line-clamp-3">{feed.content}</p>
+                        {/* 내용 스켈레톤 */}
+                        <div className="p-3 space-y-2">
+                            <div className="h-3 bg-gray-300 rounded animate-pulse"></div>
+                            <div className="h-3 bg-gray-300 rounded animate-pulse w-3/4"></div>
+                            <div className="h-3 bg-gray-300 rounded animate-pulse w-1/2"></div>
                       </div>
                     </div>
                   );
@@ -131,13 +128,23 @@ export default function FeedCards() {
                   >
                     {/* 사용자 정보 */}
                     <div className="p-3 flex items-center gap-2.5 border-b">
-                      <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
-                        <span className="text-xs font-medium text-gray-600">
-                          {feed.userId || '?'}
-                        </span>
-                      </div>
+                        {feed.user.profileUrl ? (
+                            <SmartImage
+                                src={feed.user.profileUrl}
+                                alt={`${feed.user.nickname} 프로필`}
+                                size="thumb"
+                                className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                            />
+                        ) : (
+                            <div
+                                className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
+                          <span className="text-xs font-medium text-gray-600">
+                            {feed.user.nickname?.charAt(0)?.toUpperCase() || '?'}
+                          </span>
+                            </div>
+                        )}
                       <span className="font-medium text-sm">
-                        사용자 {feed.userId}
+                        {feed.user.nickname || '익명'}
                       </span>
                     </div>
 

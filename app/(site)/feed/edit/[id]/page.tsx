@@ -10,7 +10,11 @@ interface PostData {
     postId: string;
     content: string;
     imageUrls: string[];
-    userId: number;
+    user: {
+        userId: number;
+        nickname: string;
+        profileUrl: string | null;
+    };
 }
 
 export default function EditPostPage() {

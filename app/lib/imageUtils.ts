@@ -72,6 +72,7 @@ export const useImageWithFallback = (originalUrl: string, preferredSize: ImageSi
     const [currentSize, setCurrentSize] = React.useState<ImageSize>(preferredSize);
     const [isLoading, setIsLoading] = React.useState(true);
     const [hasError, setHasError] = React.useState(false);
+    const [imageKey, setImageKey] = React.useState(0); // 강제 리렌더링용
 
     const imageUrl = React.useMemo(() => getResizedImageUrl(originalUrl, currentSize), [originalUrl, currentSize]);
 
@@ -80,24 +81,26 @@ export const useImageWithFallback = (originalUrl: string, preferredSize: ImageSi
             // 리사이징된 이미지 로드 실패 시 원본으로 폴백
             setCurrentSize('original');
             setHasError(false);
-            setIsLoading(true); // 새 이미지 로딩 시작
+            setIsLoading(true);
+            setImageKey(prev => prev + 1); // 강제 리렌더링
         } else {
             // 원본도 실패하면 에러 상태로 설정
             setHasError(true);
             setIsLoading(false);
         }
-    }, [currentSize]);
+    }, [currentSize, imageUrl, originalUrl]);
 
     const handleLoad = React.useCallback(() => {
         setIsLoading(false);
         setHasError(false);
-    }, []);
+    }, [currentSize, imageUrl]);
 
     // originalUrl이나 preferredSize가 변경되면 초기화
     React.useEffect(() => {
         setCurrentSize(preferredSize);
         setIsLoading(true);
         setHasError(false);
+        setImageKey(prev => prev + 1);
     }, [originalUrl, preferredSize]);
 
     return {
@@ -105,6 +108,7 @@ export const useImageWithFallback = (originalUrl: string, preferredSize: ImageSi
         isLoading,
         hasError,
         currentSize,
+        imageKey, // 강제 리렌더링용 키 추가
         onError: handleError,
         onLoad: handleLoad,
     };
