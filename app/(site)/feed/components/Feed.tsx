@@ -24,6 +24,7 @@ export default function Feed() {
     const loadPosts = React.useCallback(async (pageNum: number = 1, reset: boolean = false) => {
         try {
             setLoading(true);
+
             const response = await feedApi.getPosts({
                 page: pageNum,
                 size: 10,
@@ -34,7 +35,8 @@ export default function Feed() {
 
             // 클라이언트 사이드에서 내 게시글 필터링 (API에서 지원하지 않는 경우)
             if (showMyPosts && currentUserId) {
-                postsData = postsData.filter(post => post.userId === currentUserId);
+                const filteredPosts = postsData.filter(post => post.user.userId === currentUserId);
+                postsData = filteredPosts;
             }
 
             if (reset) {

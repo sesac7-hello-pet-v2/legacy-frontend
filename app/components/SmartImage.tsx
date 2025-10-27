@@ -18,7 +18,7 @@ export default function SmartImage({
                                        className = '',
                                        fallbackClassName = 'bg-gray-200 animate-pulse'
                                    }: SmartImageProps) {
-    const {imageUrl, isLoading, hasError, onError, onLoad} = useImageWithFallback(src, size);
+    const {imageUrl, isLoading, hasError, imageKey, onError, onLoad} = useImageWithFallback(src, size);
 
     if (hasError) {
         return (
@@ -35,6 +35,7 @@ export default function SmartImage({
 
             {/* 실제 이미지 */}
             <img
+                key={imageKey} // 강제 리렌더링을 위한 키
                 src={imageUrl}
                 alt={alt}
                 className={`absolute inset-0 ${className} ${isLoading ? 'opacity-0' : 'opacity-100'} transition-opacity duration-300`}
