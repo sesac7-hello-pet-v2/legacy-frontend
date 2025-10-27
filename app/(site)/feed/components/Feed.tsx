@@ -34,7 +34,7 @@ export default function Feed() {
 
             // 클라이언트 사이드에서 내 게시글 필터링 (API에서 지원하지 않는 경우)
             if (showMyPosts && currentUserId) {
-                postsData = postsData.filter(post => post.userId === currentUserId);
+                postsData = postsData.filter(post => post.user.userId === currentUserId);
             }
 
             if (reset) {
