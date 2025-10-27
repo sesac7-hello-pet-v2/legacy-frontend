@@ -12,9 +12,10 @@ interface FeedPostProps {
     post: FeedPostType;
     currentUserId?: number;
     onPostDelete?: (postId: string) => void;
+    onPostClick?: (postId: string) => void;
 }
 
-export default function FeedPost({post, currentUserId, onPostDelete}: FeedPostProps) {
+export default function FeedPost({post, currentUserId, onPostDelete, onPostClick}: FeedPostProps) {
     const router = useRouter();
     const {isAuthenticated} = useAuth();
 
@@ -54,12 +55,24 @@ export default function FeedPost({post, currentUserId, onPostDelete}: FeedPostPr
         }
     };
 
+    const handlePostClick = () => {
+        onPostClick?.(post.postId);
+    };
+
     return (
         <article className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm mb-6">
-            <PostHeader user={post.user} postedAt={post.postedAt}/>
+            <PostHeader
+                user={post.user}
+                postedAt={post.postedAt}
+                currentUserId={currentUserId}
+                onEdit={handleEdit}
+                onDelete={handleDeleteClick}
+            />
 
             {imageUrls.length > 0 && (
-                <ImageCarousel images={imageUrls}/>
+                <div onClick={handlePostClick} className="cursor-pointer">
+                    <ImageCarousel images={imageUrls}/>
+                </div>
             )}
 
             <PostActions
@@ -68,11 +81,11 @@ export default function FeedPost({post, currentUserId, onPostDelete}: FeedPostPr
                 initialIsLiked={post.isLiked}
                 currentUserId={currentUserId}
                 postUserId={post.user.userId}
-                onEdit={handleEdit}
-                onDelete={handleDeleteClick}
             />
 
-            <PostContent content={post.content}/>
+            <div onClick={handlePostClick} className="cursor-pointer">
+                <PostContent content={post.content}/>
+            </div>
         </article>
     );
 }

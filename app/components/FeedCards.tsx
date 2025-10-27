@@ -3,6 +3,7 @@
 import {useEffect, useState} from "react";
 import Link from "next/link";
 import SmartImage from "@/app/components/SmartImage";
+import PostDetailModal from "@/app/(site)/feed/components/PostDetailModal";
 
 import {feedApi} from "@/app/lib/feedApi";
 import {FeedPost} from "@/app/types/feed";
@@ -26,6 +27,7 @@ export default function FeedCards() {
   const [feeds, setFeeds] = useState<FeedPost[]>(DUMMY_FEEDS);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+    const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
 
   useEffect(() => {
     fetchFeeds();
@@ -68,6 +70,14 @@ export default function FeedCards() {
   const goToNext = () => {
     setCurrentIndex((prev) => Math.min(maxIndex, prev + 1));
   };
+
+    const handlePostClick = (postId: string) => {
+        setSelectedPostId(postId);
+    };
+
+    const handleCloseModal = () => {
+        setSelectedPostId(null);
+    };
 
   return (
     <section className="py-12 bg-white">
@@ -119,12 +129,12 @@ export default function FeedCards() {
                   );
                 }
 
-                // 실제 데이터인 경우 Link로 렌더링
+                  // 실제 데이터인 경우 클릭 가능한 div로 렌더링
                 return (
-                  <Link
+                    <div
                     key={feed.postId}
-                    href={`/feed/${feed.postId}`}
-                    className="flex-shrink-0 w-[calc(25%-18px)] bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 group border border-gray-200"
+                    onClick={() => handlePostClick(feed.postId)}
+                    className="flex-shrink-0 w-[calc(25%-18px)] bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all duration-300 group border border-gray-200 cursor-pointer"
                   >
                     {/* 사용자 정보 */}
                     <div className="p-3 flex items-center gap-2.5 border-b">
@@ -170,7 +180,7 @@ export default function FeedCards() {
                     <div className="p-3">
                       <p className="text-gray-700 text-sm line-clamp-3">{feed.content}</p>
                     </div>
-                  </Link>
+                    </div>
                 );
               })}
             </div>
@@ -201,6 +211,15 @@ export default function FeedCards() {
           )}
         </div>
       </div>
+
+        {/* 게시글 상세 모달 */}
+        {selectedPostId && (
+            <PostDetailModal
+                isOpen={true}
+                postId={selectedPostId}
+                onClose={handleCloseModal}
+            />
+        )}
     </section>
   );
 }
