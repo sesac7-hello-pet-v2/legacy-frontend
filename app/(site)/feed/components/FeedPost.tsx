@@ -56,7 +56,7 @@ export default function FeedPost({post, currentUserId, onPostDelete}: FeedPostPr
 
     return (
         <article className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm mb-6">
-            <PostHeader userId={post.userId} postedAt={post.postedAt}/>
+            <PostHeader user={post.user} postedAt={post.postedAt}/>
 
             {imageUrls.length > 0 && (
                 <ImageCarousel images={imageUrls}/>
@@ -67,7 +67,7 @@ export default function FeedPost({post, currentUserId, onPostDelete}: FeedPostPr
                 initialLikeCount={post.likeCount}
                 initialIsLiked={post.isLiked}
                 currentUserId={currentUserId}
-                postUserId={post.userId}
+                postUserId={post.user.userId}
                 onEdit={handleEdit}
                 onDelete={handleDeleteClick}
             />
