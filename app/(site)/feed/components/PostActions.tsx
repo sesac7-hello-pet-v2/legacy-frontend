@@ -1,6 +1,6 @@
 "use client";
 
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {feedApi} from "../../../lib/feedApi";
 import {PostLikeResponse} from "../../../types/feed";
 import {useAuth} from "@/app/hooks/useAuth";
@@ -8,6 +8,7 @@ import {useAuth} from "@/app/hooks/useAuth";
 interface PostActionsProps {
     postId: string;
     initialLikeCount: number;
+    initialIsLiked?: boolean;
     currentUserId?: number;
     postUserId?: number;
     onEdit?: () => void;
@@ -17,16 +18,23 @@ interface PostActionsProps {
 export default function PostActions({
                                         postId,
                                         initialLikeCount,
+                                        initialIsLiked = false,
                                         currentUserId,
                                         postUserId,
                                         onEdit,
                                         onDelete
                                     }: PostActionsProps) {
     const {isAuthenticated} = useAuth();
-    const [isLiked, setIsLiked] = useState(false);
+    const [isLiked, setIsLiked] = useState(initialIsLiked);
     const [likeCount, setLikeCount] = useState(initialLikeCount);
     const [isSaved, setIsSaved] = useState(false);
     const [isLikeLoading, setIsLikeLoading] = useState(false);
+
+    // props가 변경될 때 상태 업데이트
+    useEffect(() => {
+        setIsLiked(initialIsLiked);
+        setLikeCount(initialLikeCount);
+    }, [initialIsLiked, initialLikeCount]);
 
     const handleLike = async () => {
         if (!isAuthenticated || isLikeLoading || !currentUserId) return;
