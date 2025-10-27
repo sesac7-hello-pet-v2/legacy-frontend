@@ -1,8 +1,8 @@
 "use client";
 
 import ApplicationList from "@/app/components/application/ApplicationList";
-import CommentsList from "@/app/components/boards/CommentsList";
-import MyBoardsList from "@/app/components/boards/MyBoardList";
+// import CommentsList from "@/app/components/boards/CommentsList";
+// import MyBoardsList from "@/app/components/boards/MyBoardList";
 import UserDetail from "@/app/components/UserDetail";
 import UserList from "@/app/components/UserList";
 import { useUserStore } from "@/app/store/UserStore";
@@ -30,8 +30,8 @@ export default function MyPage() {
 
     const [myPage, setMyPage] = useState(true);
     const [roleChangedBtn, setRoleChangedBtn] = useState(false);
-    const [myBoard, setMyBoard] = useState(false);
-    const [myComment, setMyComment] = useState(false);
+    // const [myBoard, setMyBoard] = useState(false);
+    // const [myComment, setMyComment] = useState(false);
     const [myPets, setMyPets] = useState(false);
 
     if (isLoading || !user) {
@@ -43,11 +43,11 @@ export default function MyPage() {
     }
 
     /* ---------------- 탭 전환 ---------------- */
-    const toggle = (tab: "page" | "role" | "board" | "comment" | "pets") => {
+    const toggle = (tab: "page" | "role" | "pets") => {
         setMyPage(tab === "page");
         setRoleChangedBtn(tab === "role");
-        setMyBoard(tab === "board");
-        setMyComment(tab === "comment");
+        // setMyBoard(tab === "board");
+        // setMyComment(tab === "comment");
         setMyPets(tab === "pets");
     };
 
@@ -133,7 +133,7 @@ export default function MyPage() {
                                     입양신청내역
                                 </button>
                             )}
-                            <button
+                            {/* <button
                                 onClick={() => toggle("board")}
                                 className={`w-full rounded-xl py-3 px-4 font-semibold transition-all duration-200 ${
                                     myBoard
@@ -152,7 +152,7 @@ export default function MyPage() {
                                 }`}
                             >
                                 내가 쓴 댓글
-                            </button>
+                            </button> */}
                         </div>
                     </nav>
 
@@ -168,8 +168,8 @@ export default function MyPage() {
                                 ) : (
                                     <ApplicationList />
                                 ))}
-                            {myBoard && <MyBoardsList />}
-                            {myComment && <CommentsList />}
+                            {/* {myBoard && <MyBoardsList />}
+                            {myComment && <CommentsList />} */}
                             {myPets && <MyPets />}
                         </div>
                     </div>
