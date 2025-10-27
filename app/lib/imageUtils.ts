@@ -80,6 +80,7 @@ export const useImageWithFallback = (originalUrl: string, preferredSize: ImageSi
             // 리사이징된 이미지 로드 실패 시 원본으로 폴백
             setCurrentSize('original');
             setHasError(false);
+            setIsLoading(true); // 새 이미지 로딩 시작
         } else {
             // 원본도 실패하면 에러 상태로 설정
             setHasError(true);
