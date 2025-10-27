@@ -65,6 +65,7 @@ export default function FeedPost({post, currentUserId, onPostDelete}: FeedPostPr
             <PostActions
                 postId={post.postId}
                 initialLikeCount={post.likeCount}
+                initialIsLiked={post.isLiked}
                 currentUserId={currentUserId}
                 postUserId={post.userId}
                 onEdit={handleEdit}
