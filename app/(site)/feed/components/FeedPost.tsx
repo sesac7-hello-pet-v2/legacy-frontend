@@ -45,10 +45,12 @@ export default function FeedPost({post, currentUserId, onPostDelete}: FeedPostPr
 
     const handleDeleteConfirm = async () => {
         try {
-            await api.delete(`/v1/posts/${post.postId}`);
+            await api.delete(`/posts/${post.postId}`);
+            setShowDeleteConfirm(false);
             onPostDelete?.(post.postId);
         } catch (error) {
             console.error("게시글 삭제 실패:", error);
+            setShowDeleteConfirm(false);
             setAlertMessage("게시글 삭제에 실패했습니다.");
             setShowAlert(true);
         }
@@ -73,6 +75,49 @@ export default function FeedPost({post, currentUserId, onPostDelete}: FeedPostPr
             />
 
             <PostContent content={post.content}/>
+
+            {/* 삭제 확인 모달 */}
+            {showDeleteConfirm && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 mx-4 max-w-sm w-full">
+                        <h3 className="text-lg font-semibold mb-4">게시글 삭제</h3>
+                        <p className="text-gray-600 mb-6">
+                            이 게시글을 삭제하시겠습니까?<br/>
+                            삭제된 게시글은 복구할 수 없습니다.
+                        </p>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setShowDeleteConfirm(false)}
+                                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                            >
+                                취소
+                            </button>
+                            <button
+                                onClick={handleDeleteConfirm}
+                                className="flex-1 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
+                            >
+                                삭제
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* 알림 모달 */}
+            {showAlert && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 mx-4 max-w-sm w-full">
+                        <h3 className="text-lg font-semibold mb-4">알림</h3>
+                        <p className="text-gray-600 mb-6">{alertMessage}</p>
+                        <button
+                            onClick={() => setShowAlert(false)}
+                            className="w-full px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                        >
+                            확인
+                        </button>
+                    </div>
+                </div>
+            )}
         </article>
     );
 }
