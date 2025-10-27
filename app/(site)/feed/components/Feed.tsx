@@ -7,6 +7,7 @@ import FeedPost from "./FeedPost";
 import {usePostStore} from "@/app/store/PostStore";
 import PendingPostComponent from "./PendingPost";
 import {useAuth} from "@/app/hooks/useAuth";
+import FeedSkeleton from "./FeedSkeleton";
 
 export default function Feed() {
     const [posts, setPosts] = useState<FeedPostType[]>([]);
@@ -86,8 +87,15 @@ export default function Feed() {
 
     if (loading && posts.length === 0) {
         return (
-            <div className="flex justify-center items-center min-h-64">
-                <div className="animate-spin rounded-full h-8 w-8 border-2 border-gray-300 border-t-blue-600"></div>
+            <div className="max-w-md mx-auto">
+                {/* 필터 버튼 스켈레톤 */}
+                <div className="px-4 mb-4">
+                    <div className="flex gap-2">
+                        <div className="w-24 h-8 bg-gray-300 rounded-full animate-pulse"></div>
+                        <div className="w-20 h-8 bg-gray-300 rounded-full animate-pulse"></div>
+                    </div>
+                </div>
+                <FeedSkeleton count={3}/>
             </div>
         );
     }
@@ -163,14 +171,18 @@ export default function Feed() {
                         />
                     ))}
 
-                    {hasMore && (
+                    {/* 더 보기 로딩 시 스켈레톤 표시 */}
+                    {loading && posts.length > 0 && (
+                        <FeedSkeleton count={2}/>
+                    )}
+
+                    {hasMore && !loading && (
                         <div className="text-center py-4">
                             <button
                                 onClick={handleLoadMore}
-                                disabled={loading}
-                                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 transition-colors"
+                                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                             >
-                                {loading ? "로딩 중..." : "더 보기"}
+                                더 보기
                             </button>
                         </div>
                     )}
