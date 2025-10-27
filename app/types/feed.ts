@@ -1,6 +1,13 @@
+export interface PostUser {
+    userId: number;
+    nickname: string | null;
+    username: string | null;
+    profileUrl: string | null;
+}
+
 export interface FeedPost {
     postId: string;
-    userId: number;
+    user: PostUser;
     content: string;
     imageUrls: string[];
     postedAt: string;
