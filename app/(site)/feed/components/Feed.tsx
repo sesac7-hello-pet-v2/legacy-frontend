@@ -8,6 +8,7 @@ import {usePostStore} from "@/app/store/PostStore";
 import PendingPostComponent from "./PendingPost";
 import {useAuth} from "@/app/hooks/useAuth";
 import FeedSkeleton from "./FeedSkeleton";
+import PostDetailModal from "./PostDetailModal";
 
 export default function Feed() {
     const [posts, setPosts] = useState<FeedPostType[]>([]);
@@ -16,6 +17,7 @@ export default function Feed() {
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [showMyPosts, setShowMyPosts] = useState(false);
+    const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
     const {pendingPosts, isCreating} = usePostStore();
     const {user} = useAuth();
 
@@ -85,6 +87,14 @@ export default function Feed() {
 
     const handlePostDelete = (postId: string) => {
         setPosts(prev => prev.filter(post => post.postId !== postId));
+    };
+
+    const handlePostClick = (postId: string) => {
+        setSelectedPostId(postId);
+    };
+
+    const handleCloseModal = () => {
+        setSelectedPostId(null);
     };
 
     if (loading && posts.length === 0) {
@@ -170,6 +180,7 @@ export default function Feed() {
                             post={post}
                             currentUserId={currentUserId}
                             onPostDelete={handlePostDelete}
+                            onPostClick={handlePostClick}
                         />
                     ))}
 
@@ -195,6 +206,16 @@ export default function Feed() {
                         </div>
                     )}
                 </div>
+            )}
+
+            {/* 게시글 상세 모달 */}
+            {selectedPostId && (
+                <PostDetailModal
+                    isOpen={true}
+                    postId={selectedPostId}
+                    onClose={handleCloseModal}
+                    onPostDelete={handlePostDelete}
+                />
             )}
         </div>
     );
