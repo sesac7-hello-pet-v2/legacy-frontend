@@ -1,6 +1,6 @@
 "use client";
 
-import React, {forwardRef, useEffect, useImperativeHandle, useState} from 'react';
+import React, {forwardRef, useCallback, useEffect, useImperativeHandle, useState} from 'react';
 import {Comment} from '../types/comment';
 import {commentApi} from '../lib/commentApi';
 import {useAuth} from '../hooks/useAuth';
@@ -89,10 +89,22 @@ const CommentList = forwardRef<CommentListRef, CommentListProps>(({postId, isOpe
         }
     };
 
+    // 무한 스크롤 처리
+    const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+        const {scrollTop, scrollHeight, clientHeight} = e.currentTarget;
+
+        // 스크롤이 바닥에서 100px 이내에 도달했을 때 다음 페이지 로드
+        if (scrollHeight - scrollTop <= clientHeight + 100) {
+            if (!loading && hasMore) {
+                loadComments(page + 1, false);
+            }
+        }
+    }, [loading, hasMore, page]);
+
     if (!isOpen) return null;
 
     return (
-        <div>
+        <div className="flex flex-col h-full">
             {/* 댓글 목록 헤더 */}
             <div className="px-4 py-3 border-b border-gray-100">
                 <h3 className="text-sm font-semibold text-gray-900">
@@ -101,7 +113,10 @@ const CommentList = forwardRef<CommentListRef, CommentListProps>(({postId, isOpe
             </div>
 
             {/* 댓글 목록 */}
-            <div className="max-h-96 overflow-y-auto">
+            <div
+                className="flex-1 overflow-y-auto scrollbar-hide"
+                onScroll={handleScroll}
+            >
                 {error && (
                     <div className="p-4 text-center">
                         <p className="text-red-500 text-sm mb-2">{error}</p>
@@ -150,17 +165,7 @@ const CommentList = forwardRef<CommentListRef, CommentListProps>(({postId, isOpe
                     </div>
                 )}
 
-                {/* 더 보기 버튼 */}
-                {hasMore && !loading && comments.length > 0 && (
-                    <div className="p-4 text-center">
-                        <button
-                            onClick={handleLoadMore}
-                            className="text-blue-600 text-sm hover:underline"
-                        >
-                            댓글 더 보기
-                        </button>
-                    </div>
-                )}
+                {/* 더 보기는 무한 스크롤로 대체 */}
 
                 {!hasMore && comments.length > 0 && (
                     <div className="p-4 text-center">

@@ -143,15 +143,21 @@ export default function PostDetailModal({
                     </div>
 
                     {/* 내용 */}
-                    <div className="flex-1 overflow-y-auto pt-2">
-                        {post && <PostContent content={post.content}/>}
+                    <div className="flex-1 flex flex-col overflow-hidden">
+                        {post && (
+                            <div className="px-4 py-2">
+                                <PostContent content={post.content}/>
+                            </div>
+                        )}
 
                         {/* 댓글 영역 */}
-                        <CommentList
-                            ref={commentListRef}
-                            postId={postId}
-                            isOpen={true}
-                        />
+                        <div className="flex-1 overflow-hidden">
+                            <CommentList
+                                ref={commentListRef}
+                                postId={postId}
+                                isOpen={true}
+                            />
+                        </div>
                     </div>
 
                     {/* 액션 버튼들 및 댓글 입력 폼 */}
@@ -168,7 +174,7 @@ export default function PostDetailModal({
                                     hideCommentButton={true}
                                 />
                             </div>
-                            {user && (
+                            {user ? (
                                 <CommentForm
                                     postId={post.postId}
                                     onCommentAdded={() => {
@@ -178,6 +184,18 @@ export default function PostDetailModal({
                                     autoFocus={focusCommentInput}
                                     onFocused={() => setFocusCommentInput(false)}
                                 />
+                            ) : (
+                                <div className="p-4 bg-gray-50 text-center border-t border-gray-100">
+                                    <p className="text-gray-500 text-sm">
+                                        <button
+                                            onClick={() => window.location.href = '/auth/login'}
+                                            className="text-blue-600 hover:text-blue-700 underline"
+                                        >
+                                            로그인
+                                        </button>
+                                        하여 댓글을 작성해보세요
+                                    </p>
+                                </div>
                             )}
                         </div>
                     )}
