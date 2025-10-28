@@ -9,6 +9,9 @@ import PendingPostComponent from "./PendingPost";
 import {useAuth} from "@/app/hooks/useAuth";
 import FeedSkeleton from "./FeedSkeleton";
 import PostDetailModal from "./PostDetailModal";
+import {useRouter, useSearchParams} from "next/navigation";
+import GridPost from "../../feed-test/components/GridPost";
+import UserProfileHeader from "./UserProfileHeader";
 
 export default function Feed() {
     const [posts, setPosts] = useState<FeedPostType[]>([]);
@@ -16,30 +19,47 @@ export default function Feed() {
     const [error, setError] = useState<string | null>(null);
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
-    const [showMyPosts, setShowMyPosts] = useState(false);
     const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
     const {pendingPosts, isCreating} = usePostStore();
     const {user} = useAuth();
+    const router = useRouter();
+    const searchParams = useSearchParams();
 
     const currentUserId = user?.id;
+    const userParam = searchParams.get('user');
+
+    // URL 파라미터에 따른 필터 상태 결정
+    const showMyPosts = userParam === 'my';
+    const targetUserId = userParam && userParam !== 'my' && userParam !== 'all' ? userParam : undefined;
+    const filterUserId = showMyPosts ? currentUserId : targetUserId;
+
+    // 특정 사용자 조회 시 그리드 뷰로 표시
+    const isGridView = showMyPosts || !!targetUserId;
+
 
     const loadPosts = React.useCallback(async (pageNum: number = 1, reset: boolean = false) => {
+        // 내 게시글을 조회하는데 currentUserId가 없으면 대기
+        if (showMyPosts && !currentUserId) {
+            return;
+        }
+
         try {
             setLoading(true);
 
             const response = await feedApi.getPosts({
                 page: pageNum,
-                size: 10,
-                userId: showMyPosts && currentUserId ? currentUserId : undefined,
+                size: isGridView ? 30 : 10, // 그리드 뷰일 때 더 많은 게시글 로드
+                userId: filterUserId ? parseInt(filterUserId.toString()) : undefined,
             });
 
             let postsData = response.content;
 
-            // 클라이언트 사이드에서 내 게시글 필터링 (API에서 지원하지 않는 경우)
-            if (showMyPosts && currentUserId) {
-                const filteredPosts = postsData.filter(post => post.user.userId === currentUserId);
+            // 클라이언트 사이드에서 추가 필터링 (API에서 지원하지 않는 경우)
+            if (filterUserId) {
+                const filteredPosts = postsData.filter(post => post.user.userId === parseInt(filterUserId.toString()));
                 postsData = filteredPosts;
             }
+
 
             if (reset) {
                 setPosts(postsData);
@@ -56,7 +76,7 @@ export default function Feed() {
         } finally {
             setLoading(false);
         }
-    }, [showMyPosts, currentUserId]);
+    }, [filterUserId, showMyPosts, currentUserId, isGridView]);
 
     useEffect(() => {
         loadPosts(1, true);
@@ -99,15 +119,61 @@ export default function Feed() {
 
     if (loading && posts.length === 0) {
         return (
-            <div className="max-w-md mx-auto">
-                {/* 필터 버튼 스켈레톤 */}
-                <div className="px-4 mb-4">
-                    <div className="flex gap-2">
-                        <div className="w-24 h-8 bg-gray-300 rounded-full animate-pulse"></div>
-                        <div className="w-20 h-8 bg-gray-300 rounded-full animate-pulse"></div>
+            <div className="max-w-4xl mx-auto flex gap-4">
+                {/* 왼쪽 사이드바 - 실제 버튼 표시 */}
+                <div className="w-48 flex-shrink-0">
+                    <div className="sticky top-20 bg-white rounded-lg border border-gray-200 p-4">
+                        <div className="flex flex-col gap-2">
+                            <button
+                                onClick={() => router.push('/feed')}
+                                className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors text-left ${
+                                    !userParam || userParam === 'all'
+                                        ? "bg-blue-500 text-white"
+                                        : "bg-gray-50 text-gray-700 hover:bg-gray-100"
+                                }`}
+                            >
+                                모든 게시글
+                            </button>
+                            <button
+                                onClick={() => router.push('/feed?user=my')}
+                                disabled={!user}
+                                className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors text-left ${
+                                    userParam === 'my'
+                                        ? "bg-blue-500 text-white"
+                                        : !user
+                                            ? "bg-gray-50 text-gray-400 cursor-not-allowed"
+                                            : "bg-gray-50 text-gray-700 hover:bg-gray-100"
+                                }`}
+                            >
+                                내 게시글
+                            </button>
+                        </div>
                     </div>
                 </div>
-                <FeedSkeleton count={3}/>
+                {/* 오른쪽 메인 콘텐츠 스켈레톤 */}
+                <div className="flex-1 max-w-md">
+                    {/* 사용자 프로필 헤더 스켈레톤 */}
+                    <div className="bg-white border-b border-gray-200 p-6 mb-4">
+                        <div className="flex items-center gap-6">
+                            <div className="w-20 h-20 bg-gray-300 rounded-full animate-pulse"></div>
+                            <div className="flex-1">
+                                <div className="w-32 h-6 bg-gray-300 rounded animate-pulse mb-3"></div>
+                                <div className="flex gap-6">
+                                    <div className="w-16 h-4 bg-gray-300 rounded animate-pulse"></div>
+                                    <div className="w-16 h-4 bg-gray-300 rounded animate-pulse"></div>
+                                    <div className="w-16 h-4 bg-gray-300 rounded animate-pulse"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* 그리드 스켈레톤 */}
+                    <div className="grid grid-cols-3 gap-1">
+                        {Array.from({length: 9}).map((_, index) => (
+                            <div key={index} className="aspect-square bg-gray-300 animate-pulse rounded"></div>
+                        ))}
+                    </div>
+                </div>
             </div>
         );
     }
@@ -127,69 +193,106 @@ export default function Feed() {
     }
 
     return (
-        <div className="max-w-md mx-auto">
-            {/* 필터 버튼 */}
-            <div className="px-4 mb-4">
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => setShowMyPosts(false)}
-                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                            !showMyPosts
-                                ? "bg-blue-500 text-white"
-                                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                        }`}
-                    >
-                        모든 게시글
-                    </button>
-                    <button
-                        onClick={() => setShowMyPosts(true)}
-                        disabled={!user}
-                        className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
-                            showMyPosts
-                                ? "bg-blue-500 text-white"
-                                : !user
-                                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
-                                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-                        }`}
-                    >
-                        내 게시글
-                    </button>
+        <div className="max-w-4xl mx-auto flex gap-4">
+            {/* 왼쪽 사이드바 - 필터 버튼 */}
+            <div className="w-48 flex-shrink-0">
+                <div className="sticky top-20 bg-white rounded-lg border border-gray-200 p-4">
+                    <div className="flex flex-col gap-2">
+                        <button
+                            onClick={() => router.push('/feed')}
+                            className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors text-left ${
+                                !userParam || userParam === 'all'
+                                    ? "bg-blue-500 text-white"
+                                    : "bg-gray-50 text-gray-700 hover:bg-gray-100"
+                            }`}
+                        >
+                            모든 게시글
+                        </button>
+                        <button
+                            onClick={() => router.push('/feed?user=my')}
+                            disabled={!user}
+                            className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors text-left ${
+                                userParam === 'my'
+                                    ? "bg-blue-500 text-white"
+                                    : !user
+                                        ? "bg-gray-50 text-gray-400 cursor-not-allowed"
+                                        : "bg-gray-50 text-gray-700 hover:bg-gray-100"
+                            }`}
+                        >
+                            내 게시글
+                        </button>
+                    </div>
                 </div>
             </div>
+
+            {/* 오른쪽 메인 콘텐츠 - 모든 경우에 동일한 최대 너비 */}
+            <div className="flex-1 max-w-md min-h-screen">
 
             {posts.length === 0 && pendingPosts.length === 0 ? (
                 <div className="text-center py-8">
                     <p className="text-gray-500">
-                        {showMyPosts ? "작성한 게시글이 없습니다." : "게시글이 없습니다."}
+                        {userParam === 'my'
+                            ? "작성한 게시글이 없습니다."
+                            : targetUserId
+                                ? "해당 사용자의 게시글이 없습니다."
+                                : "게시글이 없습니다."
+                        }
                     </p>
                 </div>
             ) : (
                 <div>
-                    {/* Pending 게시글들 먼저 표시 */}
-                    {pendingPosts.map((pendingPost) => (
+                    {/* Pending 게시글들 먼저 표시 (그리드 뷰가 아닐 때만) */}
+                    {!isGridView && pendingPosts.map((pendingPost) => (
                         <PendingPostComponent
                             key={pendingPost.tempId}
                             post={pendingPost}
                         />
                     ))}
 
-                    {/* 실제 게시글들 */}
-                    {posts.map((post) => (
-                        <FeedPost
-                            key={post.postId}
-                            post={post}
-                            currentUserId={currentUserId}
-                            onPostDelete={handlePostDelete}
-                            onPostClick={handlePostClick}
-                        />
-                    ))}
+                    {/* 그리드 뷰 또는 일반 피드 뷰 */}
+                    {isGridView ? (
+                        <div className="bg-white">
+                            {/* 사용자 프로필 헤더 (그리드 뷰일 때만) */}
+                            {posts.length > 0 && (
+                                <UserProfileHeader
+                                    user={posts[0].user}
+                                    postCount={posts.length}
+                                    isMyProfile={showMyPosts}
+                                />
+                            )}
+
+                            {/* 그리드 뷰 - 3열 고정 */}
+                            <div className="grid grid-cols-3 gap-1">
+                                {posts.map((post) => (
+                                    <GridPost
+                                        key={post.postId}
+                                        post={post}
+                                        onClick={handlePostClick}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        // 일반 피드 뷰
+                        <div>
+                            {posts.map((post) => (
+                                <FeedPost
+                                    key={post.postId}
+                                    post={post}
+                                    currentUserId={currentUserId}
+                                    onPostDelete={handlePostDelete}
+                                    onPostClick={handlePostClick}
+                                />
+                            ))}
+                        </div>
+                    )}
 
                     {/* 더 보기 로딩 시 스켈레톤 표시 */}
-                    {loading && posts.length > 0 && (
+                    {loading && posts.length > 0 && !isGridView && (
                         <FeedSkeleton count={2}/>
                     )}
 
-                    {hasMore && !loading && (
+                    {hasMore && !loading && !isGridView && (
                         <div className="text-center py-4">
                             <button
                                 onClick={handleLoadMore}
@@ -200,13 +303,14 @@ export default function Feed() {
                         </div>
                     )}
 
-                    {!hasMore && posts.length > 0 && (
+                    {!hasMore && posts.length > 0 && !isGridView && (
                         <div className="text-center py-4">
                             <p className="text-gray-500 text-sm">모든 게시글을 확인했습니다.</p>
                         </div>
                     )}
                 </div>
             )}
+            </div>
 
             {/* 게시글 상세 모달 */}
             {selectedPostId && (
