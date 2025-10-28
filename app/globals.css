@@ -32,3 +32,14 @@ body {
   background: var(--background);
   color: var(--foreground);
 }
+
+/* 스크롤바 숨기기 */
+.scrollbar-hide {
+  /* Firefox */
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  /* Chrome, Safari, Edge */
+  display: none;
+}
