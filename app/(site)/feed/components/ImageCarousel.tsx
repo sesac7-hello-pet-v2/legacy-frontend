@@ -13,12 +13,9 @@ export default function ImageCarousel({images, isModal}: ImageCarouselProps) {
     const [preloadedImages, setPreloadedImages] = useState<Set<number>>(new Set([0]));
     const [isTransitioning, setIsTransitioning] = useState(false);
 
-    if (!images || images.length === 0) {
-        return null;
-    }
-
     // 이미지 프리로딩
     useEffect(() => {
+        if (!images || images.length === 0) return;
         const preloadImage = (index: number) => {
             if (preloadedImages.has(index)) return;
 
@@ -37,6 +34,10 @@ export default function ImageCarousel({images, isModal}: ImageCarouselProps) {
             preloadImage(currentIndex - 1);
         }
     }, [currentIndex, images, preloadedImages]);
+
+    if (!images || images.length === 0) {
+        return null;
+    }
 
     const nextImage = (e?: React.MouseEvent) => {
         e?.stopPropagation();

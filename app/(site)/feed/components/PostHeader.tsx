@@ -1,4 +1,5 @@
 import {PostUser} from "../../../types/feed";
+import {useRouter} from "next/navigation";
 
 interface PostHeaderProps {
     user: PostUser;
@@ -17,6 +18,7 @@ export default function PostHeader({
                                        onDelete,
                                        showActions = false
                                    }: PostHeaderProps) {
+    const router = useRouter();
     const formatDate = (dateString: string) => {
         const date = new Date(dateString);
         const now = new Date();
@@ -41,9 +43,20 @@ export default function PostHeader({
     const hasProfileImage = user.profileUrl && user.profileUrl.trim() !== '';
     const isMyPost = currentUserId && user.userId === currentUserId;
 
+    // 사용자 클릭 핸들러 - 해당 사용자의 그리드 뷰로 이동
+    const handleUserClick = () => {
+        if (isMyPost) {
+            router.push('/feed?user=my');
+        } else {
+            router.push(`/feed?user=${user.userId}`);
+        }
+    };
+
     return (
         <div className="flex items-center justify-between p-4">
-            <div className="flex items-center gap-3">
+            <div
+                className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors"
+                onClick={handleUserClick}>
                 {hasProfileImage ? (
                     <img
                         src={user.profileUrl!}
@@ -64,7 +77,7 @@ export default function PostHeader({
                     </span>
                 </div>
                 <div>
-                    <p className="font-semibold text-sm">{displayName}</p>
+                    <p className="font-semibold text-sm hover:text-blue-600 transition-colors">{displayName}</p>
                     <p className="text-xs text-gray-500">{formatDate(postedAt)}</p>
                 </div>
             </div>
