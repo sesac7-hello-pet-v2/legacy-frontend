@@ -14,12 +14,14 @@ const DUMMY_FEEDS: FeedPost[] = Array.from({ length: 10 }, (_, i) => ({
     user: {
         userId: 0,
         nickname: "로딩중",
+        username: null,
         profileUrl: null,
     },
   content: "데이터를 불러올 수 없습니다",
   imageUrls: [],
   postedAt: new Date().toISOString(),
   likeCount: 0,
+    commentCount: 0,
   isLiked: false,
 }));
 
