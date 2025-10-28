@@ -12,6 +12,7 @@ export interface FeedPost {
     imageUrls: string[];
     postedAt: string;
     likeCount: number;
+    commentCount: number;
     isLiked: boolean;
 }
 
