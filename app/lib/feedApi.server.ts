@@ -41,7 +41,8 @@ export async function getPostsSSR(params: GetPostsParams = {}): Promise<PostsRes
         const response = await fetch(url, {
             // SSR에서는 캐시 설정 중요
             next: {
-                revalidate: 60 // 60초마다 재검증
+                revalidate: 30, // 30초마다 재검증 (더 빠른 자동 갱신)
+                tags: ['feed-posts'] // 태그 기반 무효화 지원
             },
             headers: {
                 'Content-Type': 'application/json',
