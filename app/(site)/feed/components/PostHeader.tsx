@@ -45,11 +45,7 @@ export default function PostHeader({
 
     // 사용자 클릭 핸들러 - 해당 사용자의 그리드 뷰로 이동
     const handleUserClick = () => {
-        if (isMyPost) {
-            router.push('/feed?user=my');
-        } else {
-            router.push(`/feed?user=${user.userId}`);
-        }
+        router.push(`/feed/${user.userId}`);
     };
 
     return (
