@@ -61,7 +61,7 @@ export default function AnnouncementDetailPage() {
             const data = res.data;
             setAnnouncement(data);
             setFormData({
-                endDate: data.endDate ? data.endDate.slice(0, 16) : "",
+                endDate: data.endDate ? data.endDate.split("T")[0] : "",
                 status: data.announcementStatus,
             });
         } catch (err) {
@@ -111,7 +111,7 @@ export default function AnnouncementDetailPage() {
         setIsEditMode(false);
         if (announcement) {
             setFormData({
-                endDate: announcement.endDate ? announcement.endDate.slice(0, 16) : "",
+                endDate: announcement.endDate ? announcement.endDate.split("T")[0] : "",
                 status: announcement.announcementStatus,
             });
         }
@@ -243,7 +243,7 @@ export default function AnnouncementDetailPage() {
                             </span>
                             {isEditMode ? (
                                 <input
-                                    type="datetime-local"
+                                    type="date"
                                     name="endDate"
                                     value={formData.endDate}
                                     onChange={handleChange}
@@ -252,7 +252,7 @@ export default function AnnouncementDetailPage() {
                             ) : (
                                 <span className="text-gray-700 text-sm">
                                     {announcement.endDate
-                                        ? new Date(announcement.endDate).toLocaleString()
+                                        ? new Date(announcement.endDate).toLocaleDateString()
                                         : "미정"}
                                 </span>
                             )}

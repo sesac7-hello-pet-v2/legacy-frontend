@@ -3,6 +3,13 @@
 import { formatPhoneNumber } from "@/app/lib/formatPhoneNumber";
 import { useRouter } from "next/navigation";
 
+const statusColor = {
+    "신청서 제출": "bg-blue-500 text-white",
+    "검토 중": "bg-yellow-500 text-white",
+    "승인": "bg-green-500 text-white",
+    "거절": "bg-red-500 text-white",
+};
+
 export default function AnnouncementApplicationItem({ application, onApprove }) {
     const router = useRouter();
 
@@ -10,7 +17,7 @@ export default function AnnouncementApplicationItem({ application, onApprove }) 
         <div className="flex justify-between items-center border-b border-gray-300 py-2">
             <div className="flex-1 flex space-x-6 text-base items-center">
                 {/* 상태 뱃지 */}
-                <span className="px-3 py-0.5 text-sm rounded-xl bg-gray-200 text-gray-700 font-semibold">
+                <span className={`px-3 py-0.5 text-sm rounded-xl font-semibold ${statusColor[application.applicationStatusLabel] || 'bg-gray-200 text-gray-700'}`}>
                     {application.applicationStatusLabel}
                 </span>
 

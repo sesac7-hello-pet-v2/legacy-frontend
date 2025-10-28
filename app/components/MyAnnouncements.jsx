@@ -4,6 +4,8 @@ import api from "@/app/lib/api";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useUserStore } from "@/app/store/UserStore";
+import { ConfirmModal, AlertModal } from "@/app/components/Modal";
 
 const animalTypeKo = {
   DOG: "강아지",
@@ -48,7 +50,11 @@ export default function MyAnnouncementsPage() {
     endDate: "",
     status: "OPEN",
   });
+  const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+  const [showAlertModal, setShowAlertModal] = useState(false);
+  const [alertConfig, setAlertConfig] = useState({ message: "", type: "info" });
   const router = useRouter();
+  const user = useUserStore((state) => state.user);
 
   useEffect(() => {
     fetchMyAnnouncements();
@@ -56,7 +62,11 @@ export default function MyAnnouncementsPage() {
 
   async function fetchMyAnnouncements() {
     try {
-      const res = await api.get("/v1/announcements");
+      const res = await api.get("/v1/announcements/my", {
+        headers: {
+          "X-User-Id": user?.id
+        }
+      });
 
       // 상태별 정렬: OPEN > IN_PROGRESS > COMPLETED > CLOSED
       const statusOrder = { OPEN: 1, IN_PROGRESS: 2, COMPLETED: 3, CLOSED: 4 };
@@ -69,7 +79,11 @@ export default function MyAnnouncementsPage() {
       setMyAnnouncements(sorted);
     } catch (err) {
       console.error("공고 불러오기 실패", err);
-      alert("공고 목록을 불러올 수 없습니다.");
+      setAlertConfig({
+        message: "공고 목록을 불러올 수 없습니다.",
+        type: "error"
+      });
+      setShowAlertModal(true);
     } finally {
       setLoading(false);
     }
@@ -81,12 +95,16 @@ export default function MyAnnouncementsPage() {
       const data = res.data;
       setSelectedAnnouncement(data);
       setFormData({
-        endDate: data.endDate ? data.endDate.slice(0, 16) : "",
+        endDate: data.endDate ? data.endDate.split("T")[0] : "",
         status: data.announcementStatus,
       });
     } catch (err) {
       console.error("공고 상세 정보 불러오기 실패", err);
-      alert("공고 정보를 불러올 수 없습니다.");
+      setAlertConfig({
+        message: "공고 정보를 불러올 수 없습니다.",
+        type: "error"
+      });
+      setShowAlertModal(true);
       setShowModal(false);
     }
   }
@@ -99,33 +117,50 @@ export default function MyAnnouncementsPage() {
     }));
   };
 
-  async function handleDelete() {
-    const confirmed = confirm("정말 삭제하시겠습니까?");
-    if (!confirmed) return;
+  function confirmDelete() {
+    setShowDeleteConfirmModal(true);
+  }
 
+  async function handleDelete() {
     try {
       await api.delete(`/v1/announcements/${selectedAnnouncementId}`);
-      alert("삭제 완료!");
+      setAlertConfig({
+        message: "삭제가 완료되었습니다!",
+        type: "success"
+      });
+      setShowAlertModal(true);
       setShowModal(false);
       setSelectedAnnouncementId(null);
       setSelectedAnnouncement(null);
       fetchMyAnnouncements();
     } catch (err) {
       console.error("삭제 실패", err);
-      alert("삭제 실패");
+      setAlertConfig({
+        message: "삭제에 실패했습니다.",
+        type: "error"
+      });
+      setShowAlertModal(true);
     }
   }
 
   async function handleSave() {
     try {
       await api.put(`/v1/announcements/${selectedAnnouncementId}`, formData);
-      alert("수정 완료!");
+      setAlertConfig({
+        message: "수정이 완료되었습니다!",
+        type: "success"
+      });
+      setShowAlertModal(true);
       setIsEditMode(false);
       fetchAnnouncementDetail(selectedAnnouncementId);
       fetchMyAnnouncements();
     } catch (err) {
       console.error("수정 실패", err);
-      alert("수정에 실패했습니다.");
+      setAlertConfig({
+        message: "수정에 실패했습니다.",
+        type: "error"
+      });
+      setShowAlertModal(true);
     }
   }
 
@@ -133,7 +168,7 @@ export default function MyAnnouncementsPage() {
     setIsEditMode(false);
     if (selectedAnnouncement) {
       setFormData({
-        endDate: selectedAnnouncement.endDate ? selectedAnnouncement.endDate.slice(0, 16) : "",
+        endDate: selectedAnnouncement.endDate ? selectedAnnouncement.endDate.split("T")[0] : "",
         status: selectedAnnouncement.announcementStatus,
       });
     }
@@ -337,7 +372,7 @@ export default function MyAnnouncementsPage() {
                       <span className="text-gray-600 font-medium text-sm w-32">공고 종료일</span>
                       {isEditMode ? (
                         <input
-                          type="datetime-local"
+                          type="date"
                           name="endDate"
                           value={formData.endDate}
                           onChange={handleChange}
@@ -346,7 +381,7 @@ export default function MyAnnouncementsPage() {
                       ) : (
                         <span className="text-gray-700 text-sm">
                           {selectedAnnouncement.endDate
-                            ? new Date(selectedAnnouncement.endDate).toLocaleString()
+                            ? new Date(selectedAnnouncement.endDate).toLocaleDateString()
                             : "미정"}
                         </span>
                       )}
@@ -395,7 +430,7 @@ export default function MyAnnouncementsPage() {
                           수정
                         </button>
                         <button
-                          onClick={handleDelete}
+                          onClick={confirmDelete}
                           className="flex-1 px-6 py-3 bg-orange-400 text-white rounded-full font-semibold hover:bg-red-500 transition"
                         >
                           삭제
@@ -409,6 +444,26 @@ export default function MyAnnouncementsPage() {
           </div>
         </div>
       )}
+
+      {/* 삭제 확인 모달 */}
+      <ConfirmModal
+        isOpen={showDeleteConfirmModal}
+        onClose={() => setShowDeleteConfirmModal(false)}
+        onConfirm={handleDelete}
+        title="삭제 확인"
+        message="정말 삭제하시겠습니까?"
+        confirmText="삭제"
+        cancelText="취소"
+        type="error"
+      />
+
+      {/* 알림 모달 */}
+      <AlertModal
+        isOpen={showAlertModal}
+        onClose={() => setShowAlertModal(false)}
+        message={alertConfig.message}
+        type={alertConfig.type}
+      />
     </div>
   );
 }
