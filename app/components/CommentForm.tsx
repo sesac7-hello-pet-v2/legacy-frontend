@@ -56,10 +56,11 @@ export default function CommentForm({
                 onEditCancel?.();
             } else {
                 // 댓글 작성
-                const newComment = await commentApi.createComment(postId, {
+                await commentApi.createComment(postId, {
                     content: content.trim()
                 });
-                onCommentAdded(newComment);
+                // 댓글 생성 성공 시 onCommentAdded 콜백 호출
+                onCommentAdded(null as any); // CommentResponse 반환하지 않으므로 null 전달
                 setContent('');
             }
         } catch (error) {
