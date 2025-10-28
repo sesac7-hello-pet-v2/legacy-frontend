@@ -20,7 +20,13 @@ export async function getPostsSSR(params: GetPostsParams = {}): Promise<PostsRes
 
     try {
         // API 서버 URL 구성
-        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://hello-pet.my/api';
+        let baseUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'https://hello-pet.my/api';
+
+        // baseUrl이 상대 경로인 경우 절대 URL로 변환
+        if (baseUrl.startsWith('/')) {
+            baseUrl = 'https://hello-pet.my' + baseUrl;
+        }
+
         const searchParams = new URLSearchParams({
             page: page.toString(), // API는 1-based 페이징 사용
             size: size.toString(),
