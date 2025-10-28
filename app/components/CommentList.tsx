@@ -1,6 +1,6 @@
 "use client";
 
-import React, {useEffect, useState} from 'react';
+import React, {forwardRef, useEffect, useImperativeHandle, useState} from 'react';
 import {Comment} from '../types/comment';
 import {commentApi} from '../lib/commentApi';
 import {useAuth} from '../hooks/useAuth';
@@ -11,7 +11,11 @@ interface CommentListProps {
     isOpen: boolean;
 }
 
-export default function CommentList({postId, isOpen}: CommentListProps) {
+export interface CommentListRef {
+    reloadComments: () => void;
+}
+
+const CommentList = forwardRef<CommentListRef, CommentListProps>(({postId, isOpen}, ref) => {
     const [comments, setComments] = useState<Comment[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -53,6 +57,13 @@ export default function CommentList({postId, isOpen}: CommentListProps) {
             loadComments(1, true);
         }
     }, [isOpen, postId]);
+
+    // ref로 외부에서 호출할 수 있는 함수 노출
+    useImperativeHandle(ref, () => ({
+        reloadComments: () => {
+            loadComments(1, true);
+        }
+    }));
 
     const handleCommentAdded = (newComment: Comment) => {
         setComments(prev => [newComment, ...prev]);
@@ -160,4 +171,8 @@ export default function CommentList({postId, isOpen}: CommentListProps) {
 
         </div>
     );
-}
+});
+
+CommentList.displayName = 'CommentList';
+
+export default CommentList;

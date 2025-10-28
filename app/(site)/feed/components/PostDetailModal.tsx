@@ -1,6 +1,6 @@
 "use client";
 
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {FeedPost} from '../../../types/feed';
 import {feedApi} from '../../../lib/feedApi';
 import ImageCarousel from './ImageCarousel';
@@ -8,7 +8,7 @@ import PostHeader from './PostHeader';
 import PostActions from './PostActions';
 import PostContent from './PostContent';
 import {useAuth} from '@/app/hooks/useAuth';
-import CommentList from '../../../components/CommentList';
+import CommentList, {CommentListRef} from '../../../components/CommentList';
 import CommentForm from '../../../components/CommentForm';
 
 interface PostDetailModalProps {
@@ -35,6 +35,7 @@ export default function PostDetailModal({
     const [error, setError] = useState<string | null>(null);
     const [showComments, setShowComments] = useState(true);
     const [focusCommentInput, setFocusCommentInput] = useState(false);
+    const commentListRef = useRef<CommentListRef>(null);
     const {user} = useAuth();
 
     useEffect(() => {
@@ -147,6 +148,7 @@ export default function PostDetailModal({
 
                         {/* 댓글 영역 */}
                         <CommentList
+                            ref={commentListRef}
                             postId={postId}
                             isOpen={true}
                         />
@@ -169,9 +171,9 @@ export default function PostDetailModal({
                             {user && (
                                 <CommentForm
                                     postId={post.postId}
-                                    onCommentAdded={(newComment) => {
-                                        // CommentList 컴포넌트를 직접 업데이트할 수 없으므로 페이지 새로고침으로 대체
-                                        window.location.reload();
+                                    onCommentAdded={() => {
+                                        // 댓글 목록만 새로고침
+                                        commentListRef.current?.reloadComments();
                                     }}
                                     autoFocus={focusCommentInput}
                                     onFocused={() => setFocusCommentInput(false)}

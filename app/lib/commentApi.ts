@@ -9,12 +9,11 @@ import api from './api';
 
 export const commentApi = {
     // 댓글 작성
-    async createComment(postId: string, request: Omit<CommentCreateRequest, 'postId'>): Promise<Comment> {
-        const response = await api.post(`/posts/${postId}/comments`, {
+    async createComment(postId: string, request: Omit<CommentCreateRequest, 'postId'>): Promise<void> {
+        await api.post(`/posts/${postId}/comments`, {
             postId,
             content: request.content
         });
-        return response.data;
     },
 
     // 게시글별 댓글 조회
