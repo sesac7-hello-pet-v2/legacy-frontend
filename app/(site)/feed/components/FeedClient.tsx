@@ -10,6 +10,7 @@ import {useAuth} from "@/app/hooks/useAuth";
 import FeedSkeleton from "./FeedSkeleton";
 import PostDetailModal from "./PostDetailModal";
 import CreatePostButton from "./CreatePostButton";
+import ScrollToTopButton from "./ScrollToTopButton";
 import {useRouter} from "next/navigation";
 
 interface FeedClientProps {
@@ -30,6 +31,7 @@ export default function FeedClient({initialPosts, initialPage}: FeedClientProps)
     const [hasMore, setHasMore] = useState((initialPage.number + 1) < initialPage.totalPages);
     const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
     const [focusComment, setFocusComment] = useState(false);
+    const [isScrollToTopVisible, setIsScrollToTopVisible] = useState(false);
     const {pendingPosts} = usePostStore();
     const {user} = useAuth();
     const router = useRouter();
@@ -98,6 +100,23 @@ export default function FeedClient({initialPosts, initialPage}: FeedClientProps)
         }
     };
 
+    // 무한 스크롤 처리
+    useEffect(() => {
+        const handleScroll = () => {
+            const {scrollTop, scrollHeight, clientHeight} = document.documentElement;
+
+            // 스크롤이 바닥에서 200px 이내에 도달했을 때 다음 페이지 로드
+            if (scrollHeight - scrollTop <= clientHeight + 200) {
+                if (!loading && hasMore) {
+                    loadMorePosts(page + 1);
+                }
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [loading, hasMore, page, loadMorePosts]);
+
     const handlePostDelete = (postId: string) => {
         setPosts(prev => prev.filter(post => post.postId !== postId));
     };
@@ -156,24 +175,14 @@ export default function FeedClient({initialPosts, initialPage}: FeedClientProps)
                         ))}
                     </div>
 
-                    {/* 더 보기 로딩 시 스켈레톤 표시 */}
+                    {/* 무한 스크롤 로딩 시 스켈레톤 표시 */}
                     {loading && posts.length > 0 && (
                         <FeedSkeleton count={2}/>
                     )}
 
-                    {hasMore && !loading && (
-                        <div className="text-center py-4">
-                            <button
-                                onClick={handleLoadMore}
-                                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                            >
-                                더 보기
-                            </button>
-                        </div>
-                    )}
-
+                    {/* 모든 게시글 로드 완료 표시 */}
                     {!hasMore && posts.length > 0 && (
-                        <div className="text-center py-4">
+                        <div className="text-center py-8 mb-16">
                             <p className="text-gray-500 text-sm">모든 게시글을 확인했습니다.</p>
                         </div>
                     )}
@@ -191,8 +200,9 @@ export default function FeedClient({initialPosts, initialPage}: FeedClientProps)
                 />
             )}
 
-            {/* 플로팅 게시물 작성 버튼 */}
-            <CreatePostButton/>
+            {/* 플로팅 버튼들 */}
+            <CreatePostButton isScrollToTopVisible={isScrollToTopVisible}/>
+            <ScrollToTopButton onVisibilityChange={setIsScrollToTopVisible}/>
         </>
     );
 }

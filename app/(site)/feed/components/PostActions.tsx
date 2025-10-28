@@ -8,6 +8,7 @@ import {useAuth} from "@/app/hooks/useAuth";
 interface PostActionsProps {
     postId: string;
     initialLikeCount: number;
+    initialCommentCount?: number;
     initialIsLiked?: boolean;
     currentUserId?: number;
     postUserId?: number;
@@ -21,6 +22,7 @@ interface PostActionsProps {
 export default function PostActions({
                                         postId,
                                         initialLikeCount,
+                                        initialCommentCount = 0,
                                         initialIsLiked = false,
                                         currentUserId,
                                         postUserId,
@@ -124,16 +126,28 @@ export default function PostActions({
                     )}
                 </div>
             </div>
-            {likeCount > 0 && (
-                <div className="text-sm font-semibold text-gray-900 mb-2">
-                    좋아요 {likeCount.toLocaleString()}개
-                    {!isAuthenticated && (
-                        <span className="text-gray-500 text-xs ml-2">
-                            (로그인하여 좋아요 남기기)
-                        </span>
-                    )}
-                </div>
-            )}
+            {/* 좋아요와 댓글 수 표시 */}
+            <div className="space-y-1">
+                {likeCount > 0 && (
+                    <div className="text-sm font-semibold text-gray-900">
+                        좋아요 {likeCount.toLocaleString()}개
+                        {!isAuthenticated && (
+                            <span className="text-gray-500 text-xs ml-2">
+                                (로그인하여 좋아요 남기기)
+                            </span>
+                        )}
+                    </div>
+                )}
+
+                {initialCommentCount > 0 && (
+                    <button
+                        onClick={handleComment}
+                        className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                    >
+                        댓글 {initialCommentCount.toLocaleString()}개 보기
+                    </button>
+                )}
+            </div>
         </div>
     );
 }

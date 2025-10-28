@@ -11,6 +11,7 @@ import PostDetailModal from "../../components/PostDetailModal";
 import PendingPostComponent from "../../components/PendingPost";
 import GridPost from "../../components/GridPost";
 import CreatePostButton from "../../components/CreatePostButton";
+import ScrollToTopButton from "../../components/ScrollToTopButton";
 
 interface UserFeedProps {
     userId: string;
@@ -23,6 +24,7 @@ export default function UserFeed({userId}: UserFeedProps) {
     const [page, setPage] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+    const [isScrollToTopVisible, setIsScrollToTopVisible] = useState(false);
     const {pendingPosts} = usePostStore();
     const {user} = useAuth();
     const router = useRouter();
@@ -87,6 +89,23 @@ export default function UserFeed({userId}: UserFeedProps) {
             loadPosts(page + 1, false);
         }
     };
+
+    // 무한 스크롤 처리
+    useEffect(() => {
+        const handleScroll = () => {
+            const {scrollTop, scrollHeight, clientHeight} = document.documentElement;
+
+            // 스크롤이 바닥에서 200px 이내에 도달했을 때 다음 페이지 로드
+            if (scrollHeight - scrollTop <= clientHeight + 200) {
+                if (!loading && hasMore) {
+                    loadPosts(page + 1, false);
+                }
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [loading, hasMore, page, loadPosts]);
 
     const handleRefresh = () => {
         loadPosts(1, true);
@@ -249,18 +268,19 @@ export default function UserFeed({userId}: UserFeedProps) {
                             />
                         ))}
 
-                        {/* 그리드 뷰 */}
-                        <div className="bg-white">
-                            {/* 사용자 프로필 헤더 */}
-                            {posts.length > 0 && (
+                        {/* 사용자 프로필 헤더 - 고정 */}
+                        {posts.length > 0 && (
+                            <div className="bg-white sticky top-16 z-10 border-b border-gray-200">
                                 <UserProfileHeader
                                     user={posts[0].user}
                                     postCount={posts.length}
                                     isMyProfile={isMyProfile}
                                 />
-                            )}
+                            </div>
+                        )}
 
-                            {/* 그리드 뷰 - 3열 고정 */}
+                        {/* 그리드 뷰 - 스크롤 가능 */}
+                        <div className="bg-white">
                             <div className="grid grid-cols-3 gap-1">
                                 {posts.map((post) => (
                                     <GridPost
@@ -272,7 +292,7 @@ export default function UserFeed({userId}: UserFeedProps) {
                             </div>
                         </div>
 
-                        {/* 더 보기 로딩 */}
+                        {/* 무한 스크롤 로딩 시 스켈레톤 표시 */}
                         {loading && posts.length > 0 && (
                             <div className="grid grid-cols-3 gap-1 mt-1">
                                 {Array.from({length: 6}).map((_, index) => (
@@ -281,19 +301,9 @@ export default function UserFeed({userId}: UserFeedProps) {
                             </div>
                         )}
 
-                        {hasMore && !loading && (
-                            <div className="text-center py-4">
-                                <button
-                                    onClick={handleLoadMore}
-                                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                                >
-                                    더 보기
-                                </button>
-                            </div>
-                        )}
-
+                        {/* 모든 게시글 로드 완료 표시 */}
                         {!hasMore && posts.length > 0 && (
-                            <div className="text-center py-4">
+                            <div className="text-center py-8 mb-16">
                                 <p className="text-gray-500 text-sm">모든 게시글을 확인했습니다.</p>
                             </div>
                         )}
@@ -311,8 +321,9 @@ export default function UserFeed({userId}: UserFeedProps) {
                 />
             )}
 
-            {/* 플로팅 게시물 작성 버튼 */}
-            <CreatePostButton/>
+            {/* 플로팅 버튼들 */}
+            <CreatePostButton isScrollToTopVisible={isScrollToTopVisible}/>
+            <ScrollToTopButton onVisibilityChange={setIsScrollToTopVisible}/>
         </div>
     );
 }

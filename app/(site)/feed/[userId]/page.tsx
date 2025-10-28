@@ -49,12 +49,6 @@ export default function UserFeedPage({params}: UserFeedPageProps) {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
-                <div className="max-w-md mx-auto px-4 py-3">
-                    <h1 className="text-xl font-bold">피드</h1>
-                </div>
-            </div>
-
             <div className="py-4">
                 <UserFeed userId={userId}/>
             </div>
