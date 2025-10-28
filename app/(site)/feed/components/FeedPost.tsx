@@ -13,9 +13,10 @@ interface FeedPostProps {
     currentUserId?: number;
     onPostDelete?: (postId: string) => void;
     onPostClick?: (postId: string) => void;
+    onCommentClick?: (postId: string) => void;
 }
 
-export default function FeedPost({post, currentUserId, onPostDelete, onPostClick}: FeedPostProps) {
+export default function FeedPost({post, currentUserId, onPostDelete, onPostClick, onCommentClick}: FeedPostProps) {
     const router = useRouter();
     const {isAuthenticated} = useAuth();
 
@@ -81,6 +82,7 @@ export default function FeedPost({post, currentUserId, onPostDelete, onPostClick
                 initialIsLiked={post.isLiked}
                 currentUserId={currentUserId}
                 postUserId={post.user.userId}
+                onCommentClick={() => onCommentClick?.(post.postId)}
             />
 
             <div onClick={handlePostClick} className="cursor-pointer">
