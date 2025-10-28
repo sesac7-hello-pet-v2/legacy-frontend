@@ -8,18 +8,33 @@ import PostHeader from './PostHeader';
 import PostActions from './PostActions';
 import PostContent from './PostContent';
 import {useAuth} from '@/app/hooks/useAuth';
+import CommentList from '../../../components/CommentList';
+import CommentForm from '../../../components/CommentForm';
 
 interface PostDetailModalProps {
     isOpen: boolean;
     postId: string;
     onClose: () => void;
     onPostDelete?: (postId: string) => void;
+    focusComment?: boolean;
 }
 
-export default function PostDetailModal({isOpen, postId, onClose, onPostDelete}: PostDetailModalProps) {
+interface PostDetailModalState {
+    showComments: boolean;
+}
+
+export default function PostDetailModal({
+                                            isOpen,
+                                            postId,
+                                            onClose,
+                                            onPostDelete,
+                                            focusComment = false
+                                        }: PostDetailModalProps) {
     const [post, setPost] = useState<FeedPost | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [showComments, setShowComments] = useState(true);
+    const [focusCommentInput, setFocusCommentInput] = useState(false);
     const {user} = useAuth();
 
     useEffect(() => {
@@ -27,6 +42,12 @@ export default function PostDetailModal({isOpen, postId, onClose, onPostDelete}:
             fetchPostDetail();
         }
     }, [isOpen, postId]);
+
+    useEffect(() => {
+        if (focusComment) {
+            setFocusCommentInput(true);
+        }
+    }, [focusComment]);
 
     const fetchPostDetail = async () => {
         setLoading(true);
@@ -125,22 +146,37 @@ export default function PostDetailModal({isOpen, postId, onClose, onPostDelete}:
                         {post && <PostContent content={post.content}/>}
 
                         {/* 댓글 영역 */}
-                        <div className="p-4 text-gray-500 text-sm border-t border-gray-200">
-                            <p>댓글 기능은 추후 구현 예정입니다.</p>
-                        </div>
+                        <CommentList
+                            postId={postId}
+                            isOpen={true}
+                        />
                     </div>
 
-                    {/* 액션 버튼들 */}
+                    {/* 액션 버튼들 및 댓글 입력 폼 */}
                     {post && (
-                        <div className="border-t border-gray-200">
-                            <PostActions
-                                postId={post.postId}
-                                initialLikeCount={post.likeCount}
-                                initialIsLiked={post.isLiked}
-                                currentUserId={user?.id}
-                                postUserId={post.user.userId}
-                                isDetailModal={true}
-                            />
+                        <div>
+                            <div className="border-t border-gray-200">
+                                <PostActions
+                                    postId={post.postId}
+                                    initialLikeCount={post.likeCount}
+                                    initialIsLiked={post.isLiked}
+                                    currentUserId={user?.id}
+                                    postUserId={post.user.userId}
+                                    isDetailModal={true}
+                                    hideCommentButton={true}
+                                />
+                            </div>
+                            {user && (
+                                <CommentForm
+                                    postId={post.postId}
+                                    onCommentAdded={(newComment) => {
+                                        // CommentList 컴포넌트를 직접 업데이트할 수 없으므로 페이지 새로고침으로 대체
+                                        window.location.reload();
+                                    }}
+                                    autoFocus={focusCommentInput}
+                                    onFocused={() => setFocusCommentInput(false)}
+                                />
+                            )}
                         </div>
                     )}
                 </div>

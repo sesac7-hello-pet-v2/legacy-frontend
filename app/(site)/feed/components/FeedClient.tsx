@@ -9,6 +9,7 @@ import PendingPostComponent from "./PendingPost";
 import {useAuth} from "@/app/hooks/useAuth";
 import FeedSkeleton from "./FeedSkeleton";
 import PostDetailModal from "./PostDetailModal";
+import CreatePostButton from "./CreatePostButton";
 import {useRouter} from "next/navigation";
 
 interface FeedClientProps {
@@ -28,6 +29,7 @@ export default function FeedClient({initialPosts, initialPage}: FeedClientProps)
     const [page, setPage] = useState(initialPage.number);
     const [hasMore, setHasMore] = useState((initialPage.number + 1) < initialPage.totalPages);
     const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
+    const [focusComment, setFocusComment] = useState(false);
     const {pendingPosts} = usePostStore();
     const {user} = useAuth();
     const router = useRouter();
@@ -100,12 +102,14 @@ export default function FeedClient({initialPosts, initialPage}: FeedClientProps)
         setPosts(prev => prev.filter(post => post.postId !== postId));
     };
 
-    const handlePostClick = (postId: string) => {
+    const handlePostClick = (postId: string, shouldFocusComment = false) => {
         setSelectedPostId(postId);
+        setFocusComment(shouldFocusComment);
     };
 
     const handleCloseModal = () => {
         setSelectedPostId(null);
+        setFocusComment(false);
     };
 
     if (error && posts.length === 0) {
@@ -147,6 +151,7 @@ export default function FeedClient({initialPosts, initialPage}: FeedClientProps)
                                 currentUserId={currentUserId}
                                 onPostDelete={handlePostDelete}
                                 onPostClick={handlePostClick}
+                                onCommentClick={(postId) => handlePostClick(postId, true)}
                             />
                         ))}
                     </div>
@@ -182,8 +187,12 @@ export default function FeedClient({initialPosts, initialPage}: FeedClientProps)
                     postId={selectedPostId}
                     onClose={handleCloseModal}
                     onPostDelete={handlePostDelete}
+                    focusComment={focusComment}
                 />
             )}
+
+            {/* 플로팅 게시물 작성 버튼 */}
+            <CreatePostButton/>
         </>
     );
 }
