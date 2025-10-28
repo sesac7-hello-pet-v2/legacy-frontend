@@ -1,6 +1,5 @@
 import {Metadata} from "next";
 import {getPostsSSR} from "@/app/lib/feedApi.server";
-import CreatePostButton from "./components/CreatePostButton";
 import FeedNavigation from "./components/FeedNavigation";
 import FeedClient from "./components/FeedClient";
 
@@ -20,10 +19,7 @@ export default async function FeedPage() {
         <div className="min-h-screen bg-gray-50">
             <div className="sticky top-0 z-10 bg-white border-b border-gray-200">
                 <div className="max-w-md mx-auto px-4 py-3">
-                    <div className="flex items-center justify-between">
-                        <h1 className="text-xl font-bold">피드</h1>
-                        <CreatePostButton/>
-                    </div>
+                    <h1 className="text-xl font-bold">피드</h1>
                 </div>
             </div>
 
@@ -33,7 +29,7 @@ export default async function FeedPage() {
                     <FeedNavigation/>
 
                     {/* 오른쪽 메인 콘텐츠 */}
-                    <div className="flex-1 max-w-md min-h-screen">
+                    <div className="flex-1 max-w-md min-h-screen relative">
                         <FeedClient
                             initialPosts={initialData.content}
                             initialPage={initialData.page}

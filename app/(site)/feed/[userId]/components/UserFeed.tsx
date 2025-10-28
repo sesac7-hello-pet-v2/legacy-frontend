@@ -10,6 +10,7 @@ import UserProfileHeader from "../../components/UserProfileHeader";
 import PostDetailModal from "../../components/PostDetailModal";
 import PendingPostComponent from "../../components/PendingPost";
 import GridPost from "../../components/GridPost";
+import CreatePostButton from "../../components/CreatePostButton";
 
 interface UserFeedProps {
     userId: string;
@@ -309,6 +310,9 @@ export default function UserFeed({userId}: UserFeedProps) {
                     onPostDelete={handlePostDelete}
                 />
             )}
+
+            {/* 플로팅 게시물 작성 버튼 */}
+            <CreatePostButton/>
         </div>
     );
 }
