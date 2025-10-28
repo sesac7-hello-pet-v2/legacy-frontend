@@ -46,7 +46,36 @@ export default function CreatePostPage() {
                 formData.append("images", file);
             });
 
-            await api.post("/posts", formData);
+            const response = await api.post("/posts", formData);
+
+            // 게시글 생성 성공 시에만 캐시 무효화
+            if (response.status === 200 || response.status === 201) {
+                try {
+                    const revalidateFeed = (await import('@/app/actions/revalidate')).default;
+
+                    // 현재 사용자 정보 가져오기
+                    const {useUserStore} = await import('@/app/store/UserStore');
+                    const currentUser = useUserStore.getState().user;
+
+                    const result = await revalidateFeed({
+                        userId: currentUser?.id,
+                        skipIfRecentlyRevalidated: true,
+                        forceRevalidate: false
+                    });
+
+                    if (result.success && !result.skipped) {
+                        console.log(`✅ 캐시 무효화 성공: ${result.message}`);
+                    } else if (result.skipped) {
+                        console.log(`⏭️ 캐시 무효화 스킵: ${result.message}`);
+                    } else {
+                        console.warn('⚠️ 캐시 무효화 실패:', result.error);
+                    }
+                } catch (revalidateError) {
+                    console.warn('캐시 무효화 중 오류:', revalidateError);
+                }
+            } else {
+                console.warn(`게시글 생성 실패 (${response.status}), 캐시 무효화 스킵`);
+            }
 
             // 성공 시 상태 업데이트
             usePostStore.getState().updatePendingPost(tempId, 'success');

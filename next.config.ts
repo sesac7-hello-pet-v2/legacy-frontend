@@ -1,4 +1,4 @@
-import type { NextConfig } from "next";
+import type {NextConfig} from "next";
 
 const nextConfig: NextConfig = {
   eslint: {
@@ -8,6 +8,14 @@ const nextConfig: NextConfig = {
   typescript: {
     // 타입체크 에러가 있어도 빌드 진행
     ignoreBuildErrors: true,
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/_frontend-api/:path*',
+        destination: '/_internal/:path*',
+      },
+    ];
   },
 };
 
