@@ -4,35 +4,44 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import api from "@/app/lib/api";
 import Link from "next/link";
-import { useUserStore } from "@/app/store/UserStore";
 
 interface AnnouncementDetailResponse {
     id: number;
+    petId: number;
     breed: string;
-    announcementStatus: string;
-    animalType: string;
-    shelterName: string;
-    createdAt: string;
-    imageUrl: string;
     gender: string;
     health: string;
     personality: string;
     age: number;
-    announcementPeriod: string;
+    shelterId: number;
+    shelterName: string;
+    createdAt: string;
+    endDate: string;
+    imageUrl: string;
+    announcementStatus: string;
+    animalType: string;
+    alreadyApplied: boolean;
 }
 
-const statusLabel: Record<"IN_PROGRESS" | "COMPLETED", string> = {
-    IN_PROGRESS: "입양 중",
+const statusLabel: Record<string, string> = {
+    OPEN: "공고 중",
+    CLOSED: "마감됨",
     COMPLETED: "입양 완료",
+    DELETED: "삭제됨",
+};
+
+const statusColor: Record<string, string> = {
+    OPEN: "bg-lime-500",
+    CLOSED: "bg-red-500",
+    COMPLETED: "bg-gray-500",
+    DELETED: "bg-gray-400",
 };
 
 export default function AnnouncementDetailPage() {
     const params = useParams();
     const id = Array.isArray(params.id) ? params.id[0] : params.id;
-    const { user } = useUserStore();
 
     const [detail, setDetail] = useState<AnnouncementDetailResponse | null>(null);
-    const [alreadyApplied, setAlreadyApplied] = useState<boolean>(false);
     const [error, setError] = useState<string>("");
 
     useEffect(() => {
@@ -45,18 +54,6 @@ export default function AnnouncementDetailPage() {
                 setError("공고 정보를 불러오지 못했습니다.");
             });
     }, [id]);
-
-    // 사용자의 공고 지원 여부 확인
-    useEffect(() => {
-        if (!id || !user) return;
-
-        api.get(`/v1/applications/status?announcementId=${id}&userId=${user.id}`)
-            .then((res) => setAlreadyApplied(res.data.applied))
-            .catch((err) => {
-                console.error("지원 상태 확인 실패:", err);
-                // 에러 발생 시 기본값 false 유지
-            });
-    }, [id, user]);
 
     if (error) {
         return (
@@ -74,11 +71,21 @@ export default function AnnouncementDetailPage() {
         );
     }
 
+    // 공고 상태에 따른 신청 가능 여부 판단
+    const canApply = detail.announcementStatus === "OPEN" && !detail.alreadyApplied;
+    const isClosedOrCompleted = ["CLOSED", "COMPLETED", "DELETED"].includes(detail.announcementStatus);
+
     return (
         <main className="max-w-2xl mx-auto py-12 px-6 bg-white">
-            <h1 className="text-4xl font-extrabold mb-8 text-yellow-600 text-center">
-                {detail.breed} 상세정보
-            </h1>
+            {/* 제목과 상태 배지 */}
+            <div className="flex items-center justify-center mb-8">
+                <h1 className="text-4xl font-extrabold text-yellow-600 text-center">
+                    {detail.breed} 상세정보
+                </h1>
+                <span className={`ml-4 px-4 py-2 ${statusColor[detail.announcementStatus]} text-white text-sm font-bold rounded-full shadow-md`}>
+                    {statusLabel[detail.announcementStatus]}
+                </span>
+            </div>
 
             {detail.imageUrl ? (
                 <img
@@ -98,7 +105,6 @@ export default function AnnouncementDetailPage() {
                     { label: "성별", value: detail.gender },
                     { label: "품종", value: detail.breed },
                     { label: "건강 상태", value: detail.health },
-                    { label: "성격", value: detail.personality },
                     { label: "나이", value: `${detail.age}세` },
                     { label: "보호소", value: detail.shelterName },
                     {
@@ -106,44 +112,55 @@ export default function AnnouncementDetailPage() {
                         value: new Date(detail.createdAt).toLocaleDateString(),
                     },
                     {
-                        label: "공고 기간",
-                        value: new Date(detail.announcementPeriod).toLocaleDateString(),
-                    },
-                    {
-                        label: "상태",
-                        value: statusLabel[
-                            detail.announcementStatus as "IN_PROGRESS" | "COMPLETED"
-                        ],
+                        label: "공고 종료일",
+                        value: detail.endDate ? new Date(detail.endDate).toLocaleDateString() : "미정",
                     },
                 ].map(({ label, value }, i) => (
                     <p key={i} className="flex items-center">
-                        <strong className="w-28 text-orange-500">{label}:</strong>
+                        <strong className="w-32 text-orange-500">{label}:</strong>
                         <span className="ml-2 text-gray-900 font-normal">{value}</span>
                     </p>
                 ))}
+
+                {/* 성격 및 특징 - 여러 줄로 표시 */}
+                <div className="pt-4 border-t border-yellow-200">
+                    <strong className="text-orange-500 block mb-2">성격 및 특징:</strong>
+                    <p className="text-gray-900 leading-relaxed whitespace-pre-wrap">
+                        {detail.personality}
+                    </p>
+                </div>
             </section>
 
-            {/* 신청 여부에 따른 버튼 */}
-            {alreadyApplied ? (
+            {/* 신청 버튼 - 공고 상태에 따라 다르게 표시 */}
+            {canApply ? (
+                <Link
+                    href={`/announcements/${detail.id}/apply`}
+                    className="mt-6 w-full rounded-full bg-amber-400 py-3 font-semibold text-white shadow-md transition hover:bg-amber-500 block mx-auto text-center"
+                >
+                    입양 신청하기
+                </Link>
+            ) : detail.alreadyApplied ? (
                 <button
-                    className="mt-4 w-full rounded-full bg-gray-300 py-3 font-semibold text-white shadow-inner cursor-not-allowed block mx-auto text-center"
+                    className="mt-6 w-full rounded-full bg-gray-300 py-3 font-semibold text-white shadow-inner cursor-not-allowed block mx-auto text-center"
                     disabled
                 >
                     이미 신청한 공고입니다
                 </button>
-            ) : (
-                <Link
-                    href={`/announcements/${detail.id}/apply`}
-                    className="mt-4 w-full rounded-full bg-amber-400 py-3 font-semibold text-white shadow-md transition hover:bg-amber-500 block mx-auto text-center"
+            ) : isClosedOrCompleted ? (
+                <button
+                    className="mt-6 w-full rounded-full bg-gray-400 py-3 font-semibold text-white shadow-inner cursor-not-allowed block mx-auto text-center"
+                    disabled
                 >
-                    입양 신청하기
-                </Link>
-            )}
+                    {detail.announcementStatus === "CLOSED" && "마감된 공고입니다"}
+                    {detail.announcementStatus === "COMPLETED" && "입양이 완료된 공고입니다"}
+                    {detail.announcementStatus === "DELETED" && "삭제된 공고입니다"}
+                </button>
+            ) : null}
 
-            {/* 공고 목록으로 돌아가기 버튼 추가 */}
+            {/* 공고 목록으로 돌아가기 버튼 */}
             <Link
                 href="/announcements"
-                className="mt-6 w-full rounded-full border border-yellow-500 text-yellow-600 py-3 font-semibold text-center block hover:bg-yellow-50 transition"
+                className="mt-4 w-full rounded-full border border-yellow-500 text-yellow-600 py-3 font-semibold text-center block hover:bg-yellow-50 transition"
             >
                 입양 게시판으로 돌아가기
             </Link>

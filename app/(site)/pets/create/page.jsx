@@ -4,6 +4,7 @@ import api from "@/app/lib/api";
 import {useState} from "react";
 import {useRouter} from "next/navigation";
 import {modalAlert} from "@/app/utils/alertUtils";
+import SingleImageDragDrop from "@/app/components/SingleImageDragDrop";
 
 export default function CreatePetPage() {
   const router = useRouter();
@@ -14,8 +15,8 @@ export default function CreatePetPage() {
     health: "HEALTHY",
     personality: "",
     age: 1,
-    imageUrl: "",
   });
+  const [imageFile, setImageFile] = useState(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -43,7 +44,33 @@ export default function CreatePetPage() {
     }
 
     try {
-      await api.post("/v1/pets", formData);
+      // FormData 생성
+      const data = new FormData();
+
+      // JSON 데이터를 Blob으로 변환하여 추가
+      const petData = {
+        animalType: formData.animalType,
+        breed: formData.breed,
+        gender: formData.gender,
+        health: formData.health,
+        personality: formData.personality,
+        age: formData.age
+      };
+
+      data.append('pet', new Blob([JSON.stringify(petData)], {
+        type: 'application/json'
+      }));
+
+      // 이미지 파일이 있으면 추가
+      if (imageFile) {
+        data.append('image', imageFile);
+      }
+
+      await api.post("/v1/pets", data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
         modalAlert("반려동물이 성공적으로 등록되었습니다.", "success").then(() => {
             router.push("/me");
@@ -168,22 +195,14 @@ export default function CreatePetPage() {
             </p>
           </div>
 
-          {/* 이미지 URL */}
+          {/* 이미지 업로드 */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">
-              이미지 URL
+              반려동물 사진
             </label>
-            <input
-              type="url"
-              name="imageUrl"
-              value={formData.imageUrl}
-              onChange={handleChange}
-              placeholder="https://example.com/image.jpg"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+            <SingleImageDragDrop
+              onFileChange={setImageFile}
             />
-            <p className="text-sm text-gray-500 mt-1">
-              이미지 URL을 입력하세요 (선택사항, 최대 500자)
-            </p>
           </div>
 
           {/* 버튼 영역 */}

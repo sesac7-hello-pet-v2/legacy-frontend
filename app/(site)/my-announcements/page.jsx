@@ -3,6 +3,7 @@
 import api from "@/app/lib/api";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { useUserStore } from "@/app/store/UserStore";
 
 const statusKo = {
     OPEN: "공고 중",
@@ -22,6 +23,7 @@ export default function MyAnnouncementsPage() {
     const [announcements, setAnnouncements] = useState([]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
+    const user = useUserStore((state) => state.user);
 
     useEffect(() => {
         fetchMyAnnouncements();
@@ -29,7 +31,11 @@ export default function MyAnnouncementsPage() {
 
     async function fetchMyAnnouncements() {
         try {
-            const res = await api.get("/v1/announcements");
+            const res = await api.get("/v1/announcements/my", {
+                headers: {
+                    "X-User-Id": user?.id
+                }
+            });
 
             // 상태별 정렬: OPEN > IN_PROGRESS > COMPLETED > CLOSED
             const statusOrder = { OPEN: 1, IN_PROGRESS: 2, COMPLETED: 3, CLOSED: 4 };

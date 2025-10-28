@@ -4,6 +4,7 @@ import api from "@/app/lib/api";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ConfirmModal, AlertModal } from "@/app/components/Modal";
 
 const animalTypeKo = {
     DOG: "강아지",
@@ -32,6 +33,10 @@ export default function MyPets() {
     const [isEditMode, setIsEditMode] = useState(false);
     const [showDateModal, setShowDateModal] = useState(false);
     const [selectedEndDate, setSelectedEndDate] = useState("");
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [showAlertModal, setShowAlertModal] = useState(false);
+    const [alertConfig, setAlertConfig] = useState({ message: "", type: "info" });
+    const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
     const [formData, setFormData] = useState({
         animalType: "DOG",
         breed: "",
@@ -63,7 +68,11 @@ export default function MyPets() {
         } catch (err) {
             console.error("❌ [MyPets] 펫 목록 불러오기 실패", err);
             console.error("  - 에러 상세:", err.response || err);
-            alert("펫 목록을 불러올 수 없습니다. 콘솔을 확인해주세요.");
+            setAlertConfig({
+                message: "펫 목록을 불러올 수 없습니다. 콘솔을 확인해주세요.",
+                type: "error"
+            });
+            setShowAlertModal(true);
         } finally {
             setLoading(false);
         }
@@ -85,7 +94,11 @@ export default function MyPets() {
             });
         } catch (err) {
             console.error("펫 상세 정보 불러오기 실패", err);
-            alert("펫 정보를 불러올 수 없습니다.");
+            setAlertConfig({
+                message: "펫 정보를 불러올 수 없습니다.",
+                type: "error"
+            });
+            setShowAlertModal(true);
             setShowModal(false);
         }
     }
@@ -98,75 +111,126 @@ export default function MyPets() {
         }));
     };
 
-    async function handleDelete() {
-        const confirmed = confirm("정말 삭제하시겠습니까?");
-        if (!confirmed) return;
+    function confirmDelete() {
+        setShowDeleteConfirmModal(true);
+    }
 
+    async function handleDelete() {
         try {
             await api.delete(`/v1/pets/${selectedPetId}`);
-            alert("삭제 완료!");
+            setAlertConfig({
+                message: "삭제가 완료되었습니다!",
+                type: "success"
+            });
+            setShowAlertModal(true);
             setShowModal(false);
             setSelectedPetId(null);
             setSelectedPet(null);
             fetchMyPets();
         } catch (err) {
             console.error("삭제 실패", err);
-            alert("삭제 실패");
+            setAlertConfig({
+                message: "삭제에 실패했습니다.",
+                type: "error"
+            });
+            setShowAlertModal(true);
         }
     }
 
     async function handleSave() {
         if (!formData.breed.trim()) {
-            alert("품종을 입력해주세요.");
+            setAlertConfig({
+                message: "품종을 입력해주세요.",
+                type: "warning"
+            });
+            setShowAlertModal(true);
             return;
         }
         if (!formData.personality.trim()) {
-            alert("성격/특징을 입력해주세요.");
+            setAlertConfig({
+                message: "성격/특징을 입력해주세요.",
+                type: "warning"
+            });
+            setShowAlertModal(true);
             return;
         }
         if (formData.age < 0) {
-            alert("올바른 나이를 입력해주세요.");
+            setAlertConfig({
+                message: "올바른 나이를 입력해주세요.",
+                type: "warning"
+            });
+            setShowAlertModal(true);
             return;
         }
 
         try {
             await api.patch(`/v1/pets/${selectedPetId}`, formData);
-            alert("수정 완료!");
+            setAlertConfig({
+                message: "수정이 완료되었습니다!",
+                type: "success"
+            });
+            setShowAlertModal(true);
             setIsEditMode(false);
             fetchPetDetail(selectedPetId);
             fetchMyPets();
         } catch (err) {
             console.error("수정 실패", err);
-            alert("수정에 실패했습니다.");
+            setAlertConfig({
+                message: "수정에 실패했습니다.",
+                type: "error"
+            });
+            setShowAlertModal(true);
         }
     }
 
     function openDateModal() {
         const today = new Date();
-        const minDate = today.toISOString().slice(0, 16);
+        const minDate = today.toISOString().split("T")[0];
         setSelectedEndDate(minDate);
         setShowDateModal(true);
     }
 
-    async function handleCreateAnnouncement() {
+    function handleConfirmAnnouncement() {
         if (!selectedEndDate) {
-            alert("공고 종료일을 선택해주세요.");
+            setAlertConfig({
+                message: "공고 종료일을 선택해주세요.",
+                type: "warning"
+            });
+            setShowAlertModal(true);
             return;
         }
+        // 확인 모달을 표시하기 전에 날짜 선택 모달 닫기
+        setShowDateModal(false);
+        setShowConfirmModal(true);
+    }
 
+    async function handleCreateAnnouncement() {
         try {
             await api.post("/v1/announcements", {
                 petId: selectedPetId,
                 endDate: selectedEndDate,
             });
-            alert("공고 등록 완료!");
-            setShowDateModal(false);
+
             setSelectedEndDate("");
+            setAlertConfig({
+                message: "공고 등록이 완료되었습니다!",
+                type: "success"
+            });
+            setShowAlertModal(true);
+
+            // 데이터 갱신은 AlertModal이 닫힐 때 수행
             fetchPetDetail(selectedPetId);
             fetchMyPets();
         } catch (err) {
             console.error("공고 등록 실패", err);
-            alert("공고 등록에 실패했습니다.");
+
+            // 백엔드 에러 메시지 처리
+            const errorMessage = err.response?.data?.message || "공고 등록에 실패했습니다.";
+            setAlertConfig({
+                message: errorMessage,
+                type: "error"
+            });
+            setShowAlertModal(true);
         }
     }
 
@@ -223,9 +287,9 @@ export default function MyPets() {
                             className="block group transition cursor-pointer"
                             onClick={() => handleOpenModal(pet.id)}
                         >
-                            {pet.imageUrl ? (
+                            {pet.thumbnailUrl ? (
                                 <img
-                                    src={pet.imageUrl}
+                                    src={pet.thumbnailUrl}
                                     alt={pet.breed}
                                     className="w-full h-48 object-cover rounded-2xl mb-4 group-hover:opacity-90"
                                 />
@@ -503,7 +567,7 @@ export default function MyPets() {
                                                     수정
                                                 </button>
                                                 <button
-                                                    onClick={handleDelete}
+                                                    onClick={confirmDelete}
                                                     className="flex-1 px-6 py-3 bg-orange-400 text-white rounded-full font-semibold hover:bg-red-500 transition"
                                                 >
                                                     삭제
@@ -528,19 +592,19 @@ export default function MyPets() {
 
                         <div className="mb-6">
                             <label className="block text-sm font-semibold text-gray-700 mb-3">
-                                종료 날짜 및 시간
+                                종료 날짜
                             </label>
                             <input
-                                type="datetime-local"
+                                type="date"
                                 value={selectedEndDate}
                                 onChange={(e) => setSelectedEndDate(e.target.value)}
-                                min={new Date().toISOString().slice(0, 16)}
+                                min={new Date().toISOString().split("T")[0]}
                                 className="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-lime-500 focus:border-transparent"
                             />
                             <p className="text-xs text-gray-500 mt-2">
                                 선택한 날짜:{" "}
                                 {selectedEndDate
-                                    ? new Date(selectedEndDate).toLocaleString("ko-KR")
+                                    ? new Date(selectedEndDate).toLocaleDateString("ko-KR")
                                     : "미선택"}
                             </p>
                         </div>
@@ -556,7 +620,7 @@ export default function MyPets() {
                                 취소
                             </button>
                             <button
-                                onClick={handleCreateAnnouncement}
+                                onClick={handleConfirmAnnouncement}
                                 className="flex-1 px-6 py-3 bg-lime-500 text-white rounded-full font-semibold hover:bg-lime-600 transition"
                             >
                                 등록하기
@@ -565,6 +629,38 @@ export default function MyPets() {
                     </div>
                 </div>
             )}
+
+            {/* 공고 등록 확인 모달 */}
+            <ConfirmModal
+                isOpen={showConfirmModal}
+                onClose={() => setShowConfirmModal(false)}
+                onConfirm={handleCreateAnnouncement}
+                title="공고 등록 확인"
+                message="선택한 날짜로 공고를 등록하시겠습니까?"
+                confirmText="등록"
+                cancelText="취소"
+                type="info"
+            />
+
+            {/* 삭제 확인 모달 */}
+            <ConfirmModal
+                isOpen={showDeleteConfirmModal}
+                onClose={() => setShowDeleteConfirmModal(false)}
+                onConfirm={handleDelete}
+                title="삭제 확인"
+                message="정말 삭제하시겠습니까?"
+                confirmText="삭제"
+                cancelText="취소"
+                type="error"
+            />
+
+            {/* 알림 모달 */}
+            <AlertModal
+                isOpen={showAlertModal}
+                onClose={() => setShowAlertModal(false)}
+                message={alertConfig.message}
+                type={alertConfig.type}
+            />
         </div>
     );
 }

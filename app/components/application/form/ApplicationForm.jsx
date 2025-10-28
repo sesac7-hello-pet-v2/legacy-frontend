@@ -21,6 +21,7 @@ import CareSection from "./section/CareSection";
 import FinancialSection from "./section/FinancialSection";
 import PetExperienceSection from "./section/PetExperienceSection";
 import FuturePlanSection from "./section/FuturePlanSection";
+import { AlertModal } from "@/app/components/Modal";
 
 export default function ApplicationForm() {
     const router = useRouter();
@@ -31,6 +32,8 @@ export default function ApplicationForm() {
     const { user } = useUserStore();
     const [userDetail, setUserDetail] = useState(null);
     const [shelterInfo, setShelterInfo] = useState(null);
+    const [showAlertModal, setShowAlertModal] = useState(false);
+    const [alertConfig, setAlertConfig] = useState({ message: "", type: "info" });
 
     // 단계 관리
     const [currentStep, setCurrentStep] = useState(1);
@@ -66,7 +69,11 @@ export default function ApplicationForm() {
 
     const handleSubmit = async () => {
         if (!agreement.agreedToAccuracy || !agreement.agreedToCare || !agreement.agreedToPrivacy) {
-            alert("모든 동의 항목에 체크해주세요.");
+            setAlertConfig({
+                message: "모든 동의 항목에 체크해주세요.",
+                type: "warning"
+            });
+            setShowAlertModal(true);
             return;
         }
 
@@ -84,10 +91,18 @@ export default function ApplicationForm() {
 
         try {
             await api.post("/v1/applications", payload);
-            alert("입양 신청이 접수되었습니다.");
-            router.push(`/announcements/${announcementId}`);
+            setAlertConfig({
+                message: "입양 신청이 접수되었습니다.",
+                type: "success"
+            });
+            setShowAlertModal(true);
+            setTimeout(() => router.push(`/announcements/${announcementId}`), 1500);
         } catch (error) {
-            alert("신청에 실패했습니다: " + (error.response?.data?.message || error.message));
+            setAlertConfig({
+                message: "신청에 실패했습니다: " + (error.response?.data?.message || error.message),
+                type: "error"
+            });
+            setShowAlertModal(true);
         }
     };
 
@@ -228,6 +243,14 @@ export default function ApplicationForm() {
                     </button>
                 )}
             </div>
+
+            {/* 알림 모달 */}
+            <AlertModal
+                isOpen={showAlertModal}
+                onClose={() => setShowAlertModal(false)}
+                message={alertConfig.message}
+                type={alertConfig.type}
+            />
         </div>
     );
 }

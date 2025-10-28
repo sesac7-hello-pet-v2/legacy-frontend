@@ -121,11 +121,11 @@ export default function Page() {
         <div className="mb-6">
           <label className="block mb-1">공고 종료일</label>
           <input
-            type="datetime-local"
+            type="date"
             value={selectedDate}
             onChange={(e) => setSelectedDate(e.target.value)}
             className="border border-yellow-300 rounded px-2 py-1 bg-white"
-            min={new Date().toISOString().split("T")[0] + "T00:00"}
+            min={new Date().toISOString().split("T")[0]}
           />
         </div>
 
