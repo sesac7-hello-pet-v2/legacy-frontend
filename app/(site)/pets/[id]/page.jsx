@@ -71,7 +71,7 @@ export default function PetDetailPage() {
             console.error("펫 상세 정보 불러오기 실패", err);
             setAlertConfig({
                 message: "펫 정보를 불러올 수 없습니다.",
-                type: "error"
+                type: "error",
             });
             setShowAlertModal(true);
             setTimeout(() => router.back(), 2000);
@@ -97,15 +97,17 @@ export default function PetDetailPage() {
             await api.delete(`/v1/pets/${petId}`);
             setAlertConfig({
                 message: "삭제가 완료되었습니다!",
-                type: "success"
+                type: "success",
             });
             setShowAlertModal(true);
             setTimeout(() => router.push("/me"), 1500);
         } catch (err) {
             console.error("삭제 실패", err);
+            // 백엔드 에러 메시지 표시
+            const errorMessage = err.response?.data?.message || "삭제에 실패했습니다.";
             setAlertConfig({
-                message: "삭제에 실패했습니다.",
-                type: "error"
+                message: errorMessage,
+                type: "error",
             });
             setShowAlertModal(true);
         }
@@ -116,7 +118,7 @@ export default function PetDetailPage() {
         if (!formData.breed.trim()) {
             setAlertConfig({
                 message: "품종을 입력해주세요.",
-                type: "warning"
+                type: "warning",
             });
             setShowAlertModal(true);
             return;
@@ -124,7 +126,7 @@ export default function PetDetailPage() {
         if (!formData.personality.trim()) {
             setAlertConfig({
                 message: "성격/특징을 입력해주세요.",
-                type: "warning"
+                type: "warning",
             });
             setShowAlertModal(true);
             return;
@@ -132,7 +134,7 @@ export default function PetDetailPage() {
         if (formData.age < 0) {
             setAlertConfig({
                 message: "올바른 나이를 입력해주세요.",
-                type: "warning"
+                type: "warning",
             });
             setShowAlertModal(true);
             return;
@@ -142,7 +144,7 @@ export default function PetDetailPage() {
             await api.patch(`/v1/pets/${petId}`, formData);
             setAlertConfig({
                 message: "수정이 완료되었습니다!",
-                type: "success"
+                type: "success",
             });
             setShowAlertModal(true);
             setIsEditMode(false);
@@ -151,7 +153,7 @@ export default function PetDetailPage() {
             console.error("수정 실패", err);
             setAlertConfig({
                 message: "수정에 실패했습니다.",
-                type: "error"
+                type: "error",
             });
             setShowAlertModal(true);
         }
@@ -169,7 +171,7 @@ export default function PetDetailPage() {
         if (!selectedEndDate) {
             setAlertConfig({
                 message: "공고 종료일을 선택해주세요.",
-                type: "warning"
+                type: "warning",
             });
             setShowAlertModal(true);
             return;
@@ -189,7 +191,7 @@ export default function PetDetailPage() {
             setSelectedEndDate("");
             setAlertConfig({
                 message: "공고 등록이 완료되었습니다!",
-                type: "success"
+                type: "success",
             });
             setShowAlertModal(true);
 
@@ -202,7 +204,7 @@ export default function PetDetailPage() {
             const errorMessage = err.response?.data?.message || "공고 등록에 실패했습니다.";
             setAlertConfig({
                 message: errorMessage,
-                type: "error"
+                type: "error",
             });
             setShowAlertModal(true);
         }
@@ -263,7 +265,7 @@ export default function PetDetailPage() {
                             src={formData.imageUrl}
                             alt={formData.breed}
                             className="w-full object-contain"
-                            style={{ maxHeight: '600px' }}
+                            style={{ maxHeight: "600px" }}
                         />
                     ) : (
                         <div className="w-full flex items-center justify-center text-gray-400 font-semibold h-96">
@@ -308,7 +310,9 @@ export default function PetDetailPage() {
                                     </p>
                                     <p className="flex items-center mt-2">
                                         <strong className="w-32 text-orange-500">품종:</strong>
-                                        <span className="ml-2 text-gray-900 font-normal">{pet.breed}</span>
+                                        <span className="ml-2 text-gray-900 font-normal">
+                                            {pet.breed}
+                                        </span>
                                     </p>
                                 </>
                             )}
