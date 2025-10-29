@@ -1,9 +1,10 @@
 "use client";
 import Link from "next/link";
-import { useUserStore } from "../store/UserStore";
-import { useEffect, useRef, useState } from "react";
-import api from "../lib/api";
-import { useRouter } from "next/navigation";
+import {useUserStore} from "../store/UserStore";
+import {useEffect, useRef, useState} from "react";
+import api, {clearTokenExpiry} from "../lib/api";
+import {useRouter} from "next/navigation";
+import {modalAlert} from "@/app/utils/alertUtils";
 
 export default function Navigator() {
   const { user, clearUser } = useUserStore();
@@ -29,19 +30,20 @@ export default function Navigator() {
   /* ── 로그아웃 ── */
   const logout = async () => {
     clearUser();
+    clearTokenExpiry();
     setOpen(false);
     try {
-      await api.delete("/auth/logout");
+      await api.post("/v1/auth/logout");
       router.push("/");
-      alert("로그아웃 되었습니다.");
+        modalAlert("로그아웃 되었습니다.", "success");
     } catch (err) {
-      alert("로그아웃 실패: " + (err as Error).message);
+        modalAlert("로그아웃 실패: " + (err as Error).message, "error");
     }
   };
 
   return (
-    <nav className="bg-yellow-100 border-b border-gray-200 shadow-sm">
-      <div className="max-w-screen-xl mx-auto flex items-center justify-between px-10 py-2">
+    <nav className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50 mb-0">
+      <div className="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
         {/* 왼쪽: 로고 */}
         <Link href="/" className="flex items-center gap-2">
           <img
@@ -51,59 +53,79 @@ export default function Navigator() {
             height={40}
             className="rounded-sm"
           />
-          <span className="text-lg font-bold text-orange-400">Hello Pet</span>
+          <span className="text-xl font-bold text-amber-500">Hello Pet</span>
         </Link>
 
         {/* 오른쪽: 메뉴 + 로그인 */}
-        <div className="flex items-center gap-x-6">
+        <div className="flex items-center gap-x-12">
+          <Link
+            href="/about"
+            className="text-base text-gray-600 hover:text-amber-500 font-semibold transition-colors"
+          >
+            소개
+          </Link>
           <Link
             href="/announcements"
-            className="text-gray-700 hover:text-amber-500 font-medium transition"
+            className="text-base text-gray-600 hover:text-amber-500 font-semibold transition-colors"
           >
             입양게시판
           </Link>
           <Link
-            href="/boards"
-            className="text-gray-700 hover:text-amber-500 font-medium transition"
+            href="/feed"
+            className="text-base text-gray-600 hover:text-amber-500 font-semibold transition-colors"
           >
-            자유게시판
+            피드
+          </Link>
+          <Link
+            href="/notices"
+            className="text-base text-gray-600 hover:text-amber-500 font-semibold transition-colors"
+          >
+            공지사항
           </Link>
 
           {user ? (
             <div className="relative" ref={menuRef}>
-              <button onClick={() => setOpen(!open)}>
+              <button
+                onClick={() => setOpen(!open)}
+                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+              >
                 <img
-                  src={user.profileUrl}
+                  src={user.profileUrl || "/basic_profile.jpg"}
                   alt="Profile"
-                  width={36}
-                  height={36}
-                  className="rounded-full object-cover border-2 border-amber-400"
+                  width={28}
+                  height={28}
+                  className="rounded-full object-cover ring-2 ring-amber-400"
                 />
               </button>
 
               {open && (
-                <div className="absolute right-0 mt-2 w-56 rounded-xl border border-gray-200 bg-white p-4 shadow-lg z-10">
-                  <div className="flex flex-col items-center gap-2">
-                    <img
-                      src={user.profileUrl}
-                      alt="profile"
-                      width={64}
-                      height={64}
-                      className="rounded-full object-cover border"
-                    />
-                    <p className="text-base font-semibold">{user.nickname}</p>
+                <div className="absolute right-0 mt-3 w-52 rounded-lg border border-gray-200 bg-white shadow-lg z-50 overflow-hidden">
+                  <div className="p-4 bg-gradient-to-r from-amber-50 to-orange-50 border-b">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={user.profileUrl || "/basic_profile.jpg"}
+                        alt="profile"
+                        width={40}
+                        height={40}
+                        className="rounded-full object-cover ring-2 ring-white"
+                      />
+                      <p className="text-sm font-semibold text-gray-800">{user.nickname}</p>
+                    </div>
                   </div>
-                  <div className="mt-4 flex flex-col gap-2 w-full">
+                  <div className="p-2">
                     <Link
                       href="/me"
-                      onClick={() => setOpen(false)}
-                      className="rounded-md px-4 py-2 text-sm text-center hover:bg-gray-100 transition"
+                      onClick={() => {
+                        console.log("🔘 [Navigator] 마이페이지 버튼 클릭");
+                        setOpen(false);
+                      }}
+                      className="block rounded-md px-3 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-600 transition-colors"
                     >
                       마이페이지
                     </Link>
                     <button
                       onClick={logout}
-                      className="rounded-md bg-red-500 px-4 py-2 text-sm text-white hover:bg-red-600 transition"
+                      className="w-full text-left rounded-md px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                     >
                       로그아웃
                     </button>
@@ -114,7 +136,7 @@ export default function Navigator() {
           ) : (
             <Link
               href="/auth/login"
-              className="rounded-full bg-amber-300 px-4 py-2 text-sm text-white hover:bg-amber-400 transition"
+              className="rounded-lg bg-amber-500 px-5 py-2 text-sm text-white hover:bg-amber-600 transition-colors font-medium shadow-sm"
             >
               로그인
             </Link>

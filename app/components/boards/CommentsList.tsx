@@ -5,6 +5,7 @@ import Pagination from "../Pagination";
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { modalAlert } from "@/app/utils/alertUtils";
 
 export default function CommentsList() {
   const searchParams = useSearchParams(); //
@@ -32,7 +33,7 @@ export default function CommentsList() {
       setTotalPages(res.data.totalPage);
       console.log("✅ 댓글 응답:", res.data); // 👈 이걸 추가하세요
     } catch (e) {
-      alert("댓글 내역을 불러오지 못했습니다.");
+      await modalAlert("댓글 내역을 불러오지 못했습니다.", "error");
     }
   };
 

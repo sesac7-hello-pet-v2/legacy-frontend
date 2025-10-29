@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import api from "../lib/api";
 import { useRouter } from "next/navigation";
-import RequireRole from "./RequireRole";
+import { modalAlert, modalConfirm } from "@/app/utils/alertUtils";
 
 interface User {
   id: number;
@@ -70,10 +70,11 @@ export default function UserList() {
   }
 
   async function handleDeactivate(userId: number) {
-    if (window.confirm("정말로 이 사용자를 비활성화하시겠습니까?")) {
+    const confirmed = await modalConfirm("정말로 이 사용자를 비활성화하시겠습니까?", "warning");
+    if (confirmed) {
       try {
         await api.delete(`/admin/users/${userId}`);
-        alert("사용자가 비활성화되었습니다.");
+        await modalAlert("사용자가 비활성화되었습니다.", "success");
         setUsers((currentUsers) =>
           currentUsers.map((user) =>
             user.id === userId ? { ...user, activation: false } : user
@@ -81,7 +82,7 @@ export default function UserList() {
         );
         router.refresh();
       } catch (err) {
-        alert("비활성화 실패: " + (err as Error).message);
+        await modalAlert("비활성화 실패: " + (err as Error).message, "error");
       }
     }
   }
@@ -119,8 +120,7 @@ export default function UserList() {
 
   /* ─────────── UI ─────────── */
   return (
-    <RequireRole allow={["ADMIN"]}>
-      <div className="bg-white px-4 py-6 sm:px-8">
+    <div className="bg-white px-4 py-6 sm:px-8">
         <div className="w-full rounded-2xl bg-white p-8 shadow-[0_0_0_4px_rgba(253,224,71,0.25)] space-y-8">
           {/* ----------- 정렬 옵션 ----------- */}
           <div className="flex flex-wrap items-center justify-between gap-4">
@@ -279,6 +279,5 @@ export default function UserList() {
           </div>
         </div>
       </div>
-    </RequireRole>
   );
 }

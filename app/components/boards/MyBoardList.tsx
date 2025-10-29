@@ -5,7 +5,8 @@ import Pagination from "../Pagination";
 import { categories, petTypes } from "@/app/lib/boardConstants";
 import { changeResponse } from "@/app/lib/boardUtils";
 import Link from "next/link";
-import { useSearchParams, useRouter } from "next/navigation"; //
+import { useSearchParams, useRouter } from "next/navigation";
+import { modalAlert } from "@/app/utils/alertUtils";
 
 export default function MyBoardsList() {
   const searchParams = useSearchParams(); //
@@ -30,7 +31,7 @@ export default function MyBoardsList() {
       setBoards(res.data.boardList);
       setTotalPages(res.data.totalPages);
     } catch (e) {
-      alert("게시글 내역을 불러오지 못했습니다.");
+      await modalAlert("게시글 내역을 불러오지 못했습니다.", "error");
     }
   };
 

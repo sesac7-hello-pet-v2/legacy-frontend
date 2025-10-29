@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import api from "@/app/lib/api";
+import { modalAlert } from "@/app/utils/alertUtils";
 
 export default function EditAnnouncementPage() {
   const { id } = useParams();
@@ -29,7 +30,7 @@ export default function EditAnnouncementPage() {
     const fetchDetail = async () => {
       setLoading(true);
       try {
-        const res = await api.get(`/announcements/${id}`);
+        const res = await api.get(`/v1/announcements/${id}`);
         const data = res.data;
 
         setForm({
@@ -40,7 +41,7 @@ export default function EditAnnouncementPage() {
           personality: data.personality ?? "",
           age: data.age?.toString() ?? "",
           image: data.imageUrl ?? "",
-          selectedDate: data.announcementPeriod?.slice(0, 16) ?? "", // ISO 8601 형태 처리
+          selectedDate: data.announcementPeriod?.split("T")[0] ?? "", // ISO 8601 날짜만 추출
         });
       } catch (err) {
         console.error("수정 데이터 불러오기 실패", err);
@@ -75,11 +76,11 @@ export default function EditAnnouncementPage() {
         image: form.image || null,
       };
 
-      await api.put(`/announcements/${id}`, payload, {
+      await api.put(`/v1/announcements/${id}`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      alert("수정 완료!");
+      await modalAlert("수정 완료!", "success");
       router.push("/me");
     } catch (err) {
       console.error("수정 실패", err);
@@ -167,12 +168,12 @@ export default function EditAnnouncementPage() {
 
           {/* 공고 종료일 */}
           <input
-            type="datetime-local"
+            type="date"
             name="selectedDate"
             value={form.selectedDate}
             onChange={handleChange}
             className="border border-yellow-300 rounded px-2 py-1 bg-white"
-            min={new Date().toISOString().slice(0, 16)}
+            min={new Date().toISOString().split("T")[0]}
           />
 
           <input
