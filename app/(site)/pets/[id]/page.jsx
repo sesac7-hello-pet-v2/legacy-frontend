@@ -241,77 +241,82 @@ export default function PetDetailPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 py-10 px-4">
-            <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
-                {/* 이미지 영역 */}
-                <div className="relative">
+        <main className="max-w-6xl mx-auto py-12 px-6 bg-white">
+            {/* 제목과 상태 배지 */}
+            <div className="flex items-center justify-center mb-8">
+                <h1 className="text-4xl font-extrabold text-yellow-600 text-center">
+                    {pet.breed} 상세정보
+                </h1>
+                {pet.announced && (
+                    <span className="ml-4 px-4 py-2 bg-lime-500 text-white text-sm font-bold rounded-full shadow-md">
+                        ✓ 공고 등록됨
+                    </span>
+                )}
+            </div>
+
+            {/* 2단 레이아웃: 이미지 + 정보 */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                {/* 왼쪽: 이미지 */}
+                <div className="bg-gray-100 rounded-2xl overflow-hidden shadow-md sticky top-8">
                     {formData.imageUrl ? (
-                        <div className="w-full h-96 bg-gray-200">
-                            <img
-                                src={formData.imageUrl}
-                                alt={formData.breed}
-                                className="w-full h-full object-cover"
-                            />
-                        </div>
+                        <img
+                            src={formData.imageUrl}
+                            alt={formData.breed}
+                            className="w-full object-contain"
+                            style={{ maxHeight: '600px' }}
+                        />
                     ) : (
-                        <div className="w-full h-96 bg-yellow-200 flex items-center justify-center">
-                            <p className="text-yellow-500 text-xl font-semibold">이미지 없음</p>
-                        </div>
-                    )}
-                    {isEditMode && (
-                        <div className="absolute bottom-0 left-0 right-0 bg-black bg-opacity-70 p-4">
-                            <input
-                                type="url"
-                                name="imageUrl"
-                                value={formData.imageUrl}
-                                onChange={handleChange}
-                                placeholder="이미지 URL을 입력하세요"
-                                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent text-sm"
-                            />
+                        <div className="w-full flex items-center justify-center text-gray-400 font-semibold h-96">
+                            이미지 없음
                         </div>
                     )}
                 </div>
 
-                {/* 정보 영역 */}
-                <div className="p-8">
-                    {/* 동물 종류 및 품종 */}
-                    <div className="mb-8">
-                        {isEditMode ? (
-                            <div className="space-y-3">
-                                <select
-                                    name="animalType"
-                                    value={formData.animalType}
-                                    onChange={handleChange}
-                                    className="text-xl font-semibold text-orange-500 w-full px-3 py-1 border-2 border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-transparent"
-                                >
-                                    <option value="DOG">강아지</option>
-                                    <option value="CAT">고양이</option>
-                                </select>
-                                <input
-                                    type="text"
-                                    name="breed"
-                                    value={formData.breed}
-                                    onChange={handleChange}
-                                    placeholder="품종"
-                                    className="text-4xl font-extrabold text-gray-800 w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
-                                />
-                            </div>
-                        ) : (
-                            <>
-                                <p className="text-orange-500 text-xl font-semibold mb-2">
-                                    {animalTypeKo[pet.animalType] || pet.animalType}
-                                </p>
-                                <h1 className="text-4xl font-extrabold text-gray-800">
-                                    {pet.breed}
-                                </h1>
-                            </>
-                        )}
-                    </div>
+                {/* 오른쪽: 정보 + 버튼 */}
+                <div className="flex flex-col">
+                    {/* 동물 정보 */}
+                    <section className="bg-yellow-50 rounded-2xl p-6 shadow-inner space-y-4 text-gray-800 flex-1">
+                        {/* 동물 종류 및 품종 */}
+                        <div>
+                            {isEditMode ? (
+                                <div className="space-y-3">
+                                    <select
+                                        name="animalType"
+                                        value={formData.animalType}
+                                        onChange={handleChange}
+                                        className="text-xl font-semibold text-orange-500 w-full px-3 py-1 border-2 border-orange-300 rounded-lg focus:ring-2 focus:ring-orange-400 focus:border-transparent"
+                                    >
+                                        <option value="DOG">강아지</option>
+                                        <option value="CAT">고양이</option>
+                                    </select>
+                                    <input
+                                        type="text"
+                                        name="breed"
+                                        value={formData.breed}
+                                        onChange={handleChange}
+                                        placeholder="품종"
+                                        className="text-2xl font-bold text-gray-800 w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                                    />
+                                </div>
+                            ) : (
+                                <>
+                                    <p className="flex items-center">
+                                        <strong className="w-32 text-orange-500">동물 종류:</strong>
+                                        <span className="ml-2 text-gray-900 font-normal">
+                                            {animalTypeKo[pet.animalType] || pet.animalType}
+                                        </span>
+                                    </p>
+                                    <p className="flex items-center mt-2">
+                                        <strong className="w-32 text-orange-500">품종:</strong>
+                                        <span className="ml-2 text-gray-900 font-normal">{pet.breed}</span>
+                                    </p>
+                                </>
+                            )}
+                        </div>
 
-                    <div className="space-y-3 mb-8">
                         {/* 나이 */}
-                        <div className="flex items-center border-b border-gray-200 pb-3">
-                            <span className="text-gray-600 font-medium text-sm w-24">나이</span>
+                        <p className="flex items-center">
+                            <strong className="w-32 text-orange-500">나이:</strong>
                             {isEditMode ? (
                                 <input
                                     type="number"
@@ -319,45 +324,43 @@ export default function PetDetailPage() {
                                     value={formData.age}
                                     onChange={handleChange}
                                     min="0"
-                                    className="flex-1 px-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                                    className="ml-2 flex-1 px-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
                                 />
                             ) : (
-                                <span className="text-gray-700 text-sm">{pet.age}세</span>
+                                <span className="ml-2 text-gray-900 font-normal">{pet.age}세</span>
                             )}
-                        </div>
+                        </p>
 
                         {/* 성별 */}
-                        <div className="flex items-center border-b border-gray-200 pb-3">
-                            <span className="text-gray-600 font-medium text-sm w-24">성별</span>
+                        <p className="flex items-center">
+                            <strong className="w-32 text-orange-500">성별:</strong>
                             {isEditMode ? (
                                 <select
                                     name="gender"
                                     value={formData.gender}
                                     onChange={handleChange}
-                                    className="flex-1 px-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                                    className="ml-2 flex-1 px-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
                                 >
                                     <option value="MALE">수컷</option>
                                     <option value="FEMALE">암컷</option>
                                     <option value="UNKNOWN">미상</option>
                                 </select>
                             ) : (
-                                <span className="text-gray-700 text-sm">
+                                <span className="ml-2 text-gray-900 font-normal">
                                     {genderKo[pet.gender] || pet.gender}
                                 </span>
                             )}
-                        </div>
+                        </p>
 
                         {/* 건강 상태 */}
-                        <div className="flex items-center border-b border-gray-200 pb-3">
-                            <span className="text-gray-600 font-medium text-sm w-24">
-                                건강 상태
-                            </span>
+                        <p className="flex items-center">
+                            <strong className="w-32 text-orange-500">건강 상태:</strong>
                             {isEditMode ? (
                                 <select
                                     name="health"
                                     value={formData.health}
                                     onChange={handleChange}
-                                    className="flex-1 px-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                                    className="ml-2 flex-1 px-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
                                 >
                                     <option value="HEALTHY">건강함</option>
                                     <option value="NORMAL">보통</option>
@@ -365,15 +368,15 @@ export default function PetDetailPage() {
                                     <option value="WEAK">허약함</option>
                                 </select>
                             ) : (
-                                <span className="text-gray-700 text-sm">
+                                <span className="ml-2 text-gray-900 font-normal">
                                     {healthKo[pet.health] || pet.health}
                                 </span>
                             )}
-                        </div>
+                        </p>
 
                         {/* 성격 및 특징 */}
-                        <div className="pt-4">
-                            <h3 className="text-gray-600 font-medium text-sm mb-3">성격 및 특징</h3>
+                        <div className="pt-4 border-t border-yellow-200">
+                            <strong className="text-orange-500 block mb-2">성격 및 특징:</strong>
                             {isEditMode ? (
                                 <>
                                     <textarea
@@ -389,64 +392,49 @@ export default function PetDetailPage() {
                                     </p>
                                 </>
                             ) : (
-                                <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">
+                                <p className="text-gray-900 leading-relaxed whitespace-pre-wrap">
                                     {pet.personality}
                                 </p>
                             )}
                         </div>
-                    </div>
+                    </section>
 
-                    {/* 공고 등록 배지 */}
-                    {pet.announced && (
-                        <div className="mb-4 text-center">
-                            <span className="inline-block px-4 py-2 bg-lime-500 text-white text-sm font-bold rounded-full shadow-md">
-                                ✓ 공고 등록됨
-                            </span>
-                        </div>
-                    )}
-
-                    {/* 버튼 영역 */}
-                    <div className="flex gap-4 pt-6">
+                    {/* 버튼들 - 나란히 배치 */}
+                    <div className="mt-6 flex gap-3">
                         {isEditMode ? (
                             <>
                                 <button
                                     onClick={handleCancel}
-                                    className="flex-1 px-6 py-3 bg-gray-300 text-gray-700 rounded-full font-semibold hover:bg-gray-400 transition"
+                                    className="flex-1 px-6 py-3 bg-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-400 transition"
                                 >
                                     취소
                                 </button>
                                 <button
                                     onClick={handleSave}
-                                    className="flex-1 px-6 py-3 bg-yellow-400 text-white rounded-full font-semibold hover:bg-yellow-500 transition"
+                                    className="flex-1 px-6 py-3 bg-yellow-400 text-white rounded-lg font-semibold hover:bg-yellow-500 transition"
                                 >
                                     저장
                                 </button>
                             </>
                         ) : (
                             <>
-                                <button
-                                    onClick={() => router.back()}
-                                    className="flex-1 px-6 py-3 bg-gray-300 text-gray-700 rounded-full font-semibold hover:bg-gray-400 transition"
-                                >
-                                    목록으로
-                                </button>
                                 {!pet.announced && (
                                     <button
                                         onClick={openDateModal}
-                                        className="flex-1 px-6 py-3 bg-lime-500 text-white rounded-full font-semibold hover:bg-lime-600 transition"
+                                        className="flex-1 px-6 py-3 bg-lime-500 text-white rounded-lg font-semibold hover:bg-lime-600 transition"
                                     >
                                         공고 등록
                                     </button>
                                 )}
                                 <button
                                     onClick={() => setIsEditMode(true)}
-                                    className="flex-1 px-6 py-3 bg-yellow-400 text-white rounded-full font-semibold hover:bg-yellow-500 transition"
+                                    className="flex-1 px-6 py-3 bg-yellow-400 text-white rounded-lg font-semibold hover:bg-yellow-500 transition"
                                 >
                                     수정
                                 </button>
                                 <button
                                     onClick={confirmDelete}
-                                    className="flex-1 px-6 py-3 bg-orange-400 text-white rounded-full font-semibold hover:bg-red-500 transition"
+                                    className="flex-1 px-6 py-3 bg-orange-400 text-white rounded-lg font-semibold hover:bg-red-500 transition"
                                 >
                                     삭제
                                 </button>
@@ -454,6 +442,16 @@ export default function PetDetailPage() {
                         )}
                     </div>
                 </div>
+            </div>
+
+            {/* 목록으로 버튼 - 페이지 하단 중앙 */}
+            <div className="mt-12 text-center">
+                <button
+                    onClick={() => router.back()}
+                    className="px-8 py-3 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition"
+                >
+                    목록으로
+                </button>
             </div>
 
             {/* 공고 등록 날짜 선택 모달 */}
@@ -535,6 +533,6 @@ export default function PetDetailPage() {
                 message={alertConfig.message}
                 type={alertConfig.type}
             />
-        </div>
+        </main>
     );
 }
