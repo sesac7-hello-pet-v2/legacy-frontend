@@ -112,12 +112,12 @@ export default function AnnouncementCards() {
                 return (
                   <CardWrapper key={announcement.id} {...cardProps}>
                     {/* 이미지 */}
-                    <div className="relative h-48 overflow-hidden bg-gray-200">
+                    <div className="relative h-56 overflow-hidden bg-gray-200">
                       {announcement.thumbnailUrl ? (
                         <img
                           src={announcement.thumbnailUrl}
                           alt={announcement.breed}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
                         <div className="flex items-center justify-center h-full text-gray-400 text-sm">
