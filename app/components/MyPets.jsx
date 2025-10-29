@@ -23,6 +23,20 @@ const healthKo = {
     WEAK: "허약함",
 };
 
+const petStatusKo = {
+    AVAILABLE: "입양 가능",
+    ANNOUNCED: "공고 중",
+    ADOPTED: "입양 완료",
+    DELETED: "삭제됨",
+};
+
+const petStatusColor = {
+    AVAILABLE: "bg-blue-500",
+    ANNOUNCED: "bg-lime-500",
+    ADOPTED: "bg-gray-500",
+    DELETED: "bg-red-500",
+};
+
 export default function MyPets() {
     const [pets, setPets] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -93,15 +107,13 @@ export default function MyPets() {
                             )}
 
                             {/* 동물 종류와 배지 */}
-                            <div className="flex items-center justify-between mb-1">
+                            <div className="flex items-center mb-1">
                                 <p className="text-orange-500 text-sm font-semibold">
                                     {animalTypeKo[pet.animalType] || pet.animalType}
                                 </p>
-                                {pet.announced && (
-                                    <span className="px-2 py-1 bg-lime-500 text-white text-xs font-bold rounded-full">
-                                        공고 등록
-                                    </span>
-                                )}
+                                <span className={`ml-auto px-2 py-1 ${petStatusColor[pet.status]} text-white text-xs font-bold rounded-full`}>
+                                    {petStatusKo[pet.status] || pet.status}
+                                </span>
                             </div>
                             <h3 className="text-gray-800 text-2xl font-extrabold mb-3">
                                 {pet.breed}
