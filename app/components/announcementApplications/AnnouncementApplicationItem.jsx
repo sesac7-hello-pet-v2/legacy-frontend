@@ -4,10 +4,10 @@ import { formatPhoneNumber } from "@/app/lib/formatPhoneNumber";
 import { useRouter } from "next/navigation";
 
 const statusColor = {
-    "신청서 제출": "bg-orange-500 text-white",
-    "검토 중": "bg-yellow-500 text-white",
-    "승인": "bg-lime-500 text-white",
-    "거절": "bg-red-500 text-white",
+    "신청서 제출": "bg-[rgb(255,245,196)] text-gray-800",
+    "검토 중": "bg-[rgb(255,222,167)] text-gray-800",
+    "승인": "bg-[rgb(160,177,135)] text-white",
+    "거절": "bg-[rgb(231,116,116)] text-white",
 };
 
 export default function AnnouncementApplicationItem({ application, onApprove }) {

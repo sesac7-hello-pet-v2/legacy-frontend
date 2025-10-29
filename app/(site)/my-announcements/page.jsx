@@ -13,10 +13,10 @@ const statusKo = {
 };
 
 const statusColor = {
-    OPEN: "bg-lime-500",
-    IN_PROGRESS: "bg-blue-500",
-    COMPLETED: "bg-gray-500",
-    CLOSED: "bg-red-500",
+    OPEN: "bg-[rgb(255,222,167)]",
+    IN_PROGRESS: "bg-[rgb(255,245,196)]",
+    COMPLETED: "bg-[rgb(160,177,135)]",
+    CLOSED: "bg-[rgb(231,116,116)]",
 };
 
 export default function MyAnnouncementsPage() {
@@ -70,7 +70,7 @@ export default function MyAnnouncementsPage() {
                             <span
                                 className={`inline-block px-3 py-1 ${
                                     statusColor[announcement.status]
-                                } text-white text-xs font-bold rounded-full shadow-lg`}
+                                } ${announcement.status === "OPEN" || announcement.status === "IN_PROGRESS" ? "text-gray-800" : "text-white"} text-xs font-bold rounded-full shadow-lg`}
                             >
                                 {statusKo[announcement.status]}
                             </span>

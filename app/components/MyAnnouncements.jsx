@@ -32,10 +32,10 @@ const statusKo = {
 };
 
 const statusColor = {
-  OPEN: "bg-lime-500",
-  CLOSED: "bg-orange-500",
-  COMPLETED: "bg-yellow-500",
-  DELETED: "bg-red-500",
+  OPEN: "bg-[rgb(255,222,167)]",
+  CLOSED: "bg-[rgb(231,116,116)]",
+  COMPLETED: "bg-[rgb(160,177,135)]",
+  DELETED: "bg-[rgb(231,116,116)]",
 };
 
 export default function MyAnnouncementsPage() {
@@ -111,7 +111,7 @@ export default function MyAnnouncementsPage() {
                 <p className="text-orange-500 text-sm font-semibold">
                   {animalTypeKo[item.animalType] || item.animalType}
                 </p>
-                <span className={`ml-auto px-2 py-1 ${statusColor[item.status]} text-white text-xs font-bold rounded-full`}>
+                <span className={`ml-auto px-2 py-1 ${statusColor[item.status]} ${item.status === "OPEN" ? "text-gray-800" : "text-white"} text-xs font-bold rounded-full`}>
                   {statusKo[item.status]}
                 </span>
               </div>
