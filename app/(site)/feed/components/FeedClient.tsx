@@ -27,8 +27,9 @@ export default function FeedClient({initialPosts, initialPage}: FeedClientProps)
     const [posts, setPosts] = useState<FeedPostType[]>(initialPosts);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [page, setPage] = useState(initialPage.number);
-    const [hasMore, setHasMore] = useState((initialPage.number + 1) < initialPage.totalPages);
+  // SSR로 이미 첫 페이지를 로드했으므로, 다음 페이지부터 로드하도록 설정
+  const [page, setPage] = useState(1); // 클라이언트에서는 1-based로 관리 (SSR로 1페이지 이미 로드됨)
+  const [hasMore, setHasMore] = useState(1 < initialPage.totalPages);
     const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
     const [focusComment, setFocusComment] = useState(false);
     const [isScrollToTopVisible, setIsScrollToTopVisible] = useState(false);
