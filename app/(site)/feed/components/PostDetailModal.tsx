@@ -76,6 +76,16 @@ export default function PostDetailModal({
     if (confirmed) {
       try {
         await api.delete(`/posts/${deletedPostId}`);
+
+        // 캐시 무효화
+        try {
+          const revalidateFeed = (await import("@/app/actions/revalidate")).default;
+          await revalidateFeed({userId: user?.id, forceRevalidate: true});
+          console.log("✅ 피드 캐시 무효화 완료");
+        } catch (cacheError) {
+          console.warn("⚠️ 캐시 무효화 실패:", cacheError);
+        }
+
         onPostDelete?.(deletedPostId);
         onClose(); // 모달 닫기
       } catch (error) {
