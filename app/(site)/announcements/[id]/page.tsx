@@ -37,6 +37,24 @@ const statusColor: Record<string, string> = {
     DELETED: "bg-gray-400",
 };
 
+const animalTypeLabel: Record<string, string> = {
+    DOG: "강아지",
+    CAT: "고양이",
+};
+
+const genderLabel: Record<string, string> = {
+    MALE: "수컷",
+    FEMALE: "암컷",
+    UNKNOWN: "미상",
+};
+
+const healthLabel: Record<string, string> = {
+    HEALTHY: "건강함",
+    NORMAL: "보통",
+    UNDER_TREATMENT: "치료 중",
+    WEAK: "허약함",
+};
+
 export default function AnnouncementDetailPage() {
     const params = useParams();
     const id = Array.isArray(params.id) ? params.id[0] : params.id;
@@ -101,10 +119,10 @@ export default function AnnouncementDetailPage() {
 
             <section className="bg-yellow-50 rounded-2xl p-8 shadow-inner space-y-5 text-gray-800 text-lg">
                 {[
-                    { label: "동물 종류", value: detail.animalType },
-                    { label: "성별", value: detail.gender },
+                    { label: "동물 종류", value: animalTypeLabel[detail.animalType] || detail.animalType },
+                    { label: "성별", value: genderLabel[detail.gender] || detail.gender },
                     { label: "품종", value: detail.breed },
-                    { label: "건강 상태", value: detail.health },
+                    { label: "건강 상태", value: healthLabel[detail.health] || detail.health },
                     { label: "나이", value: `${detail.age}세` },
                     { label: "보호소", value: detail.shelterName },
                     {

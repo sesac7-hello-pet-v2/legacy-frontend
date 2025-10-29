@@ -8,9 +8,10 @@ interface Announcement {
   id: number;
   breed: string;
   status: string;
-  shelterName: string;
+  shelterNickname: string;
   createdAt: string;
-  image: string | null;
+  thumbnailUrl: string | null;
+  imageUrl: string | null;
 }
 
 interface AnnouncementPage {
@@ -41,7 +42,7 @@ export default function AnnouncementsPage() {
     setLoading(true);
     try {
       const res = await api.get<AnnouncementPage>(
-        `/v1/announcements?page=${p}&size=${ITEMS_PER_PAGE}`
+        `/v1/announcements?status=OPEN&page=${p}&size=${ITEMS_PER_PAGE}`
       );
       setData(res.data);
     } catch (err) {
@@ -71,9 +72,9 @@ export default function AnnouncementsPage() {
               href={`/announcements/${item.id}`}
               className="block bg-white rounded-2xl shadow-md hover:shadow-lg transition p-4 hover:bg-yellow-50"
             >
-              {item.image ? (
+              {item.thumbnailUrl ? (
                 <img
-                  src={item.image}
+                  src={item.thumbnailUrl}
                   alt={item.breed}
                   className="w-full h-56 object-cover rounded-xl mb-4 transition-transform hover:scale-105 duration-300"
                 />
@@ -87,8 +88,7 @@ export default function AnnouncementsPage() {
                 {item.breed}
               </p>
               <p className="text-sm text-gray-600 mb-1">
-                {animalstatus[item.status as "IN_PROGRESS" | "COMPLETED"]} /{" "}
-                보호소: {item.shelterName}
+                보호소: {item.shelterNickname}
               </p>
               <p className="text-sm text-gray-400">
                 등록일: {new Date(item.createdAt).toLocaleDateString()}
