@@ -32,9 +32,9 @@ const statusLabel: Record<string, string> = {
 
 const statusColor: Record<string, string> = {
     OPEN: "bg-lime-500",
-    CLOSED: "bg-red-500",
-    COMPLETED: "bg-gray-500",
-    DELETED: "bg-gray-400",
+    CLOSED: "bg-orange-500",
+    COMPLETED: "bg-yellow-500",
+    DELETED: "bg-red-500",
 };
 
 const animalTypeLabel: Record<string, string> = {
@@ -106,17 +106,18 @@ export default function AnnouncementDetailPage() {
             </div>
 
             {/* 2단 레이아웃: 이미지 + 정보 */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                 {/* 왼쪽: 이미지 */}
-                <div className="h-full bg-gray-100 rounded-2xl overflow-hidden shadow-md">
+                <div className="bg-gray-100 rounded-2xl overflow-hidden shadow-md sticky top-8">
                     {detail.imageUrl ? (
                         <img
                             src={detail.imageUrl}
                             alt={detail.breed}
-                            className="w-full h-full object-contain"
+                            className="w-full object-contain"
+                            style={{ maxHeight: "600px" }}
                         />
                     ) : (
-                        <div className="w-full h-full flex items-center justify-center text-gray-400 font-semibold min-h-96">
+                        <div className="w-full flex items-center justify-center text-gray-400 font-semibold h-96">
                             이미지 없음
                         </div>
                     )}

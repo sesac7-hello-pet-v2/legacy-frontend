@@ -3,6 +3,7 @@
 import api from "@/app/lib/api";
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { ConfirmModal, AlertModal } from "@/app/components/Modal";
 
 const animalTypeKo = {
     DOG: "강아지",
@@ -24,16 +25,16 @@ const healthKo = {
 
 const statusKo = {
     OPEN: "공고 중",
-    IN_PROGRESS: "입양 진행중",
+    CLOSED: "마감됨",
     COMPLETED: "입양 완료",
-    CLOSED: "종료",
+    DELETED: "삭제됨",
 };
 
 const statusColor = {
     OPEN: "bg-lime-500",
-    IN_PROGRESS: "bg-blue-500",
-    COMPLETED: "bg-gray-500",
-    CLOSED: "bg-red-500",
+    CLOSED: "bg-orange-500",
+    COMPLETED: "bg-yellow-500",
+    DELETED: "bg-red-500",
 };
 
 export default function AnnouncementDetailPage() {
@@ -46,8 +47,10 @@ export default function AnnouncementDetailPage() {
     const [isEditMode, setIsEditMode] = useState(false);
     const [formData, setFormData] = useState({
         endDate: "",
-        status: "OPEN",
     });
+    const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
+    const [showAlertModal, setShowAlertModal] = useState(false);
+    const [alertConfig, setAlertConfig] = useState({ message: "", type: "info" });
 
     useEffect(() => {
         if (announcementId) {
@@ -62,12 +65,15 @@ export default function AnnouncementDetailPage() {
             setAnnouncement(data);
             setFormData({
                 endDate: data.endDate ? data.endDate.split("T")[0] : "",
-                status: data.announcementStatus,
             });
         } catch (err) {
             console.error("공고 상세 정보 불러오기 실패", err);
-            alert("공고 정보를 불러올 수 없습니다.");
-            router.back();
+            setAlertConfig({
+                message: "공고 정보를 불러올 수 없습니다.",
+                type: "error"
+            });
+            setShowAlertModal(true);
+            setTimeout(() => router.back(), 2000);
         } finally {
             setLoading(false);
         }
@@ -81,29 +87,50 @@ export default function AnnouncementDetailPage() {
         }));
     };
 
-    async function handleDelete() {
-        const confirmed = confirm("정말 삭제하시겠습니까?");
-        if (!confirmed) return;
+    function confirmDelete() {
+        setShowDeleteConfirmModal(true);
+    }
 
+    async function handleDelete() {
         try {
             await api.delete(`/v1/announcements/${announcementId}`);
-            alert("삭제 완료!");
-            router.push("/my-announcements");
+            setAlertConfig({
+                message: "삭제가 완료되었습니다!",
+                type: "success"
+            });
+            setShowAlertModal(true);
+            fetchAnnouncementDetail(); // 삭제 후 데이터 새로고침
         } catch (err) {
             console.error("삭제 실패", err);
-            alert("삭제 실패");
+            setAlertConfig({
+                message: "삭제에 실패했습니다.",
+                type: "error"
+            });
+            setShowAlertModal(true);
         }
+    }
+
+    function handleAlertClose() {
+        setShowAlertModal(false);
     }
 
     async function handleSave() {
         try {
             await api.put(`/v1/announcements/${announcementId}`, formData);
-            alert("수정 완료!");
+            setAlertConfig({
+                message: "수정이 완료되었습니다!",
+                type: "success"
+            });
+            setShowAlertModal(true);
             setIsEditMode(false);
             fetchAnnouncementDetail();
         } catch (err) {
             console.error("수정 실패", err);
-            alert("수정에 실패했습니다.");
+            setAlertConfig({
+                message: "수정에 실패했습니다.",
+                type: "error"
+            });
+            setShowAlertModal(true);
         }
     }
 
@@ -112,7 +139,6 @@ export default function AnnouncementDetailPage() {
         if (announcement) {
             setFormData({
                 endDate: announcement.endDate ? announcement.endDate.split("T")[0] : "",
-                status: announcement.announcementStatus,
             });
         }
     }
@@ -134,152 +160,133 @@ export default function AnnouncementDetailPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 py-10 px-4">
-            <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
-                {/* 이미지 영역 */}
-                <div className="relative">
+        <main className="max-w-6xl mx-auto py-12 px-6 bg-white">
+            {/* 제목과 상태 배지 */}
+            <div className="flex items-center justify-center mb-8">
+                <h1 className="text-4xl font-extrabold text-yellow-600 text-center">
+                    {announcement.breed} 상세정보
+                </h1>
+                <span className={`ml-4 px-4 py-2 ${statusColor[announcement.announcementStatus]} text-white text-sm font-bold rounded-full shadow-md`}>
+                    {statusKo[announcement.announcementStatus]}
+                </span>
+            </div>
+
+            {/* 2단 레이아웃: 이미지 + 정보 */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                {/* 왼쪽: 이미지 */}
+                <div className="bg-gray-100 rounded-2xl overflow-hidden shadow-md sticky top-8">
                     {announcement.imageUrl ? (
-                        <div className="w-full h-96 bg-gray-200">
-                            <img
-                                src={announcement.imageUrl}
-                                alt={announcement.breed}
-                                className="w-full h-full object-cover"
-                            />
-                        </div>
+                        <img
+                            src={announcement.imageUrl}
+                            alt={announcement.breed}
+                            className="w-full object-contain"
+                            style={{ maxHeight: "600px" }}
+                        />
                     ) : (
-                        <div className="w-full h-96 bg-yellow-200 flex items-center justify-center">
-                            <p className="text-yellow-500 text-xl font-semibold">이미지 없음</p>
+                        <div className="w-full flex items-center justify-center text-gray-400 font-semibold h-96">
+                            이미지 없음
                         </div>
                     )}
                 </div>
 
-                {/* 정보 영역 */}
-                <div className="p-8">
-                    {/* 동물 종류 및 품종 */}
-                    <div className="mb-8">
-                        <p className="text-orange-500 text-xl font-semibold mb-2">
-                            {animalTypeKo[announcement.animalType] || announcement.animalType}
-                        </p>
-                        <h1 className="text-4xl font-extrabold text-gray-800">
-                            {announcement.breed}
-                        </h1>
-                    </div>
-
-                    {/* 상태 배지 */}
-                    <div className="mb-6">
-                        {isEditMode ? (
-                            <div>
-                                <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                    공고 상태
-                                </label>
-                                <select
-                                    name="status"
-                                    value={formData.status}
-                                    onChange={handleChange}
-                                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
-                                >
-                                    <option value="OPEN">공고 중</option>
-                                    <option value="IN_PROGRESS">입양 진행중</option>
-                                    <option value="COMPLETED">입양 완료</option>
-                                    <option value="CLOSED">종료</option>
-                                </select>
-                            </div>
-                        ) : (
-                            <span
-                                className={`inline-block px-4 py-2 ${
-                                    statusColor[announcement.announcementStatus]
-                                } text-white text-sm font-bold rounded-full shadow-md`}
-                            >
-                                {statusKo[announcement.announcementStatus]}
+                {/* 오른쪽: 정보 + 버튼 */}
+                <div className="flex flex-col">
+                    {/* 동물 정보 */}
+                    <section className="bg-yellow-50 rounded-2xl p-6 shadow-inner space-y-4 text-gray-800 flex-1">
+                        {/* 동물 종류 */}
+                        <p className="flex items-center">
+                            <strong className="w-32 text-orange-500">동물 종류:</strong>
+                            <span className="ml-2 text-gray-900 font-normal">
+                                {animalTypeKo[announcement.animalType] || announcement.animalType}
                             </span>
-                        )}
-                    </div>
+                        </p>
 
-                    <div className="space-y-3 mb-8">
+                        {/* 품종 */}
+                        <p className="flex items-center">
+                            <strong className="w-32 text-orange-500">품종:</strong>
+                            <span className="ml-2 text-gray-900 font-normal">{announcement.breed}</span>
+                        </p>
+
                         {/* 나이 */}
-                        <div className="flex items-center border-b border-gray-200 pb-3">
-                            <span className="text-gray-600 font-medium text-sm w-32">나이</span>
-                            <span className="text-gray-700 text-sm">{announcement.age}세</span>
-                        </div>
+                        <p className="flex items-center">
+                            <strong className="w-32 text-orange-500">나이:</strong>
+                            <span className="ml-2 text-gray-900 font-normal">{announcement.age}세</span>
+                        </p>
 
                         {/* 성별 */}
-                        <div className="flex items-center border-b border-gray-200 pb-3">
-                            <span className="text-gray-600 font-medium text-sm w-32">성별</span>
-                            <span className="text-gray-700 text-sm">
+                        <p className="flex items-center">
+                            <strong className="w-32 text-orange-500">성별:</strong>
+                            <span className="ml-2 text-gray-900 font-normal">
                                 {genderKo[announcement.gender] || announcement.gender}
                             </span>
-                        </div>
+                        </p>
 
                         {/* 건강 상태 */}
-                        <div className="flex items-center border-b border-gray-200 pb-3">
-                            <span className="text-gray-600 font-medium text-sm w-32">
-                                건강 상태
-                            </span>
-                            <span className="text-gray-700 text-sm">
+                        <p className="flex items-center">
+                            <strong className="w-32 text-orange-500">건강 상태:</strong>
+                            <span className="ml-2 text-gray-900 font-normal">
                                 {healthKo[announcement.health] || announcement.health}
                             </span>
-                        </div>
+                        </p>
 
                         {/* 보호소 */}
-                        <div className="flex items-center border-b border-gray-200 pb-3">
-                            <span className="text-gray-600 font-medium text-sm w-32">보호소</span>
-                            <span className="text-gray-700 text-sm">
+                        <p className="flex items-center">
+                            <strong className="w-32 text-orange-500">보호소:</strong>
+                            <span className="ml-2 text-gray-900 font-normal">
                                 {announcement.shelterName}
                             </span>
-                        </div>
+                        </p>
 
                         {/* 등록일 */}
-                        <div className="flex items-center border-b border-gray-200 pb-3">
-                            <span className="text-gray-600 font-medium text-sm w-32">등록일</span>
-                            <span className="text-gray-700 text-sm">
+                        <p className="flex items-center">
+                            <strong className="w-32 text-orange-500">등록일:</strong>
+                            <span className="ml-2 text-gray-900 font-normal">
                                 {new Date(announcement.createdAt).toLocaleDateString()}
                             </span>
-                        </div>
+                        </p>
 
                         {/* 공고 종료일 */}
-                        <div className="flex items-center border-b border-gray-200 pb-3">
-                            <span className="text-gray-600 font-medium text-sm w-32">
-                                공고 종료일
-                            </span>
+                        <p className="flex items-center">
+                            <strong className="w-32 text-orange-500">공고 종료일:</strong>
                             {isEditMode ? (
                                 <input
                                     type="date"
                                     name="endDate"
                                     value={formData.endDate}
                                     onChange={handleChange}
-                                    className="flex-1 px-3 py-1 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-transparent"
+                                    className="ml-2 flex-1 px-3 py-2 text-sm border-2 border-yellow-500 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:border-yellow-600"
                                 />
                             ) : (
-                                <span className="text-gray-700 text-sm">
+                                <span className="ml-2 text-gray-900 font-normal">
                                     {announcement.endDate
                                         ? new Date(announcement.endDate).toLocaleDateString()
                                         : "미정"}
                                 </span>
                             )}
-                        </div>
+                        </p>
 
                         {/* 성격 및 특징 */}
-                        <div className="pt-4">
-                            <h3 className="text-gray-600 font-medium text-sm mb-3">성격 및 특징</h3>
-                            <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">
+                        <div className="pt-4 border-t border-yellow-200">
+                            <strong className="text-orange-500 block mb-2">성격 및 특징:</strong>
+                            <p className="text-gray-900 leading-relaxed whitespace-pre-wrap">
                                 {announcement.personality}
                             </p>
                         </div>
-                    </div>
+                    </section>
 
-                    {/* 버튼 영역 */}
-                    <div className="flex gap-4 pt-6">
+                    {/* 버튼들 - 나란히 배치 */}
+                    <div className="mt-6 flex gap-3">
                         {isEditMode ? (
                             <>
                                 <button
                                     onClick={handleCancel}
-                                    className="flex-1 px-6 py-3 bg-gray-300 text-gray-700 rounded-full font-semibold hover:bg-gray-400 transition"
+                                    className="flex-1 px-6 py-3 bg-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-400 transition"
                                 >
                                     취소
                                 </button>
                                 <button
                                     onClick={handleSave}
-                                    className="flex-1 px-6 py-3 bg-yellow-400 text-white rounded-full font-semibold hover:bg-yellow-500 transition"
+                                    className="flex-1 px-6 py-3 bg-yellow-400 text-white rounded-lg font-semibold hover:bg-yellow-500 transition"
                                 >
                                     저장
                                 </button>
@@ -287,28 +294,62 @@ export default function AnnouncementDetailPage() {
                         ) : (
                             <>
                                 <button
-                                    onClick={() => router.push("/my-announcements")}
-                                    className="flex-1 px-6 py-3 bg-gray-300 text-gray-700 rounded-full font-semibold hover:bg-gray-400 transition"
+                                    onClick={() => router.push(`/announcements/${announcementId}/applications`)}
+                                    className="flex-1 px-6 py-3 bg-blue-500 text-white rounded-lg font-semibold hover:bg-blue-600 transition"
                                 >
-                                    목록으로
+                                    신청 내역
                                 </button>
-                                <button
-                                    onClick={() => setIsEditMode(true)}
-                                    className="flex-1 px-6 py-3 bg-yellow-400 text-white rounded-full font-semibold hover:bg-yellow-500 transition"
-                                >
-                                    수정
-                                </button>
-                                <button
-                                    onClick={handleDelete}
-                                    className="flex-1 px-6 py-3 bg-orange-400 text-white rounded-full font-semibold hover:bg-red-500 transition"
-                                >
-                                    삭제
-                                </button>
+                                {announcement.announcementStatus === "OPEN" && (
+                                    <>
+                                        <button
+                                            onClick={() => setIsEditMode(true)}
+                                            className="flex-1 px-6 py-3 bg-yellow-400 text-white rounded-lg font-semibold hover:bg-yellow-500 transition"
+                                        >
+                                            수정
+                                        </button>
+                                        <button
+                                            onClick={confirmDelete}
+                                            className="flex-1 px-6 py-3 bg-orange-400 text-white rounded-lg font-semibold hover:bg-red-500 transition"
+                                        >
+                                            삭제
+                                        </button>
+                                    </>
+                                )}
                             </>
                         )}
                     </div>
                 </div>
             </div>
-        </div>
+
+            {/* 목록으로 버튼 - 페이지 하단 중앙 */}
+            <div className="mt-12 text-center">
+                <button
+                    onClick={() => router.push("/me")}
+                    className="px-8 py-3 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition"
+                >
+                    목록으로
+                </button>
+            </div>
+
+            {/* 삭제 확인 모달 */}
+            <ConfirmModal
+                isOpen={showDeleteConfirmModal}
+                onClose={() => setShowDeleteConfirmModal(false)}
+                onConfirm={handleDelete}
+                title="삭제 확인"
+                message="정말 삭제하시겠습니까?"
+                confirmText="삭제"
+                cancelText="취소"
+                type="error"
+            />
+
+            {/* 알림 모달 */}
+            <AlertModal
+                isOpen={showAlertModal}
+                onClose={handleAlertClose}
+                message={alertConfig.message}
+                type={alertConfig.type}
+            />
+        </main>
     );
 }
