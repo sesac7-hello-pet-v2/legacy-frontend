@@ -2,16 +2,16 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import api from "@/app/lib/api";
 
 interface Announcement {
   id: number;
   breed: string;
   status: string;
-  shelterName: string;
+  shelterNickname: string;
   createdAt: string;
-  image: string | null;
+  thumbnailUrl: string | null;
+  imageUrl: string | null;
 }
 
 // 상태 변환
@@ -25,8 +25,9 @@ const DUMMY_ANNOUNCEMENTS: Announcement[] = Array.from({ length: 10 }, (_, i) =>
   id: i + 1,
   breed: "데이터를 불러올 수 없습니다",
   status: "IN_PROGRESS",
-  shelterName: "알 수 없음",
-  image: null,
+  shelterNickname: "알 수 없음",
+  thumbnailUrl: null,
+  imageUrl: null,
   createdAt: new Date().toISOString(),
 }));
 
@@ -52,7 +53,7 @@ export default function AnnouncementCards() {
 
   const fetchAnnouncements = async () => {
     try {
-      const response = await api.get("/v1/announcements?page=0&size=10");
+      const response = await api.get("/v1/announcements?status=OPEN&page=0&size=10");
       const data = response.data.announcements || [];
       // API 데이터가 있으면 사용, 없으면 더미 데이터 유지
       if (data.length > 0) {
@@ -112,29 +113,24 @@ export default function AnnouncementCards() {
                   <CardWrapper key={announcement.id} {...cardProps}>
                     {/* 이미지 */}
                     <div className="relative h-48 overflow-hidden bg-gray-200">
-                      {announcement.image ? (
-                        <Image
-                          src={announcement.image}
+                      {announcement.thumbnailUrl ? (
+                        <img
+                          src={announcement.thumbnailUrl}
                           alt={announcement.breed}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       ) : (
                         <div className="flex items-center justify-center h-full text-gray-400 text-sm">
                           {isDummy ? '로딩 중...' : '이미지 없음'}
                         </div>
                       )}
-                      {/* 뱃지 */}
-                      <div className="absolute top-3 left-3 bg-orange-500 text-white px-2.5 py-0.5 rounded-full text-xs font-medium">
-                        {animalStatus[announcement.status as "IN_PROGRESS" | "COMPLETED"]}
-                      </div>
                     </div>
 
                     {/* 정보 */}
                     <div className="p-3">
                       <h3 className="font-semibold text-base mb-1.5 truncate">{announcement.breed}</h3>
                       <div className="text-xs text-gray-600 space-y-0.5">
-                        <p>보호소: {announcement.shelterName}</p>
+                        <p>보호소: {announcement.shelterNickname}</p>
                         <p>등록일: {new Date(announcement.createdAt).toLocaleDateString()}</p>
                       </div>
                     </div>
