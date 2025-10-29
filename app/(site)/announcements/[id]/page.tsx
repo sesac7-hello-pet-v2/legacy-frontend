@@ -94,7 +94,7 @@ export default function AnnouncementDetailPage() {
     const isClosedOrCompleted = ["CLOSED", "COMPLETED", "DELETED"].includes(detail.announcementStatus);
 
     return (
-        <main className="max-w-2xl mx-auto py-12 px-6 bg-white">
+        <main className="max-w-6xl mx-auto py-12 px-6 bg-white">
             {/* 제목과 상태 배지 */}
             <div className="flex items-center justify-center mb-8">
                 <h1 className="text-4xl font-extrabold text-yellow-600 text-center">
@@ -105,83 +105,96 @@ export default function AnnouncementDetailPage() {
                 </span>
             </div>
 
-            {detail.imageUrl ? (
-                <img
-                    src={detail.imageUrl}
-                    alt={detail.breed}
-                    className="w-full max-w-md rounded-2xl mb-8 object-cover mx-auto shadow-md"
-                />
-            ) : (
-                <div className="w-full max-w-md h-64 bg-gray-100 rounded-2xl mb-8 flex items-center justify-center text-gray-400 mx-auto font-semibold">
-                    이미지 없음
+            {/* 2단 레이아웃: 이미지 + 정보 */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* 왼쪽: 이미지 */}
+                <div className="h-full bg-gray-100 rounded-2xl overflow-hidden shadow-md">
+                    {detail.imageUrl ? (
+                        <img
+                            src={detail.imageUrl}
+                            alt={detail.breed}
+                            className="w-full h-full object-contain"
+                        />
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400 font-semibold min-h-96">
+                            이미지 없음
+                        </div>
+                    )}
                 </div>
-            )}
 
-            <section className="bg-yellow-50 rounded-2xl p-8 shadow-inner space-y-5 text-gray-800 text-lg">
-                {[
-                    { label: "동물 종류", value: animalTypeLabel[detail.animalType] || detail.animalType },
-                    { label: "성별", value: genderLabel[detail.gender] || detail.gender },
-                    { label: "품종", value: detail.breed },
-                    { label: "건강 상태", value: healthLabel[detail.health] || detail.health },
-                    { label: "나이", value: `${detail.age}세` },
-                    { label: "보호소", value: detail.shelterName },
-                    {
-                        label: "등록일",
-                        value: new Date(detail.createdAt).toLocaleDateString(),
-                    },
-                    {
-                        label: "공고 종료일",
-                        value: detail.endDate ? new Date(detail.endDate).toLocaleDateString() : "미정",
-                    },
-                ].map(({ label, value }, i) => (
-                    <p key={i} className="flex items-center">
-                        <strong className="w-32 text-orange-500">{label}:</strong>
-                        <span className="ml-2 text-gray-900 font-normal">{value}</span>
-                    </p>
-                ))}
+                {/* 오른쪽: 정보 + 버튼 */}
+                <div className="flex flex-col">
+                    {/* 동물 정보 */}
+                    <section className="bg-yellow-50 rounded-2xl p-6 shadow-inner space-y-4 text-gray-800 flex-1">
+                        {[
+                            { label: "동물 종류", value: animalTypeLabel[detail.animalType] || detail.animalType },
+                            { label: "성별", value: genderLabel[detail.gender] || detail.gender },
+                            { label: "품종", value: detail.breed },
+                            { label: "건강 상태", value: healthLabel[detail.health] || detail.health },
+                            { label: "나이", value: `${detail.age}세` },
+                            { label: "보호소", value: detail.shelterName },
+                            {
+                                label: "등록일",
+                                value: new Date(detail.createdAt).toLocaleDateString(),
+                            },
+                            {
+                                label: "공고 종료일",
+                                value: detail.endDate ? new Date(detail.endDate).toLocaleDateString() : "미정",
+                            },
+                        ].map(({ label, value }, i) => (
+                            <p key={i} className="flex items-center">
+                                <strong className="w-32 text-orange-500">{label}:</strong>
+                                <span className="ml-2 text-gray-900 font-normal">{value}</span>
+                            </p>
+                        ))}
 
-                {/* 성격 및 특징 - 여러 줄로 표시 */}
-                <div className="pt-4 border-t border-yellow-200">
-                    <strong className="text-orange-500 block mb-2">성격 및 특징:</strong>
-                    <p className="text-gray-900 leading-relaxed whitespace-pre-wrap">
-                        {detail.personality}
-                    </p>
+                        {/* 성격 및 특징 - 여러 줄로 표시 */}
+                        <div className="pt-4 border-t border-yellow-200">
+                            <strong className="text-orange-500 block mb-2">성격 및 특징:</strong>
+                            <p className="text-gray-900 leading-relaxed whitespace-pre-wrap">
+                                {detail.personality}
+                            </p>
+                        </div>
+                    </section>
+
+                    {/* 버튼들 - 나란히 배치 */}
+                    <div className="mt-6 flex gap-3">
+                        {/* 신청 버튼 */}
+                        {canApply ? (
+                            <Link
+                                href={`/announcements/${detail.id}/apply`}
+                                className="flex-1 rounded-full bg-amber-400 py-3 font-bold text-white shadow-md transition hover:bg-amber-500 text-center"
+                            >
+                                입양 신청하기
+                            </Link>
+                        ) : detail.alreadyApplied ? (
+                            <button
+                                className="flex-1 rounded-full bg-gray-300 py-3 font-bold text-white shadow-inner cursor-not-allowed text-center"
+                                disabled
+                            >
+                                이미 신청한 공고입니다
+                            </button>
+                        ) : isClosedOrCompleted ? (
+                            <button
+                                className="flex-1 rounded-full bg-gray-400 py-3 font-bold text-white shadow-inner cursor-not-allowed text-center"
+                                disabled
+                            >
+                                {detail.announcementStatus === "CLOSED" && "마감된 공고입니다"}
+                                {detail.announcementStatus === "COMPLETED" && "입양 완료"}
+                                {detail.announcementStatus === "DELETED" && "삭제된 공고"}
+                            </button>
+                        ) : null}
+
+                        {/* 공고 목록으로 돌아가기 버튼 */}
+                        <Link
+                            href="/announcements"
+                            className="flex-1 rounded-full border-2 border-yellow-500 text-yellow-600 py-3 font-bold text-center hover:bg-yellow-50 transition"
+                        >
+                            목록으로
+                        </Link>
+                    </div>
                 </div>
-            </section>
-
-            {/* 신청 버튼 - 공고 상태에 따라 다르게 표시 */}
-            {canApply ? (
-                <Link
-                    href={`/announcements/${detail.id}/apply`}
-                    className="mt-6 w-full rounded-full bg-amber-400 py-3 font-semibold text-white shadow-md transition hover:bg-amber-500 block mx-auto text-center"
-                >
-                    입양 신청하기
-                </Link>
-            ) : detail.alreadyApplied ? (
-                <button
-                    className="mt-6 w-full rounded-full bg-gray-300 py-3 font-semibold text-white shadow-inner cursor-not-allowed block mx-auto text-center"
-                    disabled
-                >
-                    이미 신청한 공고입니다
-                </button>
-            ) : isClosedOrCompleted ? (
-                <button
-                    className="mt-6 w-full rounded-full bg-gray-400 py-3 font-semibold text-white shadow-inner cursor-not-allowed block mx-auto text-center"
-                    disabled
-                >
-                    {detail.announcementStatus === "CLOSED" && "마감된 공고입니다"}
-                    {detail.announcementStatus === "COMPLETED" && "입양이 완료된 공고입니다"}
-                    {detail.announcementStatus === "DELETED" && "삭제된 공고입니다"}
-                </button>
-            ) : null}
-
-            {/* 공고 목록으로 돌아가기 버튼 */}
-            <Link
-                href="/announcements"
-                className="mt-4 w-full rounded-full border border-yellow-500 text-yellow-600 py-3 font-semibold text-center block hover:bg-yellow-50 transition"
-            >
-                입양 게시판으로 돌아가기
-            </Link>
+            </div>
         </main>
     );
 }
