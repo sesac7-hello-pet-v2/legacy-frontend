@@ -325,7 +325,7 @@ export default function AnnouncementDetailPage() {
             <div className="mt-12 text-center">
                 <button
                     onClick={() => router.push("/me")}
-                    className="px-8 py-3 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition"
+                    className="px-8 py-3 rounded-full border-2 border-yellow-500 text-yellow-600 font-bold hover:bg-yellow-50 transition"
                 >
                     목록으로
                 </button>

@@ -1,8 +1,6 @@
 import { formatPhoneNumber } from "@/app/lib/formatPhoneNumber";
-import { useParams } from "next/navigation";
 
 export default function ApplicationInfoSection({
-    id,
     name,
     phoneNumber,
     email,
@@ -11,35 +9,29 @@ export default function ApplicationInfoSection({
     setReason,
     shelterInfo,
 }) {
-    const params = useParams();
-    const displayId = id ?? (Array.isArray(params.id) ? params.id[0] : params.id ?? "-");
-
     return (
-        <div className="space-y-6 text-sm">
-            <div className="flex gap-6">
-                <div className="space-y-4">
-                    <div className="text-gray-600 font-medium">공고 번호</div>
-                    <div className="text-gray-600 font-medium">신청 종류</div>
-                    <div className="text-gray-600 font-medium">보호소 이름</div>
-                    <div className="text-gray-600 font-medium">신청자 이름</div>
-                    <div className="text-gray-600 font-medium">신청자 연락처</div>
-                    <div className="text-gray-600 font-medium">신청자 이메일</div>
+        <div className="space-y-6 border-b border-gray-300 pb-6">
+            <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+                <div>
+                    <p className="text-base font-semibold text-amber-700 mb-1">신청자 이름</p>
+                    <p className="text-sm text-gray-800">{name || "-"}</p>
                 </div>
-
-                <div className="space-y-4 ml-10">
-                    <div className="text-gray-800">{displayId}</div>
-                    <div className="text-gray-800">입양</div>
-                    <div className="text-gray-800">
-                        {shelterInfo ? `${shelterInfo.name} (${shelterInfo.id})` : "-"}
-                    </div>
-                    <div className="text-gray-800">{name || "-"}</div>
-                    <div className="text-gray-800">{formatPhoneNumber(phoneNumber) || "-"}</div>
-                    <div className="text-gray-800">{email || "-"}</div>
+                <div>
+                    <p className="text-base font-semibold text-amber-700 mb-1">신청자 연락처</p>
+                    <p className="text-sm text-gray-800">{formatPhoneNumber(phoneNumber) || "-"}</p>
+                </div>
+                <div>
+                    <p className="text-base font-semibold text-amber-700 mb-1">신청자 이메일</p>
+                    <p className="text-sm text-gray-800">{email || "-"}</p>
+                </div>
+                <div>
+                    <p className="text-base font-semibold text-amber-700 mb-1">보호소 이름</p>
+                    <p className="text-sm text-gray-800">{shelterInfo ? `${shelterInfo.name}` : "-"}</p>
                 </div>
             </div>
 
             <div className="space-y-1 mt-6">
-                <p className="font-medium text-gray-600 mb-2">신청 희망 사유</p>
+                <p className="font-semibold text-base text-amber-700 mb-2">신청 희망 사유</p>
                 {isReadOnly ? (
                     <div className="w-full min-h-[100px] rounded-md p-2 text-sm bg-[rgba(197,197,197,0.2)]">
                         {reason || "-"}

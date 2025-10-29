@@ -4,9 +4,9 @@ import { formatPhoneNumber } from "@/app/lib/formatPhoneNumber";
 import { useRouter } from "next/navigation";
 
 const statusColor = {
-    "신청서 제출": "bg-blue-500 text-white",
+    "신청서 제출": "bg-orange-500 text-white",
     "검토 중": "bg-yellow-500 text-white",
-    "승인": "bg-green-500 text-white",
+    "승인": "bg-lime-500 text-white",
     "거절": "bg-red-500 text-white",
 };
 

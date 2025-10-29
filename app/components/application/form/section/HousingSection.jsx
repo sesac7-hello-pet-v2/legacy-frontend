@@ -10,29 +10,29 @@ export default function HousingSection({ housingInfo, setHousingInfo, isReadOnly
 
     // 공통 렌더 함수
     const renderField = (title, value) => (
-        <div className="flex gap-2">
-            <span className="font-medium text-sm">{title}:</span>
-            <span className="text-sm text-gray-800">{value !== null ? String(value) : "-"}</span>
+        <div>
+            <p className="text-base font-semibold text-amber-700 mb-1">{title}</p>
+            <p className="text-sm text-gray-800">{value !== null ? String(value) : "-"}</p>
         </div>
     );
 
     return (
-        <div className="space-y-10">
+        <div className="space-y-10 border-b border-gray-300 pb-6">
             <h2 className="text-lg font-semibold text-center mb-8">주거 환경</h2>
 
             {isReadOnly ? (
-                <>
+                <div className="space-y-6">
                     {renderField("현재 주택 형태", housingInfo.housingTypeLabel)}
                     {renderField("주택 거주 형태", housingInfo.residenceTypeLabel)}
                     {renderField("반려동물 허용 여부", housingInfo.petAllowed ? "허용" : "불허")}
                     {renderField("반려동물 생활 장소", housingInfo.petLivingPlaceLabel)}
                     {renderField("주택 면적", housingInfo.houseSizeRangeLabel)}
-                </>
+                </div>
             ) : (
                 <>
                     {/* 주택 형태 */}
                     <div className="space-y-3">
-                        <p className="font-medium text-sm">
+                        <p className="font-medium text-base">
                             현재 거주 중인 주택 형태는 무엇인가요?
                         </p>
                         {[
@@ -59,7 +59,7 @@ export default function HousingSection({ housingInfo, setHousingInfo, isReadOnly
 
                     {/* 거주 형태 */}
                     <div className="space-y-3">
-                        <p className="font-medium text-sm">현재 주택의 거주 형태는 무엇인가요?</p>
+                        <p className="font-medium text-base">현재 주택의 거주 형태는 무엇인가요?</p>
                         {[
                             { code: "OWNED", label: "자가" },
                             { code: "JEONSE", label: "전세" },
@@ -82,7 +82,7 @@ export default function HousingSection({ housingInfo, setHousingInfo, isReadOnly
 
                     {/* 반려동물 허용 여부 */}
                     <div className="space-y-3">
-                        <p className="font-medium text-sm">
+                        <p className="font-medium text-base">
                             현재 거주 중인 주택에서 반려동물 양육이 허용되나요?
                         </p>
                         <label className="flex items-center gap-2 text-sm">
@@ -109,7 +109,7 @@ export default function HousingSection({ housingInfo, setHousingInfo, isReadOnly
 
                     {/* 반려동물 생활 장소 */}
                     <div className="space-y-3">
-                        <p className="font-medium text-sm">
+                        <p className="font-medium text-base">
                             입양 후 반려동물은 어디에서 생활하나요?
                         </p>
                         {[
@@ -133,7 +133,7 @@ export default function HousingSection({ housingInfo, setHousingInfo, isReadOnly
 
                     {/* 주택 면적 */}
                     <div className="space-y-3">
-                        <p className="font-medium text-sm">
+                        <p className="font-medium text-base">
                             현재 거주 중인 주택의 면적은 얼마인가요?
                         </p>
                         {[
