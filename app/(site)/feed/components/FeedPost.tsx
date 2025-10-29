@@ -48,6 +48,16 @@ export default function FeedPost({post, currentUserId, onPostDelete, onPostClick
         if (confirmed) {
             try {
                 await api.delete(`/posts/${post.postId}`);
+
+              // 캐시 무효화
+              try {
+                const revalidateFeed = (await import("@/app/actions/revalidate")).default;
+                await revalidateFeed({userId: currentUserId, forceRevalidate: true});
+                console.log("✅ 피드 캐시 무효화 완료");
+              } catch (cacheError) {
+                console.warn("⚠️ 캐시 무효화 실패:", cacheError);
+              }
+
                 onPostDelete?.(post.postId);
             } catch (error) {
                 console.error("게시글 삭제 실패:", error);

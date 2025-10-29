@@ -64,9 +64,35 @@ export default function PostDetailModal({
         }
     };
 
-    const handlePostDelete = (deletedPostId: string) => {
+  const handlePostDelete = async (deletedPostId: string) => {
+    const {modalConfirm, modalAlert} = await import('@/app/utils/alertUtils');
+    const api = (await import('@/app/lib/api')).default;
+
+    const confirmed = await modalConfirm(
+      "이 게시글을 삭제하시겠습니까?\n삭제된 게시글은 복구할 수 없습니다.",
+      "warning"
+    );
+
+    if (confirmed) {
+      try {
+        await api.delete(`/posts/${deletedPostId}`);
+
+        // 캐시 무효화
+        try {
+          const revalidateFeed = (await import("@/app/actions/revalidate")).default;
+          await revalidateFeed({userId: user?.id, forceRevalidate: true});
+          console.log("✅ 피드 캐시 무효화 완료");
+        } catch (cacheError) {
+          console.warn("⚠️ 캐시 무효화 실패:", cacheError);
+        }
+
         onPostDelete?.(deletedPostId);
         onClose(); // 모달 닫기
+      } catch (error) {
+        console.error("게시글 삭제 실패:", error);
+        await modalAlert("게시글 삭제에 실패했습니다.", "error");
+      }
+    }
     };
 
     const handleBackdropClick = (e: React.MouseEvent) => {
