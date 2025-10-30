@@ -65,39 +65,47 @@ export default function AnnouncementsPage() {
                 입양 게시판
             </h1>
 
-            <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-10">
-                {data.announcements.map((item) => (
-                    <li key={item.id}>
-                        <Link
-                            href={`/announcements/${item.id}`}
-                            className="block bg-white rounded-2xl shadow-md hover:shadow-lg transition p-4 hover:bg-yellow-50"
-                        >
-                            {item.thumbnailUrl ? (
-                                <img
-                                    src={item.thumbnailUrl}
-                                    alt={item.breed}
-                                    className="w-full h-72 object-cover object-center rounded-xl mb-4 transition-transform hover:scale-105 duration-300"
-                                />
-                            ) : (
-                                <div className="w-full h-72 bg-gray-200 rounded-xl mb-4 flex items-center justify-center text-gray-400">
-                                    이미지 없음
-                                </div>
-                            )}
+            {data.announcements.length === 0 ? (
+                <div className="max-w-6xl mx-auto mb-10 text-center py-20">
+                    <p className="text-gray-500 text-lg mb-2">등록된 입양 공고가 없습니다.</p>
+                    <p className="text-gray-400 text-sm">새로운 공고를 기다려주세요!</p>
+                </div>
+            ) : (
+                <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-10">
+                    {data.announcements.map((item) => (
+                        <li key={item.id}>
+                            <Link
+                                href={`/announcements/${item.id}`}
+                                className="block bg-white rounded-2xl shadow-md hover:shadow-lg transition p-4 hover:bg-yellow-50"
+                            >
+                                {item.thumbnailUrl ? (
+                                    <img
+                                        src={item.thumbnailUrl}
+                                        alt={item.breed}
+                                        className="w-full h-72 object-cover object-center rounded-xl mb-4 transition-transform hover:scale-105 duration-300"
+                                    />
+                                ) : (
+                                    <div className="w-full h-72 bg-gray-200 rounded-xl mb-4 flex items-center justify-center text-gray-400">
+                                        이미지 없음
+                                    </div>
+                                )}
 
-                            <p className="text-lg text-yellow-800 font-bold mb-1">{item.breed}</p>
-                            <p className="text-sm text-gray-600 mb-1">
-                                보호소: {item.shelterNickname}
-                            </p>
-                            <p className="text-sm text-gray-400">
-                                등록일: {new Date(item.createdAt).toLocaleDateString()}
-                            </p>
-                        </Link>
-                    </li>
-                ))}
-            </ul>
+                                <p className="text-lg text-yellow-800 font-bold mb-1">{item.breed}</p>
+                                <p className="text-sm text-gray-600 mb-1">
+                                    보호소: {item.shelterNickname}
+                                </p>
+                                <p className="text-sm text-gray-400">
+                                    등록일: {new Date(item.createdAt).toLocaleDateString()}
+                                </p>
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
+            )}
 
             {/* 페이지네이션 */}
-            <div className="flex justify-center items-center gap-4">
+            {data.announcements.length > 0 && (
+                <div className="flex justify-center items-center gap-4">
                 <button
                     onClick={goPrev}
                     disabled={page === 0}
@@ -125,7 +133,8 @@ export default function AnnouncementsPage() {
                 >
                     다음 ▶
                 </button>
-            </div>
+                </div>
+            )}
         </div>
     );
 }
