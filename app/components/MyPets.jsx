@@ -31,7 +31,7 @@ const petStatusKo = {
 };
 
 const petStatusColor = {
-    AVAILABLE: "bg-[rgb(255,245,196)]",
+    AVAILABLE: "bg-[rgb(255,184,61)]",
     ANNOUNCED: "bg-[rgb(255,222,167)]",
     ADOPTED: "bg-[rgb(160,177,135)]",
     DELETED: "bg-[rgb(231,116,116)]",
@@ -65,14 +65,13 @@ export default function MyPets() {
             console.error("  - 에러 상세:", err.response || err);
             setAlertConfig({
                 message: "펫 목록을 불러올 수 없습니다. 콘솔을 확인해주세요.",
-                type: "error"
+                type: "error",
             });
             setShowAlertModal(true);
         } finally {
             setLoading(false);
         }
     }
-
 
     if (loading) return <p className="text-center mt-20 text-lg">불러오는 중…</p>;
 
@@ -111,7 +110,13 @@ export default function MyPets() {
                                 <p className="text-orange-500 text-sm font-semibold">
                                     {animalTypeKo[pet.animalType] || pet.animalType}
                                 </p>
-                                <span className={`ml-auto px-2 py-1 ${petStatusColor[pet.status]} ${pet.status === "AVAILABLE" || pet.status === "ANNOUNCED" ? "text-gray-800" : "text-white"} text-xs font-bold rounded-full`}>
+                                <span
+                                    className={`ml-auto px-2 py-1 ${petStatusColor[pet.status]} ${
+                                        pet.status === "AVAILABLE" || pet.status === "ANNOUNCED"
+                                            ? "text-gray-800"
+                                            : "text-white"
+                                    } text-xs font-bold rounded-full`}
+                                >
                                     {petStatusKo[pet.status] || pet.status}
                                 </span>
                             </div>

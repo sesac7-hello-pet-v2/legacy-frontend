@@ -38,7 +38,7 @@ export default function AgreementSection({ agreement, setAgreement, isReadOnly =
     };
 
     return (
-        <div className="border-b border-gray-300 pb-6">
+        <div className={`pb-6 ${isReadOnly ? 'border-b border-gray-300' : ''}`}>
             <h2 className="text-lg font-semibold text-center mb-8">최종 확인 및 동의</h2>
             {!isReadOnly && (
                 <p className="text-base text-gray-700 font-semibold mb-5">

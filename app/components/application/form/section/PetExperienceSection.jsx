@@ -13,7 +13,7 @@ export default function PetExperienceSection({
     };
 
     return (
-        <div className="space-y-10 border-b border-gray-300 pb-6">
+        <div className={`space-y-10 pb-6 ${isReadOnly ? 'border-b border-gray-300' : ''}`}>
             <h2 className="text-lg font-semibold text-center mb-8">반려동물 양육 경험</h2>
 
             {isReadOnly ? (

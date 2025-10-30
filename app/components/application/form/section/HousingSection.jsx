@@ -17,7 +17,7 @@ export default function HousingSection({ housingInfo, setHousingInfo, isReadOnly
     );
 
     return (
-        <div className="space-y-10 border-b border-gray-300 pb-6">
+        <div className={`space-y-10 pb-6 ${isReadOnly ? 'border-b border-gray-300' : ''}`}>
             <h2 className="text-lg font-semibold text-center mb-8">주거 환경</h2>
 
             {isReadOnly ? (

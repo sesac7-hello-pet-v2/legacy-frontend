@@ -16,7 +16,7 @@ export default function CareSection({ careInfo, setCareInfo, isReadOnly = false 
     );
 
     return (
-        <div className="space-y-10 border-b border-gray-300 pb-6">
+        <div className={`space-y-10 pb-6 ${isReadOnly ? 'border-b border-gray-300' : ''}`}>
             <h2 className="text-lg font-semibold text-center mb-8">돌봄 가능 시간</h2>
 
             {isReadOnly ? (

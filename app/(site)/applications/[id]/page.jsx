@@ -125,7 +125,13 @@ export default function ApplicationDetailPage() {
             <FuturePlanSection futurePlanInfo={data.futurePlan} isReadOnly />
             <AgreementSection agreement={data.agreement} isReadOnly />
 
-            <div className="flex justify-center mt-6">
+            <div className="flex justify-center gap-3 mt-6">
+                <button
+                    onClick={() => router.back()}
+                    className="bg-gray-300 text-gray-700 font-semibold py-2 px-6 rounded-full hover:bg-gray-400"
+                >
+                    목록으로
+                </button>
                 <button
                     onClick={handleApprove}
                     className="bg-amber-400 text-white font-semibold py-2 px-6 rounded-full hover:bg-amber-500"
