@@ -13,7 +13,7 @@ export default function FuturePlanSection({
     };
 
     return (
-        <div className="space-y-10 border-b border-gray-300 pb-6">
+        <div className={`space-y-10 pb-6 ${isReadOnly ? 'border-b border-gray-300' : ''}`}>
             <h2 className="text-lg font-semibold text-center mb-8">향후 계획</h2>
 
             {isReadOnly ? (

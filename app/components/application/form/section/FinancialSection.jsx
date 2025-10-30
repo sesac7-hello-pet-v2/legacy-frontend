@@ -13,7 +13,7 @@ export default function FinancialSection({
     };
 
     return (
-        <div className="space-y-10 border-b border-gray-300 pb-6">
+        <div className={`space-y-10 pb-6 ${isReadOnly ? 'border-b border-gray-300' : ''}`}>
             <h2 className="text-lg font-semibold text-center mb-8">경제적 여건</h2>
 
             {isReadOnly ? (

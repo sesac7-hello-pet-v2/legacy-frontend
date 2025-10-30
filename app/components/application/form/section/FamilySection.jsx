@@ -16,7 +16,7 @@ export default function FamilySection({ familyInfo, setFamilyInfo, isReadOnly = 
     );
 
     return (
-        <div className="space-y-10 border-b border-gray-300 pb-6">
+        <div className={`space-y-10 pb-6 ${isReadOnly ? 'border-b border-gray-300' : ''}`}>
             <h2 className="text-lg font-semibold text-center mb-8">가족 구성</h2>
 
             {isReadOnly ? (
@@ -51,7 +51,7 @@ export default function FamilySection({ familyInfo, setFamilyInfo, isReadOnly = 
                             onChange={(e) => update("numberOfHousehold", Number(e.target.value))}
                             min="1"
                             placeholder="예: 2"
-                            className="w-full rounded-md p-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 bg-[rgba(197,197,197,0.2)]"
+                            className="w-20 rounded-md p-2 text-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-amber-400 bg-[rgba(197,197,197,0.2)]"
                         />
                     </div>
 
@@ -81,10 +81,8 @@ export default function FamilySection({ familyInfo, setFamilyInfo, isReadOnly = 
                             함께 거주하는 가족 모두 반려동물 입양을 동의했나요?
                         </p>
                         {[
-                            { code: "ALL_AGREED", label: "모두 동의" },
-                            { code: "MOST_AGREED", label: "대부분 동의" },
-                            { code: "SOME_DISAGREED", label: "일부 반대" },
-                            { code: "NOT_CONSULTED", label: "상의하지 않음" },
+                            { code: "ALL_AGREE", label: "모두 동의" },
+                            { code: "SOME_DISAGREE", label: "일부 반대" },
                         ].map(({ code, label }) => (
                             <label key={code} className="flex items-center gap-2 text-sm">
                                 <input

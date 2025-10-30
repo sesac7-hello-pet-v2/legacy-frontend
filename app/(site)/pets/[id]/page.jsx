@@ -404,47 +404,49 @@ export default function PetDetailPage() {
                     </section>
 
                     {/* 버튼들 - 나란히 배치 */}
-                    <div className="mt-6 flex gap-3">
-                        {isEditMode ? (
-                            <>
-                                <button
-                                    onClick={handleCancel}
-                                    className="flex-1 px-6 py-3 bg-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-400 transition"
-                                >
-                                    취소
-                                </button>
-                                <button
-                                    onClick={handleSave}
-                                    className="flex-1 px-6 py-3 bg-yellow-400 text-white rounded-lg font-semibold hover:bg-yellow-500 transition"
-                                >
-                                    저장
-                                </button>
-                            </>
-                        ) : (
-                            <>
-                                {!pet.announced && (
+                    {pet.status === "AVAILABLE" && (
+                        <div className="mt-6 flex gap-3">
+                            {isEditMode ? (
+                                <>
                                     <button
-                                        onClick={openDateModal}
-                                        className="flex-1 px-6 py-3 bg-lime-500 text-white rounded-lg font-semibold hover:bg-lime-600 transition"
+                                        onClick={handleCancel}
+                                        className="flex-1 px-6 py-3 bg-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-400 transition"
                                     >
-                                        공고 등록
+                                        취소
                                     </button>
-                                )}
-                                <button
-                                    onClick={() => setIsEditMode(true)}
-                                    className="flex-1 px-6 py-3 bg-yellow-400 text-white rounded-lg font-semibold hover:bg-yellow-500 transition"
-                                >
-                                    수정
-                                </button>
-                                <button
-                                    onClick={confirmDelete}
-                                    className="flex-1 px-6 py-3 bg-orange-400 text-white rounded-lg font-semibold hover:bg-red-500 transition"
-                                >
-                                    삭제
-                                </button>
-                            </>
-                        )}
-                    </div>
+                                    <button
+                                        onClick={handleSave}
+                                        className="flex-1 px-6 py-3 bg-yellow-400 text-white rounded-lg font-semibold hover:bg-yellow-500 transition"
+                                    >
+                                        저장
+                                    </button>
+                                </>
+                            ) : (
+                                <>
+                                    {!pet.announced && (
+                                        <button
+                                            onClick={openDateModal}
+                                            className="flex-1 px-6 py-3 bg-lime-500 text-white rounded-lg font-semibold hover:bg-lime-600 transition"
+                                        >
+                                            공고 등록
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={() => setIsEditMode(true)}
+                                        className="flex-1 px-6 py-3 bg-yellow-400 text-white rounded-lg font-semibold hover:bg-yellow-500 transition"
+                                    >
+                                        수정
+                                    </button>
+                                    <button
+                                        onClick={confirmDelete}
+                                        className="flex-1 px-6 py-3 bg-orange-400 text-white rounded-lg font-semibold hover:bg-red-500 transition"
+                                    >
+                                        삭제
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    )}
                 </div>
             </div>
 

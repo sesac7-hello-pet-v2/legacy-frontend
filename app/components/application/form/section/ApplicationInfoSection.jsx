@@ -10,7 +10,7 @@ export default function ApplicationInfoSection({
     shelterInfo,
 }) {
     return (
-        <div className="space-y-6 border-b border-gray-300 pb-6">
+        <div className={`space-y-6 pb-6 ${isReadOnly ? 'border-b border-gray-300' : ''}`}>
             <div className="grid grid-cols-2 gap-x-8 gap-y-4">
                 <div>
                     <p className="text-base font-semibold text-amber-700 mb-1">신청자 이름</p>
