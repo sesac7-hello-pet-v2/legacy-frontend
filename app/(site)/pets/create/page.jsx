@@ -47,19 +47,15 @@ export default function CreatePetPage() {
       // FormData 생성
       const data = new FormData();
 
-      // JSON 데이터를 Blob으로 변환하여 추가
-      const petData = {
-        animalType: formData.animalType,
-        breed: formData.breed,
-        gender: formData.gender,
-        health: formData.health,
-        personality: formData.personality,
-        age: formData.age
-      };
-
-      data.append('pet', new Blob([JSON.stringify(petData)], {
-        type: 'application/json'
-      }));
+      // Spring Cloud Gateway MVC의 multipart 처리 문제로 인해
+      // JSON Blob 대신 개별 필드로 전송
+      // 이렇게 하면 Board 서비스처럼 정상 작동함
+      data.append('animalType', formData.animalType);
+      data.append('breed', formData.breed);
+      data.append('gender', formData.gender);
+      data.append('health', formData.health);
+      data.append('personality', formData.personality);
+      data.append('age', formData.age.toString());
 
       // 이미지 파일이 있으면 추가
       if (imageFile) {
