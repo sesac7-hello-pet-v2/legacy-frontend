@@ -31,10 +31,10 @@ const petStatusKo = {
 };
 
 const petStatusColor = {
-    AVAILABLE: "bg-blue-500",
-    ANNOUNCED: "bg-lime-500",
-    ADOPTED: "bg-gray-500",
-    DELETED: "bg-red-500",
+    AVAILABLE: "bg-[rgb(255,245,196)]",
+    ANNOUNCED: "bg-[rgb(255,222,167)]",
+    ADOPTED: "bg-[rgb(160,177,135)]",
+    DELETED: "bg-[rgb(231,116,116)]",
 };
 
 export default function MyPets() {
@@ -111,7 +111,7 @@ export default function MyPets() {
                                 <p className="text-orange-500 text-sm font-semibold">
                                     {animalTypeKo[pet.animalType] || pet.animalType}
                                 </p>
-                                <span className={`ml-auto px-2 py-1 ${petStatusColor[pet.status]} text-white text-xs font-bold rounded-full`}>
+                                <span className={`ml-auto px-2 py-1 ${petStatusColor[pet.status]} ${pet.status === "AVAILABLE" || pet.status === "ANNOUNCED" ? "text-gray-800" : "text-white"} text-xs font-bold rounded-full`}>
                                     {petStatusKo[pet.status] || pet.status}
                                 </span>
                             </div>

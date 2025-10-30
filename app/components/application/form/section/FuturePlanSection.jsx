@@ -13,16 +13,13 @@ export default function FuturePlanSection({
     };
 
     return (
-        <div className="space-y-10">
+        <div className="space-y-10 border-b border-gray-300 pb-6">
             <h2 className="text-lg font-semibold text-center mb-8">향후 계획</h2>
 
-            <div className="space-y-3">
-                <p className="font-medium text-sm">
-                    향후 1년 이내 이사, 출산, 유학, 군입대 등의 계획이 있나요?
-                </p>
-
-                {isReadOnly ? (
-                    <>
+            {isReadOnly ? (
+                <div className="space-y-6">
+                    <div>
+                        <p className="text-base font-semibold text-amber-700 mb-1">향후 계획</p>
                         <p className="text-sm text-gray-800">
                             {futurePlanInfo.hasFuturePlan === true
                                 ? "있음"
@@ -30,17 +27,25 @@ export default function FuturePlanSection({
                                 ? "없음"
                                 : "-"}
                         </p>
-                        {futurePlanInfo.hasFuturePlan && (
+                    </div>
+                    {futurePlanInfo.hasFuturePlan && (
+                        <div>
+                            <p className="text-base font-semibold text-amber-700 mb-1">계획 상세</p>
                             <textarea
                                 value={futurePlanInfo.planDetails || "-"}
                                 readOnly
                                 className="w-full rounded-md p-2 text-sm bg-[rgba(197,197,197,0.2)]"
                                 rows={2}
                             />
-                        )}
-                    </>
-                ) : (
-                    ["있음", "없음"].map((label) => (
+                        </div>
+                    )}
+                </div>
+            ) : (
+                <div className="space-y-3">
+                    <p className="font-medium text-base">
+                        향후 1년 이내 이사, 출산, 유학, 군입대 등의 계획이 있나요?
+                    </p>
+                    {["있음", "없음"].map((label) => (
                         <div key={label} className="space-y-3">
                             <label className="flex items-center gap-2 text-sm">
                                 <input
@@ -63,10 +68,9 @@ export default function FuturePlanSection({
                                 />
                             )}
                         </div>
-                    ))
-                )}
-            </div>
-
+                    ))}
+                </div>
+            )}
         </div>
     );
 }

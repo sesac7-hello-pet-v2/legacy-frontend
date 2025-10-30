@@ -31,10 +31,10 @@ const statusKo = {
 };
 
 const statusColor = {
-    OPEN: "bg-lime-500",
-    CLOSED: "bg-orange-500",
-    COMPLETED: "bg-yellow-500",
-    DELETED: "bg-red-500",
+    OPEN: "bg-[rgb(255,222,167)]",
+    CLOSED: "bg-[rgb(231,116,116)]",
+    COMPLETED: "bg-[rgb(160,177,135)]",
+    DELETED: "bg-[rgb(231,116,116)]",
 };
 
 export default function AnnouncementDetailPage() {
@@ -166,7 +166,7 @@ export default function AnnouncementDetailPage() {
                 <h1 className="text-4xl font-extrabold text-yellow-600 text-center">
                     {announcement.breed} 상세정보
                 </h1>
-                <span className={`ml-4 px-4 py-2 ${statusColor[announcement.announcementStatus]} text-white text-sm font-bold rounded-full shadow-md`}>
+                <span className={`ml-4 px-4 py-2 ${statusColor[announcement.announcementStatus]} ${announcement.announcementStatus === "OPEN" ? "text-gray-800" : "text-white"} text-sm font-bold rounded-full shadow-md`}>
                     {statusKo[announcement.announcementStatus]}
                 </span>
             </div>
@@ -325,7 +325,7 @@ export default function AnnouncementDetailPage() {
             <div className="mt-12 text-center">
                 <button
                     onClick={() => router.push("/me")}
-                    className="px-8 py-3 bg-gray-600 text-white rounded-lg font-semibold hover:bg-gray-700 transition"
+                    className="px-8 py-3 rounded-full border-2 border-yellow-500 text-yellow-600 font-bold hover:bg-yellow-50 transition"
                 >
                     목록으로
                 </button>

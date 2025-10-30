@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import api from "@/app/lib/api";
 import AnnouncementApplicationItem from "./AnnouncementApplicationItem";
 import ConfirmModal from "@/app/components/ConfirmModal";
+import { AlertModal } from "@/app/components/Modal";
 import Pagination from "@/app/components/Pagination";
 
 export default function AnnouncementApplicationList({ announcementId }) {
@@ -12,6 +13,8 @@ export default function AnnouncementApplicationList({ announcementId }) {
     const [totalPages, setTotalPages] = useState(1);
     const [announcementCreatedAt, setAnnouncementCreatedAt] = useState("");
     const [selectedAppId, setSelectedAppId] = useState(null);
+    const [showAlertModal, setShowAlertModal] = useState(false);
+    const [alertConfig, setAlertConfig] = useState({ message: "", type: "info" });
 
     const searchParams = useSearchParams();
     const currentPage = Number(searchParams.get("page")) || 1;
@@ -22,15 +25,31 @@ export default function AnnouncementApplicationList({ announcementId }) {
             const res = await api.get(
                 `/v1/applications/announcement/${announcementId}?page=${pageNum - 1}&size=10`
             );
-            setApplications(res.data.applications);
+
+            // 백엔드 필드명을 프론트엔드 필드명으로 매핑
+            const mappedApplications = res.data.applications.map((app) => ({
+                ...app,
+                userPhoneNumber: app.phoneNumber, // phoneNumber → userPhoneNumber
+                userEmail: app.email,
+            }));
+
+            setApplications(mappedApplications);
             setTotalPages(res.data.totalPages);
             setAnnouncementCreatedAt(res.data.announcementCreatedAt);
         } catch (e) {
             if (e.response?.status === 403) {
-                alert("해당 공고에 대한 접근 권한이 없습니다.");
-                router.push("/");
+                setAlertConfig({
+                    message: "해당 공고에 대한 접근 권한이 없습니다.",
+                    type: "error"
+                });
+                setShowAlertModal(true);
+                setTimeout(() => router.push("/"), 2000);
             } else {
-                alert("신청 내역을 불러오지 못했습니다.");
+                setAlertConfig({
+                    message: "신청 내역을 불러오는 중 오류가 발생했습니다.",
+                    type: "error"
+                });
+                setShowAlertModal(true);
             }
         }
     };
@@ -43,12 +62,32 @@ export default function AnnouncementApplicationList({ announcementId }) {
         if (selectedAppId === null) return;
         try {
             await api.patch(`/v1/applications/announcement/${announcementId}/${selectedAppId}/approve`);
-            alert("신청이 승인되었습니다.");
+            setAlertConfig({
+                message: "신청이 승인되었습니다.",
+                type: "success"
+            });
+            setShowAlertModal(true);
             await fetchApplications(currentPage);
         } catch (e) {
-            alert("승인에 실패했습니다: " + (e.response?.data?.message || e.message));
+            setAlertConfig({
+                message: "승인에 실패했습니다: " + (e.response?.data?.message || e.message),
+                type: "error"
+            });
+            setShowAlertModal(true);
         } finally {
             setSelectedAppId(null);
+        }
+    };
+
+    // 날짜 안전하게 포맷팅
+    const formatDate = (dateStr) => {
+        if (!dateStr) return "-";
+        try {
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return "-";
+            return date.toISOString().slice(0, 10);
+        } catch {
+            return "-";
         }
     };
 
@@ -58,11 +97,7 @@ export default function AnnouncementApplicationList({ announcementId }) {
             <div className="flex justify-between items-center border-b pb-2 text-lg">
                 <span className="font-semibold text-gray-700">공고 번호</span>
                 <span>{announcementId}</span>
-                <span>
-                    {announcementCreatedAt
-                        ? new Date(announcementCreatedAt).toISOString().slice(0, 10)
-                        : "-"}
-                </span>
+                <span>{formatDate(announcementCreatedAt)}</span>
             </div>
 
             {/* 신청자 리스트 또는 없음 안내 */}
@@ -95,6 +130,14 @@ export default function AnnouncementApplicationList({ announcementId }) {
                     onCancel={() => setSelectedAppId(null)}
                 />
             )}
+
+            {/* 알림 모달 */}
+            <AlertModal
+                isOpen={showAlertModal}
+                onClose={() => setShowAlertModal(false)}
+                message={alertConfig.message}
+                type={alertConfig.type}
+            />
         </div>
     );
 }

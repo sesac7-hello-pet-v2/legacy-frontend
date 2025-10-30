@@ -9,26 +9,26 @@ export default function CareSection({ careInfo, setCareInfo, isReadOnly = false 
     };
 
     const renderField = (title, value) => (
-        <div className="flex gap-2">
-            <span className="font-medium text-sm">{title}:</span>
-            <span className="text-sm text-gray-800">{value || "-"}</span>
+        <div>
+            <p className="text-base font-semibold text-amber-700 mb-1">{title}</p>
+            <p className="text-sm text-gray-800">{value !== null ? String(value) : "-"}</p>
         </div>
     );
 
     return (
-        <div className="space-y-10">
+        <div className="space-y-10 border-b border-gray-300 pb-6">
             <h2 className="text-lg font-semibold text-center mb-8">돌봄 가능 시간</h2>
 
             {isReadOnly ? (
-                <>
+                <div className="space-y-6">
                     {renderField("하루 평균 집 비우는 시간", careInfo.absenceTimeLabel || "-")}
                     {renderField("하루 평균 돌봄 시간", careInfo.careTimeLabel || "-")}
-                </>
+                </div>
             ) : (
                 <>
                     {/* 집을 비우는 시간 */}
                     <div className="space-y-3">
-                        <p className="font-medium text-sm">
+                        <p className="font-medium text-base">
                             평일 기준 하루 평균 집을 비우는 시간은 얼마나 되나요?
                         </p>
                         {[
@@ -53,7 +53,7 @@ export default function CareSection({ careInfo, setCareInfo, isReadOnly = false 
 
                     {/* 반려동물과 함께하는 시간 */}
                     <div className="space-y-3">
-                        <p className="font-medium text-sm">
+                        <p className="font-medium text-base">
                             평일 기준 하루 평균 반려동물과 함께할 수 있는 시간은 얼마나 되나요?
                         </p>
                         {[

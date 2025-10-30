@@ -18,8 +18,8 @@ export default function AgreementSection({ agreement, setAgreement, isReadOnly =
         if (isReadOnly) {
             return (
                 <div className="flex items-center gap-2 text-sm" key={key}>
-                    <span className="inline-block w-4">{agreement[key] ? "✅" : "❌"}</span>
-                    {label}
+                    <span>{agreement[key] ? "✅" : "❌"}</span>
+                    <span className="text-gray-800">{label}</span>
                 </div>
             );
         } else {
@@ -38,11 +38,13 @@ export default function AgreementSection({ agreement, setAgreement, isReadOnly =
     };
 
     return (
-        <div>
+        <div className="border-b border-gray-300 pb-6">
             <h2 className="text-lg font-semibold text-center mb-8">최종 확인 및 동의</h2>
-            <p className="text-sm text-gray-700 font-semibold mb-5">
-                제출 전 아래 내용을 확인하고 동의해주세요.
-            </p>
+            {!isReadOnly && (
+                <p className="text-base text-gray-700 font-semibold mb-5">
+                    제출 전 아래 내용을 확인하고 동의해주세요.
+                </p>
+            )}
             <div className="space-y-3">
                 {CHECKBOXES.map(({ key, label }) => renderItem(key, label))}
             </div>

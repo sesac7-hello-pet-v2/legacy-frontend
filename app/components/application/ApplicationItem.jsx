@@ -1,8 +1,8 @@
 const statusColor = {
-    "신청서 제출": "bg-blue-500",
-    "검토 중": "bg-yellow-500",
-    "승인": "bg-green-500",
-    "거절": "bg-red-500",
+    "신청서 제출": "bg-[rgb(255,245,196)]",
+    "검토 중": "bg-[rgb(255,222,167)]",
+    승인: "bg-[rgb(160,177,135)]",
+    거절: "bg-[rgb(231,116,116)]",
 };
 
 export default function ApplicationItem({ application, onClick }) {
@@ -14,7 +14,15 @@ export default function ApplicationItem({ application, onClick }) {
                         <span className="bg-amber-100 text-amber-800 text-base px-3 py-1 rounded-xl">
                             입양
                         </span>
-                        <span className={`${statusColor[application.applicationStatusLabel] || 'bg-gray-400'} text-white text-base px-3 py-1 rounded-xl`}>
+                        <span
+                            className={`${
+                                statusColor[application.applicationStatusLabel] || "bg-gray-400"
+                            } ${
+                                application.applicationStatusLabel === "승인" || application.applicationStatusLabel === "거절"
+                                ? "text-white"
+                                : "text-gray-800"
+                            } text-base px-3 py-1 rounded-xl font-semibold`}
+                        >
                             {application.applicationStatusLabel}
                         </span>
                     </div>
