@@ -53,7 +53,7 @@ export default function Navigator() {
             height={40}
             className="rounded-sm"
           />
-          <span className="text-xl font-bold text-amber-500">Hello Pet</span>
+          <span className="text-xl font-bold text-amber-500">Hello PET</span>
         </Link>
 
         {/* 오른쪽: 메뉴 + 로그인 */}

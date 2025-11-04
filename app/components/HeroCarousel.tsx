@@ -61,10 +61,10 @@ export default function HeroCarousel() {
       {/* 텍스트 오버레이 */}
       <div className="relative z-10 flex flex-col items-center justify-center h-full text-white text-center px-4">
         <h1 className="text-3xl md:text-4xl font-bold mb-3 drop-shadow-lg">
-          반려동물권의 올바른 실천,
+          반려의 첫걸음, 행복의 시작
         </h1>
         <p className="text-xl md:text-2xl mb-6 drop-shadow-lg font-light">
-          삶을이야기 생명으로
+          함께 웃고 함께 살아가는 반려의 순간
         </p>
         <Link
           href="/announcements"

@@ -61,8 +61,7 @@ export default function NoticeContactSection() {
             <div className="relative z-10">
               <h2 className="text-2xl font-bold mb-4 tracking-tight">동물사랑센터</h2>
               <p className="text-teal-100 text-base mb-8 leading-relaxed">
-                유기 동물 문의, 입양 상담을 위한 문의는<br />
-                아래 연락처로 문의해 주세요!
+                유기 동물 문의, 입양 상담을 위한 문의는 아래 연락처로 문의해 주세요!
               </p>
 
               <div className="space-y-5">
@@ -96,7 +95,7 @@ export default function NoticeContactSection() {
                   </svg>
                   <div>
                     <p className="text-sm text-teal-100 mb-1">위치</p>
-                    <p className="text-base font-semibold">서울 성동구</p>
+                    <p className="text-base font-semibold">서울 영등포구 문래동6가 57</p>
                   </div>
                 </div>
               </div>
