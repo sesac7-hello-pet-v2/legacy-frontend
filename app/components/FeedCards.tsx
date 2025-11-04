@@ -151,12 +151,12 @@ export default function FeedCards() {
                             <div
                                 className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center flex-shrink-0">
                           <span className="text-xs font-medium text-gray-600">
-                            {feed.user.nickname?.charAt(0)?.toUpperCase() || '?'}
+                            {(feed.user.nickname || feed.user.username || `사용자${feed.user.userId}`)?.charAt(0)?.toUpperCase() || '?'}
                           </span>
                             </div>
                         )}
                       <span className="font-medium text-sm">
-                        {feed.user.nickname || '익명'}
+                        {feed.user.nickname || feed.user.username || `사용자${feed.user.userId}` || '익명'}
                       </span>
                     </div>
 
