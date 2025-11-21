@@ -8,7 +8,7 @@ import ConfirmModal from "@/app/components/ConfirmModal";
 import { AlertModal } from "@/app/components/Modal";
 import Pagination from "@/app/components/Pagination";
 
-export default function AnnouncementApplicationList({ announcementId }) {
+export default function AnnouncementApplicationList({ announcementId, minScore = "", orderBy = "createdAt" }) {
     const [applications, setApplications] = useState([]);
     const [totalPages, setTotalPages] = useState(1);
     const [announcementCreatedAt, setAnnouncementCreatedAt] = useState("");
@@ -22,8 +22,19 @@ export default function AnnouncementApplicationList({ announcementId }) {
 
     const fetchApplications = async (pageNum) => {
         try {
+            // 쿼리 파라미터 구성
+            const params = new URLSearchParams({
+                page: pageNum - 1,
+                size: 10,
+                orderBy: orderBy
+            });
+
+            if (minScore) {
+                params.append('minScore', minScore);
+            }
+
             const res = await api.get(
-                `/v1/applications/announcement/${announcementId}?page=${pageNum - 1}&size=10`
+                `/v1/applications/announcement/${announcementId}?${params.toString()}`
             );
 
             // 백엔드 필드명을 프론트엔드 필드명으로 매핑
@@ -56,7 +67,7 @@ export default function AnnouncementApplicationList({ announcementId }) {
 
     useEffect(() => {
         fetchApplications(currentPage);
-    }, [currentPage]);
+    }, [currentPage, minScore, orderBy]);
 
     const handleApprove = async () => {
         if (selectedAppId === null) return;
